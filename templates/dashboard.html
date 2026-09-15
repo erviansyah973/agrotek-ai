@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — AGROTEK AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body class="page-dashboard">
+
+<header class="site-header" id="siteHeader">
+    <div class="container nav-wrap">
+        <a href="/" class="brand">
+            <span class="brand-mark">AG</span>
+            <span class="brand-text">
+                <strong>AGROTEK AI</strong>
+                <small>Spatial Agriculture Intelligence Platform</small>
+            </span>
+        </a>
+        <nav class="nav-menu" id="navMenu">
+            <ul>
+                <li><a href="/">Beranda</a></li>
+                <li><a href="/dashboard" class="active">Dashboard</a></li>
+                <li><a href="#">Peta GIS</a></li>
+                <li><a href="#">Data</a></li>
+                <li><a href="#">Tentang</a></li>
+            </ul>
+            <a href="#" class="nav-cta">Buka Peta</a>
+        </nav>
+    </div>
+</header>
+
+<section class="dash-hero">
+    <div class="dash-hero-bg"></div>
+    <div class="container">
+        <div class="dash-hero-inner">
+            <div>
+                <span class="eyebrow eyebrow-light">Dashboard</span>
+                <h1>Ringkasan Platform</h1>
+                <p>Monitoring pertanian, irigasi, hidrologi, dan risiko bencana Kabupaten Jember.</p>
+            </div>
+            <div class="demo-pill">
+                <span class="dot dot-live"></span> DATA DEMO
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="dash-section">
+    <div class="container">
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Produksi Padi (demo)</div>
+                <div class="kpi-value"><span>1.24</span><small>juta ton</small></div>
+                <div class="kpi-trend trend-up">▲ +4.2%</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Produktivitas Padi (demo)</div>
+                <div class="kpi-value"><span>6.12</span><small>ton/ha</small></div>
+                <div class="kpi-trend trend-up">▲ +1.8%</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Lahan Teririgasi (demo)</div>
+                <div class="kpi-value"><span>64.8</span><small>ribu ha</small></div>
+                <div class="kpi-trend trend-down">▼ -0.5%</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Kecamatan Waspada (demo)</div>
+                <div class="kpi-value"><span>5</span><small>kecamatan</small></div>
+                <div class="kpi-trend trend-flat">— 0</div>
+            </div>
+        </div>
+
+        <div class="chart-grid">
+            <div class="chart-card">
+                <header>
+                    <h3>Curah Hujan Bulanan</h3>
+                    <span class="chart-tag">mm · 12 bulan</span>
+                </header>
+                <div class="chart-wrap"><canvas id="chartRainfall"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <header>
+                    <h3>Produksi Komoditas</h3>
+                    <span class="chart-tag">ribu ton</span>
+                </header>
+                <div class="chart-wrap"><canvas id="chartCrops"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <header>
+                    <h3>Penggunaan Lahan</h3>
+                    <span class="chart-tag">ribu ha</span>
+                </header>
+                <div class="chart-wrap"><canvas id="chartLandUse"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <header>
+                    <h3>Debit &amp; TMA 30 Hari</h3>
+                    <span class="chart-tag">time-series</span>
+                </header>
+                <div class="chart-wrap"><canvas id="chartWater"></canvas></div>
+            </div>
+        </div>
+
+        <div class="bottom-grid">
+            <div class="panel">
+                <header><h3>Status Risiko Per Kecamatan</h3></header>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Kecamatan</th><th>Banjir</th><th>Kekeringan</th><th>Skor</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Tempurejo</strong></td>
+                            <td><span class="risk-pill risk-tinggi">Tinggi</span></td>
+                            <td><span class="risk-pill risk-sedang">Sedang</span></td>
+                            <td><span class="score-bar"><i style="width:82%"></i></span> 82</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Wuluhan</strong></td>
+                            <td><span class="risk-pill risk-sedang">Sedang</span></td>
+                            <td><span class="risk-pill risk-rendah">Rendah</span></td>
+                            <td><span class="score-bar"><i style="width:68%"></i></span> 68</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Puger</strong></td>
+                            <td><span class="risk-pill risk-sedang">Sedang</span></td>
+                            <td><span class="risk-pill risk-sedang">Sedang</span></td>
+                            <td><span class="score-bar"><i style="width:65%"></i></span> 65</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ambulu</strong></td>
+                            <td><span class="risk-pill risk-rendah">Rendah</span></td>
+                            <td><span class="risk-pill risk-sedang">Sedang</span></td>
+                            <td><span class="score-bar"><i style="width:58%"></i></span> 58</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Silo</strong></td>
+                            <td><span class="risk-pill risk-rendah">Rendah</span></td>
+                            <td><span class="risk-pill risk-tinggi">Tinggi</span></td>
+                            <td><span class="score-bar"><i style="width:74%"></i></span> 74</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Sumberjambe</strong></td>
+                            <td><span class="risk-pill risk-rendah">Rendah</span></td>
+                            <td><span class="risk-pill risk-tinggi">Tinggi</span></td>
+                            <td><span class="score-bar"><i style="width:76%"></i></span> 76</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="panel">
+                <header><h3>Monitoring Sensor Terkini</h3></header>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Waktu</th><th>Sensor</th><th>Param</th><th>Nilai</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="mono">08:00</td><td>AWLR Bedadung</td><td class="muted-sm">TMA</td><td><strong>182 cm</strong> <span class="dot-sm status-normal"></span></td></tr>
+                        <tr><td class="mono">08:05</td><td>AWLR Wuluhan</td><td class="muted-sm">TMA</td><td><strong>215 cm</strong> <span class="dot-sm status-warning"></span></td></tr>
+                        <tr><td class="mono">08:10</td><td>Weather Jenggawah</td><td class="muted-sm">Curah Hujan</td><td><strong>12 mm</strong> <span class="dot-sm status-normal"></span></td></tr>
+                        <tr><td class="mono">08:15</td><td>Sensor Tanah A1</td><td class="muted-sm">Kelembapan</td><td><strong>38%</strong> <span class="dot-sm status-warning"></span></td></tr>
+                        <tr><td class="mono">08:20</td><td>Debit Bedadung</td><td class="muted-sm">Debit</td><td><strong>4.8 m³/s</strong> <span class="dot-sm status-normal"></span></td></tr>
+                        <tr><td class="mono">08:25</td><td>Early Warning</td><td class="muted-sm">Status</td><td><strong>Siaga</strong> <span class="dot-sm status-alert"></span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<footer class="site-footer" style="padding-top:40px;">
+    <div class="footer-bottom" style="border-top:none;">
+        <div class="container footer-bottom-inner">
+            <p>&copy; 2026 AGROTEK AI — Kabupaten Jember, Jawa Timur</p>
+            <p class="footer-status">
+                <span class="dot dot-live"></span>
+                System Status: <strong>Online</strong>
+            </p>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>

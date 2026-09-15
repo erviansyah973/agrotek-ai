@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peta GIS — AGROTEK AI</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/peta.css') }}">
+</head>
+<body class="page-peta">
+
+<!-- NAVBAR -->
+<header class="modul-nav">
+    <div class="container modul-nav-inner">
+        <a href="/hub" class="brand">
+            <span class="brand-mark">AG</span>
+            <span class="brand-text">
+                <strong>AGROTEK AI</strong>
+                <small>Spatial Agriculture Intelligence Platform</small>
+            </span>
+        </a>
+        <nav class="modul-nav-links">
+            <a href="/statistik">Statistik</a>
+            <a href="/hidrologi">Hidrologi</a>
+            <a href="/peta" class="active">Peta</a>
+            <a href="/analisis">Analisis</a>
+            <a href="/data">Data</a>
+            {% if is_logged_in %}
+                <a href="/hub" class="modul-back">← Hub</a>
+            {% else %}
+                <a href="/" class="modul-back">← Beranda</a>
+            {% endif %}
+        </nav>
+    </div>
+</header>
+
+<!-- LAYOUT -->
+<div class="peta-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="peta-side" id="petaSide">
+
+        <div class="peta-side-head">
+            <h2>Peta GIS Jember</h2>
+            <p class="peta-subtitle">Layer spasial &amp; analisis wilayah</p>
+        </div>
+
+        <div class="peta-section">
+            <h3>Pencarian</h3>
+            <div class="search-box">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>
+                </svg>
+                <input type="text" id="searchInput" placeholder="Cari kecamatan...">
+            </div>
+            <ul class="search-results" id="searchResults"></ul>
+        </div>
+
+        <div class="peta-section">
+            <h3>Layer</h3>
+            <ul class="layer-toggles">
+                <li>
+                    <label class="layer-toggle">
+                        <input type="checkbox" data-layer="districts" checked>
+                        <span class="layer-swatch" style="background:#38bdf8"></span>
+                        <span>Kecamatan</span>
+                    </label>
+                </li>
+                <li>
+                    <label class="layer-toggle">
+                        <input type="checkbox" data-layer="rivers" checked>
+                        <span class="layer-swatch" style="background:#0ea5e9"></span>
+                        <span>Sungai</span>
+                    </label>
+                </li>
+                <li>
+                    <label class="layer-toggle">
+                        <input type="checkbox" data-layer="irrigation" checked>
+                        <span class="layer-swatch" style="background:#f59e0b"></span>
+                        <span>Jaringan Irigasi</span>
+                    </label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="peta-section">
+            <h3>Basemap</h3>
+            <ul class="basemap-toggles">
+                <li><label><input type="radio" name="basemap" value="osm" checked> OpenStreetMap</label></li>
+                <li><label><input type="radio" name="basemap" value="satellite"> Satellite</label></li>
+                <li><label><input type="radio" name="basemap" value="terrain"> Terrain</label></li>
+            </ul>
+        </div>
+
+        <div class="peta-section">
+            <h3>Alat</h3>
+            <div class="tool-buttons">
+                <button class="tool-btn" id="btnLocate" title="Lokasi saya">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+                    </svg>
+                    Lokasi
+                </button>
+                <button class="tool-btn" id="btnReset" title="Reset tampilan">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 12a9 9 0 1 0 3-6.7L3 8"/>
+                        <path d="M3 3v5h5"/>
+                    </svg>
+                    Reset
+                </button>
+            </div>
+        </div>
+
+    </aside>
+
+    <!-- PETA -->
+    <div class="peta-map-wrap">
+        <button class="peta-side-toggle" id="btnSideToggle" aria-label="Buka panel">☰</button>
+        <div id="map"></div>
+
+        <!-- Legend -->
+        <div class="map-legend">
+            <h4>Legenda</h4>
+            <ul>
+                <li><span class="legend-swatch" style="background:#38bdf8"></span> Kecamatan</li>
+                <li><span class="legend-swatch" style="background:#0ea5e9"></span> Sungai</li>
+                <li><span class="legend-swatch" style="background:#f59e0b"></span> Jaringan Irigasi</li>
+            </ul>
+        </div>
+
+        <!-- Info bawah -->
+        <div class="map-info">
+            <span id="coordDisplay">—, —</span>
+            <span class="sep">•</span>
+            <span id="zoomDisplay">z—</span>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    window.AGROTEK_MAP = {
+        center: [-8.1845, 113.6681],
+        zoom: 10,
+    };
+</script>
+<script src="{{ url_for('static', filename='js/peta.js') }}"></script>
+
+</body>
+</html>

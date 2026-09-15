@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AGROTEK AI — Spatial Agriculture Intelligence Platform Kabupaten Jember.">
+    <title>AGROTEK AI — Spatial Agriculture Intelligence Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <style>
+        /* Landing-only styles (inline biar cepat) */
+        .landing-nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 72px;
+            z-index: 1000;
+            background: rgba(10,22,40,.75);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255,255,255,.06);
+            display: flex;
+            align-items: center;
+        }
+        .landing-hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            color: #f1f5f9;
+            overflow: hidden;
+            background: #0a1628;
+            padding: 120px 0 80px;
+        }
+        .landing-hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background:
+                radial-gradient(900px 600px at 20% 30%, rgba(16,185,129,.22), transparent 55%),
+                radial-gradient(800px 700px at 85% 70%, rgba(14,165,233,.18), transparent 55%),
+                linear-gradient(180deg, #071022 0%, #0a1628 55%, #0f1e35 100%);
+        }
+        .landing-hero-grid {
+            position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(52,211,153,.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(52,211,153,.05) 1px, transparent 1px);
+            background-size: 56px 56px;
+            -webkit-mask-image: radial-gradient(ellipse at 50% 40%, black 20%, transparent 75%);
+            mask-image: radial-gradient(ellipse at 50% 40%, black 20%, transparent 75%);
+        }
+        .landing-hero-inner {
+            position: relative;
+            z-index: 2;
+            max-width: 860px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .landing-badges {
+            display: flex; flex-wrap: wrap; gap: 8px;
+            justify-content: center; margin-bottom: 28px;
+        }
+        .landing-title {
+            font-size: clamp(2rem, 5.5vw, 3.8rem);
+            font-weight: 800;
+            line-height: 1.05;
+            letter-spacing: -.025em;
+            margin-bottom: 24px;
+            color: #fff;
+        }
+        .landing-sub {
+            font-size: 1.05rem;
+            color: #cbd5e1;
+            max-width: 720px;
+            margin: 0 auto 40px;
+            line-height: 1.7;
+        }
+        .landing-actions {
+            display: flex; gap: 14px; justify-content: center;
+            flex-wrap: wrap; margin-bottom: 30px;
+        }
+        .landing-info {
+            display: flex; gap: 8px; justify-content: center;
+            flex-wrap: wrap;
+            color: #94a3b8;
+            font-size: .85rem;
+        }
+
+        /* Fitur section */
+        .landing-features {
+            padding: 90px 0;
+            background: #f8fafc;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 22px;
+            margin-top: 50px;
+        }
+        .feature-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 28px 24px;
+            transition: all .3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 50px rgba(15,23,42,.12);
+            border-color: rgba(16,185,129,.35);
+        }
+        .feature-icon {
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 18px;
+            color: #fff;
+        }
+        .fi-emerald { background: linear-gradient(135deg, #10b981, #059669); }
+        .fi-sky     { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+        .fi-amber   { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .fi-purple  { background: linear-gradient(135deg, #a855f7, #7c3aed); }
+        .feature-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; color: #0f172a; }
+        .feature-card p { font-size: .9rem; color: #64748b; line-height: 1.6; }
+
+        /* CTA */
+        .landing-cta {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #0f1e35, #0a1628);
+            color: #fff;
+            text-align: center;
+        }
+        .landing-cta h2 {
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            font-weight: 800;
+            margin-bottom: 14px;
+        }
+        .landing-cta p {
+            color: #cbd5e1;
+            max-width: 620px;
+            margin: 0 auto 32px;
+            line-height: 1.7;
+        }
+
+        /* Footer mini */
+        .landing-footer {
+            padding: 30px 0;
+            background: #050b18;
+            color: #94a3b8;
+            text-align: center;
+            font-size: .85rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR LANDING -->
+<header class="landing-nav">
+    <div class="container nav-wrap">
+        <a href="/" class="brand">
+            <span class="brand-mark">AG</span>
+            <span class="brand-text">
+                <strong>AGROTEK AI</strong>
+                <small>Spatial Agriculture Intelligence Platform</small>
+            </span>
+        </a>
+        <div style="display:flex;gap:12px;align-items:center;">
+            {% if is_logged_in %}
+                <a href="/hub" class="btn btn-primary">Buka Dashboard</a>
+            {% else %}
+                <a href="/login" style="color:#cbd5e1;font-size:.9rem;padding:8px 14px;">Masuk</a>
+                <a href="/login" class="btn btn-primary">Mulai →</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<!-- HERO -->
+<section class="landing-hero">
+    <div class="landing-hero-grid"></div>
+    <div class="container landing-hero-inner">
+        <div class="landing-badges">
+            <span class="badge">GIS</span>
+            <span class="badge">AI</span>
+            <span class="badge">Hydrology</span>
+            <span class="badge">Agriculture</span>
+        </div>
+
+        <h1 class="landing-title">
+            SPATIAL AGRICULTURE<br>
+            <span style="background:linear-gradient(135deg,#6ee7b7,#38bdf8 60%,#34d399);-webkit-background-clip:text;background-clip:text;color:transparent;">INTELLIGENCE PLATFORM</span>
+        </h1>
+
+        <p class="landing-sub">
+            Platform informasi spasial dan sistem pendukung keputusan untuk
+            pertanian, irigasi, hidrologi, dan pengelolaan sumber daya lahan
+            Kabupaten Jember.
+        </p>
+
+        <div class="landing-actions">
+            <a href="/login" class="btn btn-primary btn-lg">
+                Masuk / Daftar
+            </a>
+            <a href="#fitur" class="btn btn-ghost btn-lg">
+                Lihat Fitur →
+            </a>
+        </div>
+
+        <div class="landing-info">
+            <span><span class="dot dot-live"></span>Sistem aktif</span>
+            <span>•</span>
+            <span>Kabupaten Jember, Jawa Timur</span>
+        </div>
+    </div>
+</section>
+
+<!-- FITUR -->
+<section class="landing-features" id="fitur">
+    <div class="container">
+        <div style="text-align:center;max-width:700px;margin:0 auto;">
+            <span class="eyebrow">Fitur Platform</span>
+            <h2 style="font-size:clamp(1.75rem,3vw,2.25rem);margin:12px 0;color:#0f172a;">Satu Platform, Semua Kebutuhan</h2>
+            <p style="color:#64748b;line-height:1.7;">
+                Akses berbagai modul analisis spasial pertanian dalam satu platform terintegrasi.
+            </p>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon fi-emerald">📊</div>
+                <h3>Statistik Wilayah</h3>
+                <p>Data spasial, luas lahan, jaringan irigasi, dan profil kecamatan Kabupaten Jember.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon fi-sky">🌊</div>
+                <p style="display:none;"></p>
+                <h3>Hidrologi</h3>
+                <p>Monitoring curah hujan, debit sungai, dan tinggi muka air secara time-series.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon fi-amber">🗺️</div>
+                <h3>Peta GIS</h3>
+                <p>Peta interaktif dengan layer administrasi, irigasi, sungai, dan analisis spasial.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon fi-purple">🌾</div>
+                <h3>Analisis Sawah Saya</h3>
+                <p>Pilih lokasi di peta, dapatkan rekomendasi tanaman yang cocok untuk lahan Anda.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="landing-cta">
+    <div class="container">
+        <h2>Siap Mencoba?</h2>
+        <p>Masuk sebagai Umum, Mahasiswa, atau Admin untuk mengakses modul analisis sesuai kebutuhan Anda.</p>
+        <a href="/login" class="btn btn-primary btn-lg">Masuk Sekarang</a>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="landing-footer">
+    <div class="container">
+        &copy; 2026 AGROTEK AI — Kabupaten Jember, Jawa Timur
+    </div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

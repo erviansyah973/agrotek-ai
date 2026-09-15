@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel — AGROTEK AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <style>
+        .page-admin { min-height: 100vh; background: #f8fafc; }
+
+        /* NAVBAR */
+        .admin-nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(10,22,40,.95);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255,255,255,.06);
+            height: 72px; display: flex; align-items: center;
+        }
+        .admin-nav-inner {
+            display: flex; justify-content: space-between; align-items: center;
+            width: 100%; gap: 20px;
+        }
+        .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+        .brand { display: flex; gap: 12px; align-items: center; text-decoration: none; color: #fff; }
+        .brand-mark {
+            width: 40px; height: 40px; border-radius: 10px;
+            background: linear-gradient(135deg, #34d399, #38bdf8);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: #0a1628; font-size: .9rem;
+        }
+        .brand-text strong { display: block; font-size: 1rem; font-weight: 800; color: #fff; }
+        .brand-text small { display: block; font-size: .68rem; color: #6ee7b7; }
+        .admin-user { display: flex; align-items: center; gap: 12px; }
+        .admin-user-name { color: #fff; font-size: .88rem; font-weight: 600; }
+        .admin-badge {
+            display: inline-block; padding: 3px 10px;
+            background: rgba(239,68,68,.15);
+            border: 1px solid rgba(239,68,68,.4);
+            color: #f87171; font-size: .65rem; font-weight: 700;
+            letter-spacing: .1em; border-radius: 999px;
+        }
+        .admin-back {
+            color: #6ee7b7; font-size: .85rem; text-decoration: none;
+            padding: 8px 14px; border-radius: 8px; transition: all .2s;
+        }
+        .admin-back:hover { background: rgba(52,211,153,.12); }
+
+        /* HERO */
+        .admin-hero {
+            padding: 50px 0 40px;
+            background: linear-gradient(180deg, #0a1628, #0f1e35);
+            color: #f1f5f9; position: relative; overflow: hidden;
+        }
+        .admin-hero::before {
+            content: ''; position: absolute; inset: 0;
+            background:
+                radial-gradient(700px 400px at 15% 50%, rgba(239,68,68,.12), transparent 60%),
+                radial-gradient(700px 400px at 85% 50%, rgba(16,185,129,.14), transparent 60%);
+            pointer-events: none;
+        }
+        .admin-hero-inner { position: relative; }
+        .admin-hero h1 {
+            font-size: clamp(1.6rem, 3vw, 2.2rem);
+            font-weight: 800; color: #fff;
+            margin: 8px 0; letter-spacing: -.02em;
+        }
+        .admin-hero p { color: #cbd5e1; max-width: 640px; font-size: .95rem; }
+
+        /* CONTENT */
+        .admin-content { padding: 40px 0 80px; }
+
+        /* FLASH MESSAGES */
+        .flash {
+            padding: 12px 18px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: .88rem;
+            font-weight: 500;
+        }
+        .flash.success { background: rgba(16,185,129,.10); border: 1px solid rgba(16,185,129,.30); color: #059669; }
+        .flash.error   { background: rgba(239,68,68,.10);  border: 1px solid rgba(239,68,68,.30);  color: #dc2626; }
+
+        /* KPI */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 16px; margin-bottom: 32px;
+        }
+        .kpi-card {
+            background: #fff; border: 1px solid #e2e8f0;
+            border-radius: 14px; padding: 20px;
+            position: relative; overflow: hidden;
+            box-shadow: 0 1px 2px rgba(15,23,42,.06);
+            transition: all .25s;
+        }
+        .kpi-card::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+            width: 4px; background: linear-gradient(180deg, #10b981, #0ea5e9);
+        }
+        .kpi-card.kpi-amber::before { background: linear-gradient(180deg, #f59e0b, #d97706); }
+        .kpi-card.kpi-red::before   { background: linear-gradient(180deg, #ef4444, #dc2626); }
+        .kpi-card.kpi-purple::before{ background: linear-gradient(180deg, #a855f7, #7c3aed); }
+        .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(15,23,42,.08); }
+        .kpi-label { font-size: .72rem; color: #64748b; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .06em; }
+        .kpi-value { font-size: 1.9rem; font-weight: 800; color: #0f172a; letter-spacing: -.02em; line-height: 1.1; }
+
+        /* TABS */
+        .tabs {
+            display: flex; gap: 6px; flex-wrap: wrap;
+            margin-bottom: 26px;
+            background: #fff;
+            padding: 8px;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 2px rgba(15,23,42,.06);
+        }
+        .tab {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: .88rem;
+            font-weight: 600;
+            color: #334155;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all .2s;
+            display: inline-flex; align-items: center; gap: 6px;
+            font-family: inherit;
+        }
+        .tab:hover { background: #f1f5f9; }
+        .tab.active {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(16,185,129,.3);
+        }
+        .tab-count {
+            display: inline-block;
+            padding: 1px 8px;
+            background: rgba(0,0,0,.1);
+            border-radius: 999px;
+            font-size: .72rem;
+            font-weight: 700;
+        }
+        .tab.active .tab-count { background: rgba(255,255,255,.25); }
+
+        /* PANEL */
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+        .panel {
+            background: #fff; border: 1px solid #e2e8f0;
+            border-radius: 14px; padding: 22px;
+            box-shadow: 0 1px 2px rgba(15,23,42,.06);
+            margin-bottom: 22px;
+            overflow: hidden;
+        }
+        .panel header { margin-bottom: 16px; }
+        .panel h3 { font-size: 1rem; font-weight: 700; color: #0f172a; }
+
+        /* TABLE */
+        .data-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+        .data-table th {
+            text-align: left;
+            font-size: .72rem; text-transform: uppercase;
+            letter-spacing: .08em; color: #64748b;
+            font-weight: 600; padding: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .data-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #334155;
+        }
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tr:hover td { background: rgba(16,185,129,.03); }
+        .mono { font-family: monospace; font-size: .82rem; color: #64748b; }
+
+        /* BADGES */
+        .badge {
+            display: inline-block; padding: 3px 10px;
+            font-size: .7rem; font-weight: 700;
+            border-radius: 999px; letter-spacing: .05em;
+        }
+        .badge-pending   { background: rgba(251,191,36,.15); color: #b45309; }
+        .badge-approved  { background: rgba(16,185,129,.12); color: #059669; }
+        .badge-rejected  { background: rgba(239,68,68,.12);  color: #dc2626; }
+        .badge-delivered { background: rgba(14,165,233,.12); color: #0284c7; }
+        .badge-info      { background: rgba(14,165,233,.12); color: #0284c7; }
+        .badge-warn      { background: rgba(251,191,36,.15); color: #b45309; }
+        .badge-error     { background: rgba(239,68,68,.12);  color: #dc2626; }
+        .badge-admin     { background: rgba(239,68,68,.12);  color: #dc2626; }
+        .badge-mahasiswa { background: rgba(14,165,233,.12); color: #0284c7; }
+        .badge-umum      { background: rgba(100,116,139,.12); color: #475569; }
+        .badge-active    { background: rgba(16,185,129,.12); color: #059669; }
+        .badge-inactive  { background: rgba(100,116,139,.12); color: #475569; }
+
+        /* ACTION BUTTONS */
+        .btn-mini {
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: .72rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all .2s;
+            margin-right: 4px;
+            display: inline-flex; align-items: center; gap: 4px;
+        }
+        .btn-approve { background: rgba(16,185,129,.15); color: #059669; }
+        .btn-approve:hover { background: #10b981; color: #fff; }
+        .btn-reject  { background: rgba(239,68,68,.12);  color: #dc2626; }
+        .btn-reject:hover { background: #ef4444; color: #fff; }
+        .btn-toggle  { background: rgba(251,191,36,.15); color: #b45309; }
+        .btn-toggle:hover { background: #f59e0b; color: #fff; }
+        .btn-role    { background: rgba(168,85,247,.12); color: #7c3aed; }
+        .btn-role:hover { background: #a855f7; color: #fff; }
+
+        .role-select {
+            padding: 5px 10px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            font-size: .78rem;
+            font-family: inherit;
+            background: #fff;
+            color: #334155;
+            cursor: pointer;
+        }
+
+        .empty-state {
+            padding: 40px 20px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: .9rem;
+            font-style: italic;
+        }
+
+        /* CHART GRID */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 22px;
+        }
+        .chart-card {
+            background: #fff; border: 1px solid #e2e8f0;
+            border-radius: 14px; padding: 22px;
+            box-shadow: 0 1px 2px rgba(15,23,42,.06);
+        }
+        .chart-card h3 {
+            font-size: 1rem; font-weight: 700; color: #0f172a;
+            margin-bottom: 16px;
+        }
+        .chart-wrap { position: relative; height: 240px; }
+
+        @media (max-width: 900px) {
+            .chart-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 640px) {
+            .panel { overflow-x: auto; }
+            .data-table { min-width: 640px; }
+            .tabs { overflow-x: auto; flex-wrap: nowrap; }
+            .tab { white-space: nowrap; }
+        }
+    </style>
+</head>
+<body class="page-admin">
+
+<header class="admin-nav">
+    <div class="container admin-nav-inner">
+        <a href="/hub" class="brand">
+            <span class="brand-mark">AG</span>
+            <span class="brand-text">
+                <strong>AGROTEK AI</strong>
+                <small>Admin Panel</small>
+            </span>
+        </a>
+        <div class="admin-user">
+            <span class="admin-badge">ADMIN</span>
+            <span class="admin-user-name">{{ user.name }}</span>
+            <a href="/hub" class="admin-back">← Hub</a>
+        </div>
+    </div>
+</header>
+
+<section class="admin-hero">
+    <div class="container admin-hero-inner">
+        <span style="display:inline-block;padding:5px 14px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);color:#6ee7b7;border-radius:999px;font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;">
+            Admin Panel
+        </span>
+        <h1>Dashboard Administrator</h1>
+        <p>Kelola permintaan data, user platform, dan pantau aktivitas sistem.</p>
+    </div>
+</section>
+
+<section class="admin-content">
+    <div class="container">
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <!-- KPI -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Total Request</div>
+                <div class="kpi-value">{{ stats.requests }}</div>
+            </div>
+            <div class="kpi-card kpi-amber">
+                <div class="kpi-label">Pending</div>
+                <div class="kpi-value">{{ stats.pending }}</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Approved</div>
+                <div class="kpi-value">{{ stats.approved }}</div>
+            </div>
+            <div class="kpi-card kpi-purple">
+                <div class="kpi-label">Total User</div>
+                <div class="kpi-value">{{ stats.users }}</div>
+            </div>
+            <div class="kpi-card kpi-red">
+                <div class="kpi-label">Log Sistem</div>
+                <div class="kpi-value">{{ stats.logs }}</div>
+            </div>
+        </div>
+
+        <!-- CHARTS -->
+        <div class="chart-grid">
+            <div class="chart-card">
+                <h3>Distribusi User per Role</h3>
+                <div class="chart-wrap"><canvas id="chartRole"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <h3>Status Request</h3>
+                <div class="chart-wrap"><canvas id="chartStatus"></canvas></div>
+            </div>
+        </div>
+
+        <!-- TABS -->
+        <div class="tabs">
+            <button class="tab active" data-tab="requests">
+                📝 Request <span class="tab-count">{{ requests|length }}</span>
+            </button>
+            <button class="tab" data-tab="users">
+                👥 User <span class="tab-count">{{ users|length }}</span>
+            </button>
+            <button class="tab" data-tab="logs">
+                📋 Log <span class="tab-count">{{ logs|length }}</span>
+            </button>
+        </div>
+
+        <!-- TAB: REQUESTS -->
+        <div class="tab-panel active" id="panel-requests">
+            <div class="panel">
+                <header><h3>Permintaan Data (20 terbaru)</h3></header>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th><th>Nama</th><th>Email</th><th>Institusi</th>
+                            <th>Dataset</th><th>Status</th><th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in requests %}
+                        <tr>
+                            <td class="mono">#{{ r.id }}</td>
+                            <td><strong>{{ r.name }}</strong></td>
+                            <td class="mono">{{ r.email }}</td>
+                            <td>{{ r.institution or '-' }}</td>
+                            <td class="mono">{{ r.dataset }}</td>
+                            <td><span class="badge badge-{{ r.status }}">{{ r.status }}</span></td>
+                            <td>
+                                <form method="post" action="{{ url_for('admin.update_request', req_id=r.id, action='approved') }}" style="display:inline;">
+                                    <button class="btn-mini btn-approve" type="submit" title="Approve">✓</button>
+                                </form>
+                                <form method="post" action="{{ url_for('admin.update_request', req_id=r.id, action='rejected') }}" style="display:inline;">
+                                    <button class="btn-mini btn-reject" type="submit" title="Reject">✕</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="7" class="empty-state">Belum ada permintaan data.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB: USERS -->
+        <div class="tab-panel" id="panel-users">
+            <div class="panel">
+                <header><h3>Kelola User ({{ users|length }})</h3></header>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th><th>Username</th><th>Nama</th><th>Email</th>
+                            <th>Role</th><th>Status</th><th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            <td class="mono">#{{ u.id }}</td>
+                            <td class="mono">{{ u.username }}</td>
+                            <td><strong>{{ u.name }}</strong></td>
+                            <td class="mono">{{ u.email or '-' }}</td>
+                            <td>
+                                <form method="post" action="{{ url_for('admin.update_user_role', user_id=u.id) }}" style="display:inline-flex;gap:6px;align-items:center;">
+                                    <select name="role" class="role-select">
+                                        <option value="umum"      {% if u.role == 'umum'      %}selected{% endif %}>Umum</option>
+                                        <option value="mahasiswa" {% if u.role == 'mahasiswa' %}selected{% endif %}>Mahasiswa</option>
+                                        <option value="admin"     {% if u.role == 'admin'     %}selected{% endif %}>Admin</option>
+                                    </select>
+                                    <button class="btn-mini btn-role" type="submit" title="Ubah role">💾</button>
+                                </form>
+                            </td>
+                            <td>
+                                {% if u.active %}
+                                    <span class="badge badge-active">Aktif</span>
+                                {% else %}
+                                    <span class="badge badge-inactive">Nonaktif</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form method="post" action="{{ url_for('admin.toggle_user', user_id=u.id) }}" style="display:inline;">
+                                    <button class="btn-mini btn-toggle" type="submit" title="Toggle aktif/nonaktif">
+                                        {% if u.active %}🚫 Nonaktifkan{% else %}✓ Aktifkan{% endif %}
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB: LOGS -->
+        <div class="tab-panel" id="panel-logs">
+            <div class="panel">
+                <header><h3>Log Sistem (30 terbaru)</h3></header>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Waktu</th><th>Level</th><th>Source</th><th>Pesan</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for l in logs %}
+                        <tr>
+                            <td class="mono">{{ l.created_at }}</td>
+                            <td><span class="badge badge-{{ l.level }}">{{ l.level }}</span></td>
+                            <td class="mono">{{ l.source }}</td>
+                            <td>{{ l.message }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="empty-state">Belum ada log.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- Data untuk chart (JSON inline) -->
+<script id="roleStats" type="application/json">{{ role_stats|tojson }}</script>
+<script id="statusStats" type="application/json">{{ status_stats|tojson }}</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+
+</body>
+</html>

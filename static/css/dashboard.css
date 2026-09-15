@@ -1,0 +1,217 @@
+/* ============================================================
+   AGROTEK AI — Dashboard Styles (FASE 3)
+   ============================================================ */
+
+.page-dashboard { background: var(--bg); }
+
+/* ---------- HERO DASHBOARD ---------- */
+.dash-hero {
+    position: relative;
+    padding: calc(var(--nav-h) + 48px) 0 48px;
+    background: linear-gradient(180deg, var(--navy-900), var(--navy-800));
+    color: var(--text-light);
+    overflow: hidden;
+}
+.dash-hero-bg {
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(700px 400px at 20% 50%, rgba(16,185,129,.18), transparent 60%),
+        radial-gradient(700px 400px at 85% 50%, rgba(14,165,233,.14), transparent 60%);
+    pointer-events: none;
+}
+.dash-hero-inner {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+.dash-hero h1 {
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 800;
+    letter-spacing: -.02em;
+    margin: 10px 0 6px;
+    color: #fff;
+}
+.dash-hero p { color: var(--muted-light); font-size: .95rem; max-width: 560px; }
+
+.demo-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    background: rgba(251,191,36,.12);
+    border: 1px solid rgba(251,191,36,.35);
+    color: var(--amber-400);
+    font-size: .8rem;
+    font-weight: 600;
+    border-radius: 999px;
+}
+
+.dash-section { padding: 48px 0 96px; }
+
+/* ---------- KPI CARDS ---------- */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+}
+.kpi-card {
+    padding: 22px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    transition: all .25s var(--ease);
+    position: relative;
+    overflow: hidden;
+}
+.kpi-card::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, var(--emerald-500), var(--sky-500));
+}
+.kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.kpi-label { font-size: .8rem; color: var(--muted); font-weight: 500; margin-bottom: 8px; }
+.kpi-value {
+    display: flex; align-items: baseline; gap: 6px;
+    font-size: 1.9rem; font-weight: 800;
+    color: var(--text); letter-spacing: -.02em;
+    line-height: 1.1;
+}
+.kpi-value small { font-size: .8rem; font-weight: 600; color: var(--muted); }
+.kpi-trend { margin-top: 8px; font-size: .82rem; font-weight: 600; }
+.trend-up   { color: var(--emerald-600); }
+.trend-down { color: var(--red-500); }
+.trend-flat { color: var(--muted); }
+
+/* ---------- CHARTS ---------- */
+.chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 32px;
+}
+.chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    box-shadow: var(--shadow-sm);
+}
+.chart-card header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+.chart-card h3 { font-size: 1rem; font-weight: 700; color: var(--text); }
+.chart-tag {
+    font-size: .72rem;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    padding: 3px 8px;
+    background: var(--bg-off);
+    border-radius: 6px;
+}
+.chart-wrap { position: relative; height: 260px; }
+
+/* ---------- TABEL ---------- */
+.bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+.panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+.panel header { margin-bottom: 14px; }
+.panel h3 { font-size: 1rem; font-weight: 700; color: var(--text); }
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .88rem;
+}
+.data-table th {
+    text-align: left;
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+    font-weight: 600;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+}
+.data-table td {
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-soft);
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: rgba(16,185,129,.03); }
+.mono { font-family: var(--font-mono); font-size: .82rem; }
+.muted-sm { color: var(--muted); font-size: .82rem; }
+
+/* Badges */
+.risk-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    font-size: .72rem;
+    font-weight: 600;
+    border-radius: 999px;
+}
+.risk-rendah { background: rgba(16,185,129,.12); color: var(--emerald-600); }
+.risk-sedang { background: rgba(251,191,36,.15); color: #b45309; }
+.risk-tinggi { background: rgba(239,68,68,.12); color: var(--red-500); }
+
+.score-bar {
+    display: inline-block;
+    width: 60px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 999px;
+    margin-right: 8px;
+    vertical-align: middle;
+    overflow: hidden;
+}
+.score-bar i {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--emerald-500), var(--amber-500));
+    border-radius: 999px;
+}
+
+.dot-sm {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+.dot-sm.status-normal  { background: var(--emerald-500); }
+.dot-sm.status-warning { background: var(--amber-500); }
+.dot-sm.status-alert   { background: var(--red-500); }
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 900px) {
+    .chart-grid { grid-template-columns: 1fr; }
+    .bottom-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .kpi-card { padding: 16px; }
+    .kpi-value { font-size: 1.5rem; }
+    .chart-wrap { height: 220px; }
+    .panel { padding: 16px; overflow-x: auto; }
+    .data-table { min-width: 480px; }
+}

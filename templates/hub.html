@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hub — AGROTEK AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <style>
+        .hub-page { min-height: 100vh; background: #f8fafc; }
+
+        /* Navbar hub */
+        .hub-nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(10,22,40,.95);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255,255,255,.06);
+            height: 72px;
+            display: flex; align-items: center;
+        }
+        .hub-user {
+            display: flex; align-items: center; gap: 12px;
+            color: #f1f5f9;
+        }
+        .hub-user-avatar {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #34d399, #38bdf8);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: #0a1628;
+            font-size: .9rem;
+        }
+        .hub-user-info { display: flex; flex-direction: column; line-height: 1.15; }
+        .hub-user-info strong { font-size: .9rem; color: #fff; }
+        .hub-user-info small { font-size: .7rem; color: #6ee7b7; }
+        .hub-logout {
+            color: #cbd5e1; font-size: .85rem;
+            padding: 8px 14px;
+            border: 1px solid rgba(255,255,255,.15);
+            border-radius: 999px;
+            transition: all .2s;
+        }
+        .hub-logout:hover {
+            background: rgba(239,68,68,.15);
+            border-color: rgba(239,68,68,.4);
+            color: #f87171;
+        }
+
+        /* Hero hub */
+        .hub-hero {
+            padding: 60px 0 40px;
+            background: linear-gradient(180deg, #0a1628, #0f1e35);
+            color: #f1f5f9;
+            position: relative;
+            overflow: hidden;
+        }
+        .hub-hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background:
+                radial-gradient(700px 400px at 15% 50%, rgba(16,185,129,.18), transparent 60%),
+                radial-gradient(700px 400px at 85% 50%, rgba(14,165,233,.14), transparent 60%);
+            pointer-events: none;
+        }
+        .hub-hero-inner { position: relative; }
+        .hub-hero h1 {
+            font-size: clamp(1.6rem, 3vw, 2.2rem);
+            font-weight: 800;
+            margin: 8px 0 8px;
+            color: #fff;
+            letter-spacing: -.02em;
+        }
+        .hub-hero p { color: #cbd5e1; max-width: 640px; font-size: .95rem; }
+        .hub-role-badge {
+            display: inline-block;
+            padding: 5px 14px;
+            background: rgba(52,211,153,.12);
+            border: 1px solid rgba(52,211,153,.3);
+            color: #6ee7b7;
+            border-radius: 999px;
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+        }
+
+        /* Kartu modul */
+        .hub-content { padding: 40px 0 80px; }
+        .hub-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 22px;
+        }
+        .hub-card {
+            display: block;
+            padding: 28px 24px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            box-shadow: 0 1px 2px rgba(15,23,42,.06);
+            transition: all .3s;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+        .hub-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #10b981, #0ea5e9);
+            opacity: 0;
+            transition: opacity .3s;
+        }
+        .hub-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 50px rgba(15,23,42,.12);
+            border-color: rgba(16,185,129,.35);
+        }
+        .hub-card:hover::before { opacity: 1; }
+        .hub-icon {
+            width: 52px; height: 52px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 18px;
+            color: #fff;
+        }
+        .hi-emerald { background: linear-gradient(135deg, #10b981, #059669); }
+        .hi-sky     { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+        .hi-cyan    { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        .hi-amber   { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .hi-purple  { background: linear-gradient(135deg, #a855f7, #7c3aed); }
+        .hi-red     { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+        .hub-card h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #0f172a;
+        }
+        .hub-card p {
+            font-size: .88rem;
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 14px;
+        }
+        .hub-arrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: .82rem;
+            font-weight: 600;
+            color: #059669;
+        }
+        .hub-empty {
+            grid-column: 1 / -1;
+            padding: 60px 20px;
+            text-align: center;
+            background: #fff;
+            border: 1px dashed #e2e8f0;
+            border-radius: 14px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body class="hub-page">
+
+<!-- NAVBAR HUB -->
+<header class="hub-nav">
+    <div class="container nav-wrap" style="display:flex;justify-content:space-between;align-items:center;">
+        <a href="/hub" class="brand">
+            <span class="brand-mark">AG</span>
+            <span class="brand-text">
+                <strong>AGROTEK AI</strong>
+                <small>Spatial Agriculture Intelligence Platform</small>
+            </span>
+        </a>
+        <div class="hub-user">
+            <div class="hub-user-avatar">{{ user.name[0] if user else 'U' }}</div>
+            <div class="hub-user-info">
+                <strong>{{ user.name }}</strong>
+                <small>{{ role|capitalize }}</small>
+            </div>
+            <a href="/logout" class="hub-logout">Keluar</a>
+        </div>
+    </div>
+</header>
+
+<!-- HERO HUB -->
+<section class="hub-hero">
+    <div class="container hub-hero-inner">
+        <span class="hub-role-badge">{{ role|upper }}</span>
+        <h1>Selamat Datang, {{ user.name }}</h1>
+        <p>Pilih modul yang ingin Anda akses. Setiap modul dirancang untuk kebutuhan analisis spasial pertanian di Kabupaten Jember.</p>
+    </div>
+</section>
+
+<!-- KARTU MODUL -->
+<section class="hub-content">
+    <div class="container">
+        <div class="hub-grid">
+            {% for m in modules %}
+            <a href="{{ url_for(m.endpoint) }}" class="hub-card">
+                <div class="hub-icon hi-{{ m.color }}">{{ m.icon }}</div>
+                <h3>{{ m.title }}</h3>
+                <p>{{ m.desc }}</p>
+                <span class="hub-arrow">Buka Modul →</span>
+            </a>
+            {% else %}
+            <div class="hub-empty">
+                <p>Belum ada modul yang tersedia untuk role Anda.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

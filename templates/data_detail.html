@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ ds.name }} — Data Center</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <style>
+        .page-detail { min-height: 100vh; background: #f8fafc; }
+        .modul-nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(10,22,40,.95);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255,255,255,.06);
+            height: 72px; display: flex; align-items: center;
+        }
+        .modul-nav-inner { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 20px; }
+        .modul-nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .modul-nav-links a {
+            color: #cbd5e1; font-size: .85rem; padding: 8px 12px;
+            border-radius: 8px; transition: all .2s; text-decoration: none;
+        }
+        .modul-nav-links a:hover { color: #fff; background: rgba(255,255,255,.06); }
+        .modul-back { color: #6ee7b7 !important; }
+
+        .detail-hero {
+            padding: 50px 0 40px;
+            background: linear-gradient(180deg, #0a1628, #0f1e35);
+            color: #f1f5f9; position: relative; overflow: hidden;
+        }
+        .detail-hero::before {
+            content: ''; position: absolute; inset: 0;
+            background:
+                radial-gradient(700px 400px at 15% 50%, rgba(168,85,247,.18), transparent 60%),
+                radial-gradient(700px 400px at 85% 50%, rgba(14,165,233,.14), transparent 60%);
+            pointer-events: none;
+        }
+        .detail-hero-inner { position: relative; }
+        .breadcrumb {
+            display: flex; gap: 8px; font-size: .82rem;
+            color: #94a3b8; margin-bottom: 20px; flex-wrap: wrap;
+        }
+        .breadcrumb a { color: #94a3b8; text-decoration: none; transition: color .2s; }
+        .breadcrumb a:hover { color: #6ee7b7; }
+        .breadcrumb span { color: #64748b; }
+
+        .detail-title {
+            display: flex; gap: 12px; align-items: center;
+            flex-wrap: wrap; margin-bottom: 12px;
+        }
+        .dataset-cat {
+            display: inline-block; padding: 4px 12px;
+            font-size: .7rem; font-weight: 700;
+            letter-spacing: .06em; text-transform: uppercase;
+            border-radius: 6px; color: #fff;
+        }
+        .cat-administrasi   { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+        .cat-hidrologi      { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        .cat-irigasi        { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .cat-pertanian      { background: linear-gradient(135deg, #10b981, #059669); }
+        .cat-analisis       { background: linear-gradient(135deg, #a855f7, #7c3aed); }
+        .cat-remote-sensing { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+
+        .status-badge {
+            display: inline-block; padding: 4px 12px;
+            font-size: .7rem; font-weight: 700;
+            letter-spacing: .06em; border-radius: 999px;
+        }
+        .badge-public     { background: rgba(16,185,129,.15); color: #6ee7b7; border: 1px solid rgba(52,211,153,.35); }
+        .badge-restricted { background: rgba(251,191,36,.15); color: #fbbf24; border: 1px solid rgba(251,191,36,.35); }
+        .badge-internal   { background: rgba(239,68,68,.15);  color: #f87171; border: 1px solid rgba(239,68,68,.35); }
+
+        .detail-hero h1 {
+            font-size: clamp(1.6rem, 3vw, 2.4rem);
+            font-weight: 800; color: #fff;
+            margin-bottom: 12px; letter-spacing: -.02em;
+            line-height: 1.2;
+        }
+        .detail-hero p {
+            color: #cbd5e1; max-width: 780px;
+            font-size: .98rem; line-height: 1.7;
+        }
+
+        /* Content */
+        .detail-content { padding: 40px 0 80px; }
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 22px;
+            align-items: start;
+        }
+        .panel {
+            background: #fff; border: 1px solid #e2e8f0;
+            border-radius: 14px; padding: 24px;
+            box-shadow: 0 1px 2px rgba(15,23,42,.06);
+            margin-bottom: 20px;
+        }
+        .panel h3 {
+            font-size: 1rem; font-weight: 700;
+            color: #0f172a; margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .meta-table { width: 100%; border-collapse: collapse; }
+        .meta-table td {
+            padding: 12px 4px;
+            font-size: .88rem;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: top;
+        }
+        .meta-table td:first-child {
+            color: #64748b; width: 42%;
+            font-size: .82rem;
+        }
+        .meta-table td:last-child {
+            color: #0f172a; font-weight: 500;
+        }
+        .meta-table tr:last-child td { border-bottom: none; }
+
+        .keyword-pills {
+            display: flex; flex-wrap: wrap; gap: 8px;
+        }
+        .keyword {
+            display: inline-block; padding: 5px 12px;
+            background: #f1f5f9; color: #334155;
+            border-radius: 999px; font-size: .78rem;
+        }
+
+        /* Provenance */
+        .prov-chain {
+            display: flex; flex-direction: column;
+            gap: 6px; padding: 8px 0;
+        }
+        .prov-node {
+            padding: 12px 14px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border-left: 3px solid #10b981;
+        }
+        .prov-label {
+            font-size: .68rem; text-transform: uppercase;
+            letter-spacing: .08em; color: #94a3b8;
+            margin-bottom: 3px; display: block;
+        }
+        .prov-node strong {
+            font-size: .88rem; color: #0f172a;
+            font-weight: 600;
+        }
+        .prov-arrow {
+            text-align: center; color: #10b981;
+            font-size: 1.1rem; line-height: 1;
+        }
+
+        /* Action box */
+        .action-box {
+            padding: 20px; border-radius: 12px;
+            margin-bottom: 16px;
+        }
+        .action-box.public {
+            background: rgba(16,185,129,.08);
+            border: 1px solid rgba(16,185,129,.25);
+        }
+        .action-box.restricted {
+            background: rgba(251,191,36,.10);
+            border: 1px solid rgba(251,191,36,.30);
+        }
+        .action-box.internal {
+            background: rgba(239,68,68,.08);
+            border: 1px solid rgba(239,68,68,.25);
+        }
+        .action-box h4 {
+            font-size: .88rem; font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .action-box.public h4     { color: #059669; }
+        .action-box.restricted h4 { color: #b45309; }
+        .action-box.internal h4   { color: #dc2626; }
+        .action-box p {
+            font-size: .82rem; line-height: 1.6;
+            color: #64748b; margin-bottom: 14px;
+        }
+
+        .btn {
+            display: inline-flex; align-items: center;
+            justify-content: center; gap: 8px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font: inherit; font-size: .88rem;
+            font-weight: 600;
+            cursor: pointer; transition: all .2s;
+            text-decoration: none;
+            border: none;
+            width: 100%;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(16,185,129,.25);
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(16,185,129,.35);
+        }
+        .btn-outline {
+            background: #fff; color: #334155;
+            border: 1px solid #e2e8f0;
+        }
+        .btn-outline:hover {
+            border-color: #10b981;
+            color: #059669;
+            background: rgba(16,185,129,.05);
+        }
+        .btn:disabled {
+            opacity: .5; cursor: not-allowed;
+            transform: none; box-shadow: none;
+        }
+
+        /* Modal */
+        .modal-backdrop {
+            display: none; position: fixed; inset: 0;
+            background: rgba(10,22,40,.75);
+            backdrop-filter: blur(6px);
+            z-index: 2000;
+            align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .modal-backdrop.open { display: flex; }
+        .modal {
+            background: #fff; border-radius: 20px;
+            max-width: 560px; width: 100%;
+            max-height: 92vh; overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0,0,0,.4);
+        }
+        .modal-head {
+            display: flex; justify-content: space-between;
+            align-items: flex-start; padding: 22px 26px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .modal-head h2 { font-size: 1.15rem; color: #0f172a; margin-bottom: 4px; }
+        .modal-head p { font-size: .82rem; color: #64748b; }
+        .modal-close {
+            width: 34px; height: 34px; border-radius: 8px;
+            color: #64748b; font-size: 1.4rem;
+            border: none; background: transparent;
+            cursor: pointer; transition: all .2s;
+        }
+        .modal-close:hover { background: #f1f5f9; color: #0f172a; }
+
+        .form-body {
+            padding: 22px 26px;
+            display: flex; flex-direction: column; gap: 14px;
+        }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .form-field { display: flex; flex-direction: column; gap: 6px; }
+        .form-field label {
+            font-size: .82rem; font-weight: 600; color: #334155;
+        }
+        .form-field input, .form-field select, .form-field textarea {
+            padding: 10px 14px; border: 1px solid #e2e8f0;
+            border-radius: 10px; font: inherit; font-size: .9rem;
+            color: #0f172a; background: #fff;
+            transition: all .2s; font-family: inherit;
+            resize: vertical;
+        }
+        .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+            outline: none; border-color: #10b981;
+            box-shadow: 0 0 0 4px rgba(16,185,129,.12);
+        }
+        .form-actions {
+            display: flex; justify-content: flex-end;
+            gap: 10px; padding-top: 8px;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 4px;
+        }
+        .btn-cancel {
+            padding: 10px 18px; border-radius: 999px;
+            background: transparent; color: #64748b;
+            border: 1px solid #e2e8f0; cursor: pointer;
+            font: inherit; font-size: .88rem; font-weight: 600;
+        }
+        .btn-cancel:hover { background: #f1f5f9; color: #334155; }
+        .btn-submit {
+            padding: 10px 22px; border-radius: 999px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff; border: none;
+            font: inherit; font-size: .88rem; font-weight: 600;
+            cursor: pointer; transition: all .2s;
+            box-shadow: 0 4px 14px rgba(16,185,129,.25);
+        }
+        .btn-submit:hover { transform: translateY(-1px); }
+        .btn-submit:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+        .form-alert {
+            display: none; padding: 12px 16px;
+            border-radius: 10px; font-size: .85rem;
+            line-height: 1.5;
+        }
+        .form-alert.show { display: block; }
+        .form-alert.success { background: rgba(16,185,129,.08); border: 1px solid rgba(16,185,129,.25); color: #059669; }
+        .form-alert.error   { background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.25); color: #dc2626; }
+
+        @media (max-width: 900px) {
+            .detail-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 640px) {
+            .modul-nav-links { display: none; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body class="page-detail">
+
+<header class="modul-nav">
+    <div class="container modul-nav-inner">
+        <a href="/hub" class="brand">
+            <span class="brand-mark">AG</span>
+            <span class="brand-text">
+                <strong>AGROTEK AI</strong>
+                <small>Spatial Agriculture Intelligence Platform</small>
+            </span>
+        </a>
+        <nav class="modul-nav-links">
+            <a href="/statistik">Statistik</a>
+            <a href="/hidrologi">Hidrologi</a>
+            <a href="/peta">Peta</a>
+            <a href="/analisis">Analisis</a>
+            <a href="/data">Data</a>
+            <a href="/hub" class="modul-back">← Hub</a>
+        </nav>
+    </div>
+</header>
+
+<section class="detail-hero">
+    <div class="container detail-hero-inner">
+
+        <nav class="breadcrumb">
+            <a href="/hub">Hub</a>
+            <span>/</span>
+            <a href="/data">Data Center</a>
+            <span>/</span>
+            <span>{{ ds.name }}</span>
+        </nav>
+
+        <div class="detail-title">
+            <span class="dataset-cat cat-{{ ds.category }}">{{ ds.category_label }}</span>
+            <span class="status-badge badge-{{ ds.status|lower }}">{{ ds.status }}</span>
+        </div>
+
+        <h1>{{ ds.name }}</h1>
+        <p>{{ ds.desc }}</p>
+    </div>
+</section>
+
+<section class="detail-content">
+    <div class="container">
+        <div class="detail-grid">
+
+            <!-- LEFT COLUMN -->
+            <div>
+
+                <div class="panel">
+                    <h3>Metadata Dataset</h3>
+                    <table class="meta-table">
+                        <tbody>
+                            <tr><td>Nama Dataset</td><td>{{ ds.name }}</td></tr>
+                            <tr><td>Kategori</td><td>{{ ds.category_label }}</td></tr>
+                            <tr><td>Sumber</td><td>{{ ds.source }}</td></tr>
+                            <tr><td>Tahun</td><td>{{ ds.year }}</td></tr>
+                            <tr><td>Format</td><td>{{ ds.format }}</td></tr>
+                            <tr><td>Resolusi / Cakupan</td><td>{{ ds.resolution }}</td></tr>
+                            <tr><td>Lisensi</td><td>{{ ds.license }}</td></tr>
+                            <tr><td>Status Akses</td><td>{{ ds.status }}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="panel">
+                    <h3>Kata Kunci</h3>
+                    <div class="keyword-pills">
+                        {% for k in ds.keywords %}
+                        <span class="keyword">{{ k }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>Provenance</h3>
+                    <div class="prov-chain">
+                        <div class="prov-node">
+                            <span class="prov-label">Sumber Asli</span>
+                            <strong>{{ ds.source }}</strong>
+                        </div>
+                        <div class="prov-arrow">↓</div>
+                        <div class="prov-node">
+                            <span class="prov-label">Kurasi</span>
+                            <strong>AGROTEK AI Data Team</strong>
+                        </div>
+                        <div class="prov-arrow">↓</div>
+                        <div class="prov-node">
+                            <span class="prov-label">Publikasi</span>
+                            <strong>Platform AGROTEK AI — {{ ds.year }}</strong>
+                        </div>
+                    </div>
+                    <p style="font-size:.82rem;color:#64748b;margin-top:14px;line-height:1.6;">
+                        Data disajikan apa adanya. Untuk penggunaan akademik atau publikasi,
+                        harap cantumkan sumber asli.
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <aside>
+
+                {% if ds.status == 'PUBLIC' %}
+                <div class="panel">
+                    <h3>Akses Data</h3>
+                    <div class="action-box public">
+                        <h4>✓ Tersedia untuk Publik</h4>
+                        <p>Dataset ini dapat diakses dan diunduh langsung tanpa perlu permintaan khusus.</p>
+                    </div>
+                    {% if ds.preview %}
+                    <a href="{{ ds.preview }}" class="btn btn-outline" style="margin-bottom:10px;">
+                        Lihat Preview
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('main.data_download', slug=ds.slug) }}" class="btn btn-primary">
+                        ⬇ Download Dataset
+                    </a>
+                </div>
+
+                {% elif ds.status == 'RESTRICTED' %}
+                <div class="panel">
+                    <h3>Akses Data</h3>
+                    <div class="action-box restricted">
+                        <h4>⚠ Akses Terbatas</h4>
+                        <p>Dataset ini memerlukan permintaan resmi dan persetujuan pengelola data.</p>
+                    </div>
+                    <button class="btn btn-primary" id="btnRequest">
+                        📝 Ajukan Permintaan
+                    </button>
+                </div>
+
+                {% else %}
+                <div class="panel">
+                    <h3>Akses Data</h3>
+                    <div class="action-box internal">
+                        <h4>🔒 Internal</h4>
+                        <p>Dataset ini hanya tersedia untuk pengguna dengan hak akses khusus (admin internal).</p>
+                    </div>
+                    <button class="btn btn-outline" disabled>
+                        Tidak Tersedia
+                    </button>
+                </div>
+                {% endif %}
+
+                <div class="panel">
+                    <h3>Lisensi</h3>
+                    <p style="font-size:.9rem;color:#0f172a;font-weight:600;margin-bottom:10px;">
+                        {{ ds.license }}
+                    </p>
+                    <p style="font-size:.82rem;color:#64748b;line-height:1.6;">
+                        Penggunaan data wajib mengikuti ketentuan lisensi.
+                        Untuk klarifikasi, hubungi pengelola data.
+                    </p>
+                </div>
+
+                <div class="panel">
+                    <h3>Navigasi</h3>
+                    <a href="/data" class="btn btn-outline" style="margin-bottom:10px;">
+                        ← Kembali ke Katalog
+                    </a>
+                    <a href="/hub" class="btn btn-outline">
+                        🏠 Hub Utama
+                    </a>
+                </div>
+
+            </aside>
+
+        </div>
+    </div>
+</section>
+
+<!-- MODAL REQUEST (hanya untuk RESTRICTED) -->
+<div class="modal-backdrop" id="requestModal">
+    <div class="modal">
+        <div class="modal-head">
+            <div>
+                <h2>Form Permintaan Data</h2>
+                <p>{{ ds.name }}</p>
+            </div>
+            <button class="modal-close" type="button" id="modalClose">×</button>
+        </div>
+
+        <form class="form-body" id="requestForm">
+            <input type="hidden" name="dataset_slug" value="{{ ds.slug }}">
+
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="fieldNama">Nama Lengkap *</label>
+                    <input type="text" id="fieldNama" name="name" required maxlength="160">
+                </div>
+                <div class="form-field">
+                    <label for="fieldEmail">Email *</label>
+                    <input type="email" id="fieldEmail" name="email" required maxlength="160">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="fieldInstitusi">Institusi</label>
+                    <input type="text" id="fieldInstitusi" name="institution" maxlength="200" placeholder="Universitas, Dinas, dll">
+                </div>
+                <div class="form-field">
+                    <label for="fieldFormat">Format *</label>
+                    <select id="fieldFormat" name="format" required>
+                        <option value="">— Pilih —</option>
+                        <option value="GeoJSON">GeoJSON</option>
+                        <option value="CSV">CSV</option>
+                        <option value="Shapefile">Shapefile</option>
+                        <option value="GeoTIFF">GeoTIFF</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label for="fieldPurpose">Tujuan Penggunaan *</label>
+                <textarea id="fieldPurpose" name="purpose" rows="3" required minlength="10" maxlength="800" placeholder="Contoh: Penelitian akademik, perencanaan wilayah, dll"></textarea>
+            </div>
+
+            <div class="form-alert" id="formAlert"></div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" id="btnCancel">Batal</button>
+                <button type="submit" class="btn-submit" id="btnSubmit">Kirim Permintaan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    const modal = document.getElementById('requestModal');
+    const btnRequest = document.getElementById('btnRequest');
+    if (!modal || !btnRequest) return;
+
+    const form = document.getElementById('requestForm');
+    const alertBox = document.getElementById('formAlert');
+    const btnSubmit = document.getElementById('btnSubmit');
+
+    function openModal() {
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        alertBox.classList.remove('show');
+        form.reset();
+        setTimeout(() => {
+            document.getElementById('fieldNama').focus();
+        }, 100);
+    }
+
+    function closeModal() {
+        modal.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    btnRequest.addEventListener('click', openModal);
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.getElementById('btnCancel').addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        alertBox.classList.remove('show');
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = 'Mengirim...';
+
+        const formData = new FormData(form);
+
+        try {
+            const res = await fetch('/api/data-request', {
+                method: 'POST',
+                body: formData,
+            });
+            const json = await res.json();
+
+            if (json.ok) {
+                alertBox.className = 'form-alert success show';
+                alertBox.textContent = '✓ ' + json.message + ' (ID: #' + json.id + ')';
+                setTimeout(closeModal, 2500);
+            } else {
+                alertBox.className = 'form-alert error show';
+                alertBox.textContent = '✗ ' + (json.error || 'Terjadi kesalahan.');
+            }
+        } catch (err) {
+            alertBox.className = 'form-alert error show';
+            alertBox.textContent = '✗ Gagal terhubung ke server.';
+        } finally {
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = 'Kirim Permintaan';
+        }
+    });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AGROTEK AI — Spatial Agriculture Intelligence Platform Kabupaten Jember.">
+    <meta name="theme-color" content="#0a1628">
+    <title>AGROTEK AI — Spatial Agriculture Intelligence Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body>
+
+<!-- ============================================================
+     NAVBAR
+     ============================================================ -->
+<header class="site-header" id="siteHeader">
+    <div class="container nav-wrap">
+        <a href="#hero" class="brand">
+            <span class="brand-mark">AG</span>
+            <span class="brand-text">
+                <strong>AGROTEK AI</strong>
+                <small>Spatial Agriculture Intelligence Platform</small>
+            </span>
+        </a>
+        <nav class="nav-menu" id="navMenu">
+            <ul>
+                <li><a href="#hero" class="active">Beranda</a></li>
+                <li><a href="#statistik">Statistik</a></li>
+                <li><a href="#monitoring">Monitoring</a></li>
+                <li><a href="#dashboard">Dashboard</a></li>
+                <li><a href="#peta">Peta GIS</a></li>
+                <li><a href="#modul">Modul</a></li>
+                <li><a href="#tentang">Tentang</a></li>
+            </ul>
+            <a href="#peta" class="nav-cta">
+                Buka Peta
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </a>
+        </nav>
+        <button class="nav-toggle" id="navToggle" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+    </div>
+</header>
+
+<!-- ============================================================
+     1. HERO
+     ============================================================ -->
+<section class="hero" id="hero">
+    <div class="hero-bg" aria-hidden="true">
+        <div class="hero-mesh"></div>
+        <div class="hero-grid"></div>
+        <svg class="hero-contours" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+            <defs>
+                <linearGradient id="cg" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#10b981" stop-opacity="0.35"/>
+                    <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.20"/>
+                </linearGradient>
+            </defs>
+            <g fill="none" stroke="url(#cg)" stroke-width="1.1">
+                <path d="M-50,220 Q 240,140 480,240 T 1000,260 T 1500,200"/>
+                <path d="M-50,300 Q 240,220 480,320 T 1000,340 T 1500,280"/>
+                <path d="M-50,380 Q 240,300 480,400 T 1000,420 T 1500,360"/>
+                <path d="M-50,460 Q 240,380 480,480 T 1000,500 T 1500,440"/>
+                <path d="M-50,540 Q 240,460 480,560 T 1000,580 T 1500,520"/>
+                <path d="M-50,620 Q 240,540 480,640 T 1000,660 T 1500,600"/>
+            </g>
+            <path d="M 0,780 Q 300,720 540,760 T 1050,800 T 1440,740" fill="none" stroke="#38bdf8" stroke-opacity="0.28" stroke-width="2.2"/>
+            <g fill="#34d399">
+                <circle cx="220" cy="480" r="2.8" opacity="0.85"/>
+                <circle cx="480" cy="440" r="2.2" opacity="0.7"/>
+                <circle cx="720" cy="500" r="3.0" opacity="0.9"/>
+                <circle cx="980" cy="455" r="2.4" opacity="0.75"/>
+                <circle cx="1200" cy="520" r="2.6" opacity="0.8"/>
+            </g>
+        </svg>
+        <div class="hero-fade"></div>
+    </div>
+
+    <div class="container hero-inner">
+        <div class="hero-badges reveal">
+            <span class="badge">GIS</span>
+            <span class="badge">AI</span>
+            <span class="badge">Hydrology</span>
+            <span class="badge">Agriculture</span>
+        </div>
+        <h1 class="hero-title reveal">
+            SPATIAL AGRICULTURE<br>
+            <span class="grad-text">INTELLIGENCE PLATFORM</span>
+        </h1>
+        <p class="hero-sub reveal">
+            Platform informasi spasial dan sistem pendukung keputusan untuk
+            pertanian, irigasi, hidrologi, dan pengelolaan sumber daya lahan
+            Kabupaten Jember.
+        </p>
+        <div class="hero-actions reveal">
+            <a href="#peta" class="btn btn-primary btn-lg">Buka Peta GIS</a>
+            <a href="#dashboard" class="btn btn-ghost btn-lg">Lihat Dashboard →</a>
+        </div>
+        <div class="hero-meta reveal">
+            <span><span class="dot dot-live"></span>Sistem aktif</span>
+            <span>•</span>
+            <span id="heroClock">—</span>
+        </div>
+    </div>
+
+    <a href="#statistik" class="hero-scroll" aria-label="Gulir ke bawah">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+    </a>
+</section>
+
+<!-- ============================================================
+     2. STATISTIK
+     ============================================================ -->
+<section class="section section-light" id="statistik">
+    <div class="container">
+        <div class="section-head reveal">
+            <span class="eyebrow">Statistik Wilayah</span>
+            <h2>Ringkasan Data Spasial</h2>
+            <p class="section-desc">Angka DEMO — akan tersinkronisasi otomatis dengan database PostGIS.</p>
+        </div>
+        <div class="stats-grid">
+            {% for s in stats %}
+            <div class="stat-card reveal">
+                <div class="stat-icon stat-icon-{{ s.icon }}">📌</div>
+                <div class="stat-value">
+                    <span class="counter" data-target="{{ s.value }}">0</span>
+                    {% if s.unit %}<span class="stat-unit">{{ s.unit }}</span>{% endif %}
+                </div>
+                <div class="stat-label">{{ s.label }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     3. LIVE MONITORING
+     ============================================================ -->
+<section class="section section-dark" id="monitoring">
+    <div class="section-bg-grid" aria-hidden="true"></div>
+    <div class="container">
+        <div class="section-head section-head-light reveal">
+            <span class="eyebrow eyebrow-light">Live Monitoring</span>
+            <h2>Status Platform Real-Time</h2>
+            <p class="section-desc">Ringkasan kondisi modul utama. Akan digantikan oleh feed IoT pada fase lanjutan.</p>
+        </div>
+        <div class="monitor-grid">
+            {% for m in monitoring %}
+            <div class="monitor-card reveal status-{{ m.status }}">
+                <div class="monitor-head">
+                    <span class="status-pill status-pill-{{ m.status }}">{{ m.label }}</span>
+                </div>
+                <h3>{{ m.title }}</h3>
+                <p class="monitor-metric">{{ m.metric }}</p>
+                <div class="monitor-bar"><span></span></div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="monitor-footer reveal">
+            <span><span class="dot dot-live"></span>Last updated: <strong id="lastUpdated">—</strong></span>
+            <span>•</span>
+            <span>Sumber: DEMO</span>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     4. DASHBOARD
+     ============================================================ -->
+<section class="section section-light" id="dashboard">
+    <div class="container">
+        <div class="section-head reveal">
+            <span class="eyebrow">Dashboard</span>
+            <h2>Ringkasan Platform</h2>
+            <p class="section-desc">KPI dan time-series monitoring pertanian, irigasi, dan hidrologi.</p>
+        </div>
+
+        <!-- KPI -->
+        <div class="kpi-grid">
+            <div class="kpi-card reveal">
+                <div class="kpi-label">Produksi Padi (demo)</div>
+                <div class="kpi-value"><span>1.24</span><small>juta ton</small></div>
+                <div class="kpi-trend trend-up">▲ +4.2%</div>
+            </div>
+            <div class="kpi-card reveal">
+                <div class="kpi-label">Produktivitas Padi (demo)</div>
+                <div class="kpi-value"><span>6.12</span><small>ton/ha</small></div>
+                <div class="kpi-trend trend-up">▲ +1.8%</div>
+            </div>
+            <div class="kpi-card reveal">
+                <div class="kpi-label">Lahan Teririgasi (demo)</div>
+                <div class="kpi-value"><span>64.8</span><small>ribu ha</small></div>
+                <div class="kpi-trend trend-down">▼ -0.5%</div>
+            </div>
+            <div class="kpi-card reveal">
+                <div class="kpi-label">Kecamatan Waspada (demo)</div>
+                <div class="kpi-value"><span>5</span><small>kecamatan</small></div>
+                <div class="kpi-trend trend-flat">— 0</div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="chart-grid">
+            <div class="chart-card reveal">
+                <header>
+                    <h3>Curah Hujan Bulanan</h3>
+                    <span class="chart-tag">mm · 12 bulan</span>
+                </header>
+                <div class="chart-wrap"><canvas id="chartRainfall"></canvas></div>
+            </div>
+            <div class="chart-card reveal">
+                <header>
+                    <h3>Produksi Komoditas</h3>
+                    <span class="chart-tag">ribu ton</span>
+                </header>
+                <div class="chart-wrap"><canvas id="chartCrops"></canvas></div>
+            </div>
+            <div class="chart-card reveal">
+                <header>
+                    <h3>Penggunaan Lahan</h3>
+                    <span class="chart-tag">ribu ha</span>
+                </header>
+                <div class="chart-wrap"><canvas id="chartLandUse"></canvas></div>
+            </div>
+            <div class="chart-card reveal">
+                <header>
+                    <h3>Debit &amp; TMA 30 Hari</h3>
+                    <span class="chart-tag">time-series</span>
+                </header>
+                <div class="chart-wrap"><canvas id="chartWater"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Tabel -->
+        <div class="bottom-grid">
+            <div class="panel reveal">
+                <header><h3>Status Risiko Per Kecamatan</h3></header>
+                <table class="data-table">
+                    <thead><tr><th>Kecamatan</th><th>Banjir</th><th>Kekeringan</th><th>Skor</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Tempurejo</strong></td><td><span class="risk-pill risk-tinggi">Tinggi</span></td><td><span class="risk-pill risk-sedang">Sedang</span></td><td><span class="score-bar"><i style="width:82%"></i></span> 82</td></tr>
+                        <tr><td><strong>Wuluhan</strong></td><td><span class="risk-pill risk-sedang">Sedang</span></td><td><span class="risk-pill risk-rendah">Rendah</span></td><td><span class="score-bar"><i style="width:68%"></i></span> 68</td></tr>
+                        <tr><td><strong>Puger</strong></td><td><span class="risk-pill risk-sedang">Sedang</span></td><td><span class="risk-pill risk-sedang">Sedang</span></td><td><span class="score-bar"><i style="width:65%"></i></span> 65</td></tr>
+                        <tr><td><strong>Ambulu</strong></td><td><span class="risk-pill risk-rendah">Rendah</span></td><td><span class="risk-pill risk-sedang">Sedang</span></td><td><span class="score-bar"><i style="width:58%"></i></span> 58</td></tr>
+                        <tr><td><strong>Silo</strong></td><td><span class="risk-pill risk-rendah">Rendah</span></td><td><span class="risk-pill risk-tinggi">Tinggi</span></td><td><span class="score-bar"><i style="width:74%"></i></span> 74</td></tr>
+                        <tr><td><strong>Sumberjambe</strong></td><td><span class="risk-pill risk-rendah">Rendah</span></td><td><span class="risk-pill risk-tinggi">Tinggi</span></td><td><span class="score-bar"><i style="width:76%"></i></span> 76</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="panel reveal">
+                <header><h3>Monitoring Sensor Terkini</h3></header>
+                <table class="data-table">
+                    <thead><tr><th>Waktu</th><th>Sensor</th><th>Param</th><th>Nilai</th></tr></thead>
+                    <tbody>
+                        <tr><td class="mono">08:00</td><td>AWLR Bedadung</td><td class="muted-sm">TMA</td><td><strong>182 cm</strong> <span class="dot-sm status-normal"></span></td></tr>
+                        <tr><td class="mono">08:05</td><td>AWLR Wuluhan</td><td class="muted-sm">TMA</td><td><strong>215 cm</strong> <span class="dot-sm status-warning"></span></td></tr>
+                        <tr><td class="mono">08:10</td><td>Weather Jenggawah</td><td class="muted-sm">Curah Hujan</td><td><strong>12 mm</strong> <span class="dot-sm status-normal"></span></td></tr>
+                        <tr><td class="mono">08:15</td><td>Sensor Tanah A1</td><td class="muted-sm">Kelembapan</td><td><strong>38%</strong> <span class="dot-sm status-warning"></span></td></tr>
+                        <tr><td class="mono">08:20</td><td>Debit Bedadung</td><td class="muted-sm">Debit</td><td><strong>4.8 m³/s</strong> <span class="dot-sm status-normal"></span></td></tr>
+                        <tr><td class="mono">08:25</td><td>Early Warning</td><td class="muted-sm">Status</td><td><strong>Siaga</strong> <span class="dot-sm status-alert"></span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     5. PETA GIS (placeholder)
+     ============================================================ -->
+<section class="section section-off" id="peta">
+    <div class="container">
+        <div class="section-head reveal">
+            <span class="eyebrow">WebGIS</span>
+            <h2>Peta Spasial Kabupaten Jember</h2>
+            <p class="section-desc">Modul WebGIS penuh akan dibangun pada fase berikutnya.</p>
+        </div>
+        <div class="webgis-preview reveal">
+            <div class="webgis-map-placeholder">
+                <div class="map-grid-overlay"></div>
+                <div class="map-crosshair"></div>
+                <div class="map-badge map-badge-tl">
+                    Jember · EPSG:4326
+                </div>
+                <div class="map-badge map-badge-tr">
+                    <span class="dot dot-live"></span> Live
+                </div>
+                <div class="map-pins">
+                    <span class="pin pin-a"></span>
+                    <span class="pin pin-b"></span>
+                    <span class="pin pin-c"></span>
+                    <span class="pin pin-d"></span>
+                </div>
+                <div class="map-coming">
+                    <strong>Peta Interaktif</strong>
+                    <span class="muted-small">Segera Hadir</span>
+                </div>
+            </div>
+            <aside class="webgis-side">
+                <h3>Layer Rencana</h3>
+                <ul class="layer-list">
+                    <li><span class="layer-dot" style="background:#10b981"></span> Administrasi</li>
+                    <li><span class="layer-dot" style="background:#38bdf8"></span> Sungai &amp; DAS</li>
+                    <li><span class="layer-dot" style="background:#f59e0b"></span> Jaringan Irigasi</li>
+                    <li><span class="layer-dot" style="background:#22c55e"></span> Lahan Pertanian</li>
+                    <li><span class="layer-dot" style="background:#ef4444"></span> Risiko Banjir</li>
+                    <li><span class="layer-dot" style="background:#a855f7"></span> Kesesuaian Lahan</li>
+                </ul>
+                <button class="btn btn-outline btn-block" disabled>Segera Hadir</button>
+            </aside>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     6. MODUL
+     ============================================================ -->
+<section class="section section-light" id="modul">
+    <div class="container">
+        <div class="section-head reveal">
+            <span class="eyebrow">Modul Platform</span>
+            <h2>Menuju Sistem Pendukung Keputusan</h2>
+            <p class="section-desc">Setiap modul dirancang modular dan akan dikembangkan bertahap.</p>
+        </div>
+        <div class="module-grid">
+            {% for m in modules %}
+            <article class="module-card reveal">
+                <div class="module-icon icon-{{ m.icon }}">◆</div>
+                <h3>{{ m.title }}</h3>
+                <p>{{ m.desc }}</p>
+                <span class="module-tag">Segera</span>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     7. CTA
+     ============================================================ -->
+<section class="cta-section" id="tentang">
+    <div class="container cta-inner reveal">
+        <h2>Siap Membangun Pertanian Cerdas?</h2>
+        <p>AGROTEK AI dirancang untuk tumbuh menjadi platform Spatial Decision Support System jangka panjang — dari WebGIS, analisis spasial, hingga AI recommendation.</p>
+        <div class="cta-actions">
+            <a href="#hero" class="btn btn-primary btn-lg">Mulai Sekarang</a>
+            <a href="#dashboard" class="btn btn-ghost btn-lg">Lihat Dashboard</a>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer class="site-footer">
+    <div class="footer-pattern"></div>
+    <div class="container footer-grid">
+        <div class="footer-brand">
+            <div class="brand">
+                <span class="brand-mark">AG</span>
+                <span class="brand-text">
+                    <strong>AGROTEK AI</strong>
+                    <small>Spatial Agriculture Intelligence Platform</small>
+                </span>
+            </div>
+            <p class="footer-desc">Platform informasi spasial dan sistem pendukung keputusan untuk pertanian, irigasi, hidrologi, dan pengelolaan sumber daya lahan.</p>
+            <p class="footer-region">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Kabupaten Jember, Jawa Timur
+            </p>
+        </div>
+        <div class="footer-col">
+            <h4>Platform</h4>
+            <ul>
+                <li><a href="#hero">Beranda</a></li>
+                <li><a href="#statistik">Statistik</a></li>
+                <li><a href="#monitoring">Monitoring</a></li>
+                <li><a href="#dashboard">Dashboard</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4>Modul</h4>
+            <ul>
+                <li><a href="#peta">Peta GIS</a></li>
+                <li><a href="#modul">Pertanian</a></li>
+                <li><a href="#modul">Irigasi</a></li>
+                <li><a href="#modul">Hidrologi</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4>Informasi</h4>
+            <ul>
+                <li><a href="#">Sumber Data</a></li>
+                <li><a href="#">Kebijakan Privasi</a></li>
+                <li><a href="#">Syarat &amp; Ketentuan</a></li>
+                <li><a href="#">Kontak</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <div class="container footer-bottom-inner">
+            <p>&copy; 2026 AGROTEK AI — Kabupaten Jember, Jawa Timur.</p>
+            <p class="footer-status">
+                <span class="dot dot-live"></span>
+                System Status: <strong>Online</strong>
+            </p>
+        </div>
+    </div>
+</footer>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>

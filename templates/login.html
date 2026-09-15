@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masuk — AGROTEK AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <style>
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            background:
+                radial-gradient(800px 500px at 20% 30%, rgba(16,185,129,.18), transparent 60%),
+                radial-gradient(700px 500px at 85% 70%, rgba(14,165,233,.14), transparent 60%),
+                linear-gradient(180deg, #071022, #0a1628);
+        }
+        .login-box {
+            width: 100%;
+            max-width: 440px;
+            background: #fff;
+            border-radius: 20px;
+            padding: 40px 34px;
+            box-shadow: 0 30px 80px rgba(0,0,0,.4);
+        }
+        .login-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+            justify-content: center;
+        }
+        .login-brand .brand-mark {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #34d399, #38bdf8);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: #0a1628;
+            font-size: 1rem;
+        }
+        .login-brand-text {
+            display: flex; flex-direction: column; line-height: 1.15;
+        }
+        .login-brand-text strong {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+        .login-brand-text small {
+            font-size: .7rem;
+            color: #059669;
+        }
+        .login-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-align: center;
+            color: #0f172a;
+            margin-bottom: 6px;
+        }
+        .login-sub {
+            font-size: .9rem;
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 26px;
+        }
+        .login-error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: .85rem;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .login-field {
+            margin-bottom: 16px;
+        }
+        .login-field label {
+            display: block;
+            font-size: .82rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+        .login-field input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            font: inherit;
+            font-size: .95rem;
+            color: #0f172a;
+            background: #fff;
+            transition: all .2s;
+        }
+        .login-field input:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 4px rgba(16,185,129,.12);
+        }
+        .login-submit {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font: inherit;
+            font-weight: 600;
+            font-size: .95rem;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: all .2s;
+            box-shadow: 0 6px 20px rgba(16,185,129,.30);
+        }
+        .login-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px rgba(16,185,129,.4);
+        }
+        .login-help {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .login-help p {
+            font-size: .78rem;
+            color: #64748b;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .login-accounts {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+        .login-account {
+            padding: 10px 6px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: .72rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all .2s;
+        }
+        .login-account:hover {
+            border-color: #10b981;
+            background: rgba(16,185,129,.05);
+        }
+        .login-account strong {
+            display: block;
+            color: #0f172a;
+            margin-bottom: 2px;
+        }
+        .login-account span {
+            color: #94a3b8;
+            font-family: monospace;
+            font-size: .68rem;
+        }
+        .login-back {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            font-size: .82rem;
+            color: #64748b;
+        }
+        .login-back:hover { color: #059669; }
+    </style>
+</head>
+<body>
+
+<div class="login-page">
+    <div class="login-box">
+
+        <div class="login-brand">
+            <span class="brand-mark">AG</span>
+            <span class="login-brand-text">
+                <strong>AGROTEK AI</strong>
+                <small>Spatial Agriculture Intelligence Platform</small>
+            </span>
+        </div>
+
+        <h1 class="login-title">Masuk ke Platform</h1>
+        <p class="login-sub">Pilih akun sesuai kebutuhan Anda</p>
+
+        {% if error %}
+        <div class="login-error">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" action="/login">
+            <div class="login-field">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required autofocus
+                       autocomplete="username" placeholder="Masukkan username">
+            </div>
+
+            <div class="login-field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required
+                       autocomplete="current-password" placeholder="Masukkan password">
+            </div>
+
+            <button type="submit" class="login-submit">Masuk →</button>
+        </form>
+
+        <div class="login-help">
+            <p>Akun demo (klik untuk isi otomatis)</p>
+            <div class="login-accounts">
+                <div class="login-account" onclick="fillLogin('umum','umum123')">
+                    <strong>Umum</strong>
+                    <span>umum</span>
+                </div>
+                <div class="login-account" onclick="fillLogin('mahasiswa','mhs123')">
+                    <strong>Mahasiswa</strong>
+                    <span>mahasiswa</span>
+                </div>
+                <div class="login-account" onclick="fillLogin('admin','admin123')">
+                    <strong>Admin</strong>
+                    <span>admin</span>
+                </div>
+            </div>
+        </div>
+
+        <a href="/" class="login-back">← Kembali ke Beranda</a>
+    </div>
+</div>
+
+<script>
+function fillLogin(username, password) {
+    document.getElementById('username').value = username;
+    document.getElementById('password').value = password;
+    document.getElementById('username').focus();
+}
+</script>
+
+</body>
+</html>

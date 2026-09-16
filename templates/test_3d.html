@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>3D WebGIS Mobile — AGROTEK AI</title>
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; overflow: hidden; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; }
+        #map { position: absolute; inset: 0; touch-action: none; }
+
+        .menu-toggle {
+            position: absolute; top: 16px; left: 16px; z-index: 100;
+            width: 48px; height: 48px;
+            background: rgba(10,22,40,.94);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(52,211,153,.3);
+            border-radius: 12px;
+            color: #f1f5f9; font-size: 1.4rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all .3s;
+            box-shadow: 0 8px 24px rgba(0,0,0,.4);
+            padding: 0; font-family: inherit;
+        }
+        .menu-toggle:hover, .menu-toggle:active {
+            background: rgba(52,211,153,.2);
+            border-color: #34d399; color: #6ee7b7;
+        }
+        .menu-toggle.open {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: #10b981; color: #fff;
+        }
+        .menu-toggle .lines {
+            display: flex; flex-direction: column; gap: 5px; width: 22px;
+        }
+        .menu-toggle .lines span {
+            display: block; height: 2px; background: currentColor;
+            border-radius: 2px; transition: all .3s;
+        }
+        .menu-toggle.open .lines span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .menu-toggle.open .lines span:nth-child(2) { opacity: 0; }
+        .menu-toggle.open .lines span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        .sidebar {
+            position: absolute; top: 0; left: 0; bottom: 0; z-index: 90;
+            background: rgba(10,22,40,.96);
+            backdrop-filter: blur(18px);
+            border-right: 1px solid rgba(52,211,153,.2);
+            padding: 24px 20px; color: #f1f5f9; width: 320px;
+            overflow-y: auto; -webkit-overflow-scrolling: touch;
+            box-shadow: 4px 0 30px rgba(0,0,0,.4);
+            transition: transform .35s cubic-bezier(.22,.61,.36,1);
+            padding-top: 80px;
+        }
+        .sidebar::-webkit-scrollbar { width: 5px; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(52,211,153,.3); border-radius: 3px; }
+        .sidebar.closed { transform: translateX(-100%); }
+
+        .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+        .brand-mark {
+            width: 38px; height: 38px;
+            background: linear-gradient(135deg, #34d399, #38bdf8);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: #0a1628; font-size: .85rem; flex-shrink: 0;
+        }
+        .brand-text strong { display: block; font-size: 1rem; font-weight: 800; color: #fff; }
+        .brand-text small { display: block; font-size: .65rem; color: #6ee7b7; letter-spacing: .04em; }
+        .sub { font-size: .68rem; color: #94a3b8; margin-bottom: 20px; letter-spacing: .1em; text-transform: uppercase; }
+
+        .section { margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px dashed rgba(255,255,255,.08); }
+        .section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+        .section-title {
+            font-size: .68rem; font-weight: 700; letter-spacing: .12em;
+            text-transform: uppercase; color: #6ee7b7; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .section-title::before {
+            content: ''; width: 3px; height: 12px;
+            background: linear-gradient(180deg, #34d399, #0ea5e9); border-radius: 2px;
+        }
+
+        .ctrl-btn {
+            display: flex; align-items: center; gap: 10px;
+            padding: 11px 14px;
+            background: rgba(255,255,255,.05);
+            border: 1px solid rgba(255,255,255,.10);
+            border-radius: 10px; color: #cbd5e1;
+            font-size: .85rem; font-weight: 500; cursor: pointer;
+            transition: all .2s; width: 100%; text-align: left;
+            font-family: inherit; margin-bottom: 8px; min-height: 44px;
+        }
+        .ctrl-btn:hover, .ctrl-btn:active {
+            background: rgba(52,211,153,.12);
+            border-color: rgba(52,211,153,.4); color: #6ee7b7;
+        }
+        .ctrl-btn.active {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: #10b981; color: #fff;
+            box-shadow: 0 4px 14px rgba(16,185,129,.3);
+        }
+        .ctrl-btn .icon {
+            width: 24px; height: 24px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,.08);
+            border-radius: 6px; font-size: .9rem; flex-shrink: 0;
+        }
+
+        .layer-toggle {
+            display: flex; align-items: center; gap: 12px;
+            padding: 11px 12px;
+            background: rgba(255,255,255,.03);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 10px; margin-bottom: 8px; cursor: pointer;
+            transition: all .2s; font-size: .85rem; color: #cbd5e1; min-height: 44px;
+        }
+        .layer-toggle:active { background: rgba(255,255,255,.08); }
+        .layer-toggle input { display: none; }
+        .layer-toggle .check {
+            width: 20px; height: 20px;
+            border: 2px solid rgba(255,255,255,.25);
+            border-radius: 5px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all .2s; flex-shrink: 0;
+            font-size: .75rem; color: transparent;
+        }
+        .layer-toggle input:checked ~ .check {
+            background: #10b981; border-color: #10b981; color: #fff;
+        }
+        .layer-toggle input:checked ~ span:not(.check) {
+            color: #fff; font-weight: 600;
+        }
+
+        .opacity-row {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; font-size: .8rem; color: #cbd5e1;
+            min-height: 44px;
+        }
+        .opacity-row label { flex: 1; }
+        .opacity-row input[type="range"] {
+            width: 110px; accent-color: #10b981; height: 20px;
+        }
+        .opacity-row .value {
+            font-family: monospace; font-size: .72rem;
+            color: #6ee7b7; min-width: 38px; text-align: right;
+        }
+
+        .basemap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .basemap-btn {
+            padding: 11px 10px;
+            background: rgba(255,255,255,.05);
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 9px; color: #cbd5e1;
+            font-size: .78rem; font-family: inherit;
+            cursor: pointer; transition: all .2s;
+            display: flex; align-items: center; gap: 6px;
+            justify-content: center; min-height: 44px;
+        }
+        .basemap-btn:active { background: rgba(255,255,255,.12); }
+        .basemap-btn.active {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: #10b981; color: #fff; font-weight: 600;
+        }
+
+        .info-badge { font-size: .72rem; color: #94a3b8; line-height: 1.8; }
+        .info-badge strong { color: #6ee7b7; }
+        .info-badge kbd {
+            display: inline-block; padding: 1px 6px;
+            background: rgba(52,211,153,.15);
+            border: 1px solid rgba(52,211,153,.3);
+            border-radius: 4px; font-family: monospace;
+            font-size: .68rem; color: #6ee7b7;
+        }
+
+        .hud-pitch {
+            position: absolute; bottom: 16px; left: 16px; z-index: 40;
+            background: rgba(10,22,40,.92);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 10px; padding: 8px 12px;
+            color: #cbd5e1; font-size: .7rem; font-family: monospace;
+            display: flex; gap: 14px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.4);
+        }
+        .hud-pitch .item span:first-child { color: #64748b; }
+        .hud-pitch .item span:last-child { color: #6ee7b7; font-weight: 700; margin-left: 4px; }
+
+        .hud-ctrl {
+            position: absolute; bottom: 16px; right: 16px; z-index: 40;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .ctrl-btn-mini {
+            width: 52px; height: 52px;
+            background: rgba(10,22,40,.94);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 14px; color: #cbd5e1;
+            font-size: 1.4rem; cursor: pointer;
+            transition: all .2s;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,.4); padding: 0;
+        }
+        .ctrl-btn-mini:active {
+            background: rgba(52,211,153,.2);
+            border-color: rgba(52,211,153,.5); transform: scale(.95);
+        }
+        .ctrl-btn-mini.active {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: #10b981; color: #fff;
+        }
+
+        .maplibregl-ctrl-group {
+            background: rgba(10,22,40,.92) !important;
+            border: 1px solid rgba(255,255,255,.1) !important;
+            border-radius: 10px !important; overflow: hidden;
+        }
+        .maplibregl-ctrl-group button {
+            background: transparent !important;
+            filter: invert(1) brightness(1.5);
+            width: 36px !important; height: 36px !important;
+        }
+        .maplibregl-ctrl-attrib {
+            background: rgba(10,22,40,.7) !important;
+            border-radius: 8px !important; font-size: .65rem !important;
+        }
+        .maplibregl-ctrl-attrib a { color: #6ee7b7 !important; }
+        .maplibregl-ctrl-scale {
+            background: rgba(10,22,40,.85) !important;
+            color: #6ee7b7 !important;
+            border-color: rgba(52,211,153,.4) !important;
+            border-radius: 4px !important;
+        }
+
+        .marker-3d {
+            width: 16px; height: 16px;
+            background: linear-gradient(135deg, #34d399, #0ea5e9);
+            border: 2px solid #fff; border-radius: 50%;
+            box-shadow: 0 0 0 4px rgba(52,211,153,.3), 0 0 20px rgba(52,211,153,.8);
+            cursor: pointer; transition: all .2s;
+        }
+        .marker-3d:hover, .marker-3d:active {
+            transform: scale(1.5);
+            box-shadow: 0 0 0 8px rgba(52,211,153,.25), 0 0 30px rgba(52,211,153,1);
+        }
+
+        .maplibregl-popup-content {
+            background: #0f1e35 !important;
+            color: #f1f5f9 !important;
+            border: 1px solid rgba(52,211,153,.35) !important;
+            border-radius: 12px !important;
+            padding: 14px 16px !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,.6) !important;
+        }
+        .popup-title {
+            font-weight: 700; font-size: .95rem;
+            color: #fff; margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255,255,255,.1);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .popup-title::before {
+            content: ''; width: 6px; height: 6px;
+            background: #34d399; border-radius: 50%;
+            box-shadow: 0 0 8px #34d399;
+        }
+        .popup-row {
+            display: flex; justify-content: space-between;
+            font-size: .8rem; padding: 3px 0; gap: 16px;
+        }
+        .popup-row span:first-child { color: #94a3b8; }
+        .popup-row span:last-child { color: #fff; font-weight: 500; }
+
+        .loading {
+            position: absolute; inset: 0; z-index: 999;
+            background: #0a1628;
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column; gap: 20px;
+            color: #f1f5f9;
+            transition: opacity .6s, visibility .6s;
+        }
+        .loading.hide { opacity: 0; visibility: hidden; }
+        .loading .spinner {
+            width: 48px; height: 48px;
+            border: 3px solid rgba(52,211,153,.2);
+            border-top-color: #34d399; border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading p { font-size: .85rem; color: #6ee7b7; letter-spacing: .1em; text-transform: uppercase; }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 85%; max-width: 320px; padding-top: 80px; }
+            .sidebar.closed { transform: translateX(-100%); }
+            .menu-toggle { width: 52px; height: 52px; font-size: 1.5rem; }
+            .hud-pitch {
+                left: 16px; bottom: 16px;
+                padding: 6px 10px; font-size: .65rem; gap: 10px;
+            }
+            .ctrl-btn-mini { width: 48px; height: 48px; font-size: 1.25rem; }
+            .maplibregl-ctrl-top-right { top: 80px !important; right: 8px !important; }
+        }
+        @media (min-width: 769px) {
+            .sidebar { width: 340px; box-shadow: 4px 0 40px rgba(0,0,0,.35); }
+        }
+        body { overscroll-behavior: none; }
+    </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Memuat 3D WebGIS…</p>
+</div>
+
+<button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+    <div class="lines">
+        <span></span><span></span><span></span>
+    </div>
+</button>
+
+<div class="sidebar" id="sidebar">
+    <div class="brand">
+        <div class="brand-mark">AG</div>
+        <div class="brand-text">
+            <strong>3D WebGIS</strong>
+            <small>Jember · MapLibre GL</small>
+        </div>
+    </div>
+    <p class="sub">Terrain · SHP · 3D Building</p>
+
+    <div class="section">
+        <div class="section-title">View Mode</div>
+        <button class="ctrl-btn active" id="btnTerrain">
+            <span class="icon">🗻</span><span>3D Terrain</span>
+        </button>
+        <button class="ctrl-btn" id="btnRotate">
+            <span class="icon">🔄</span><span>Auto-Rotate</span>
+        </button>
+        <button class="ctrl-btn" id="btnReset">
+            <span class="icon">🎯</span><span>Reset View</span>
+        </button>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Basemap</div>
+        <div class="basemap-grid">
+            <button class="basemap-btn" data-basemap="street">🗺️ Street</button>
+            <button class="basemap-btn active" data-basemap="satellite">🛰️ Satellite</button>
+            <button class="basemap-btn" data-basemap="terrain">⛰️ Terrain</button>
+            <button class="basemap-btn" data-basemap="dark">🌙 Dark</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Layer SHP</div>
+        <label class="layer-toggle">
+            <input type="checkbox" id="layerSHP_Sungai" checked>
+            <span class="check">✓</span>
+            <span>🌊 Sungai</span>
+        </label>
+        <label class="layer-toggle">
+            <input type="checkbox" id="layerSHP_DAS" checked>
+            <span class="check">✓</span>
+            <span>💧 DAS</span>
+        </label>
+        <label class="layer-toggle">
+            <input type="checkbox" id="layerSHP_Irigasi" checked>
+            <span class="check">✓</span>
+            <span>🚿 Irigasi</span>
+        </label>
+        <label class="layer-toggle">
+            <input type="checkbox" id="layerMarker" checked>
+            <span class="check">✓</span>
+            <span>📍 Kecamatan</span>
+        </label>
+        <label class="layer-toggle">
+            <input type="checkbox" id="layerBuilding" checked>
+            <span class="check">✓</span>
+            <span>🏢 3D Building</span>
+        </label>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Opacity</div>
+        <div class="opacity-row">
+            <label>Sungai</label>
+            <input type="range" id="opSungai" min="0" max="100" value="95">
+            <span class="value" id="opSungaiVal">95%</span>
+        </div>
+        <div class="opacity-row">
+            <label>DAS</label>
+            <input type="range" id="opDAS" min="0" max="100" value="30">
+            <span class="value" id="opDASVal">30%</span>
+        </div>
+        <div class="opacity-row">
+            <label>Building</label>
+            <input type="range" id="opBuilding" min="0" max="100" value="85">
+            <span class="value" id="opBuildingVal">85%</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Kontrol</div>
+        <div class="info-badge">
+            <strong>📱 HP (Touch):</strong><br>
+            • 1 jari drag = geser<br>
+            • 2 jari drag = tilt + rotate<br>
+            • Pinch = zoom<br>
+            <br>
+            <strong>💻 Laptop:</strong><br>
+            • Klik kiri = geser<br>
+            • Klik kanan = tilt + rotate<br>
+            • <kbd>R</kbd> reset · <kbd>3</kbd> terrain · <kbd>F</kbd> fullscreen
+        </div>
+    </div>
+</div>
+
+<div class="hud-pitch">
+    <div class="item"><span>P</span><span id="pitchVal">60°</span></div>
+    <div class="item"><span>B</span><span id="bearingVal">-20°</span></div>
+    <div class="item"><span>Z</span><span id="zoomVal">11.5</span></div>
+</div>
+
+<div class="hud-ctrl">
+    <button class="ctrl-btn-mini active" id="btnTerrainMini" title="Terrain">🗻</button>
+    <button class="ctrl-btn-mini" id="btnRotateMini" title="Rotate">🔄</button>
+    <button class="ctrl-btn-mini" id="btnResetMini" title="Reset">🎯</button>
+    <button class="ctrl-btn-mini" id="btnFullscreen" title="Fullscreen">⛶</button>
+</div>
+
+<script>
+/* ============================================================
+   DATA DEMO KECAMATAN
+   ============================================================ */
+const DISTRICTS = [
+    { name: 'Wuluhan',     lng: 113.550, lat: -8.300, area: 105.2, elev: 25 },
+    { name: 'Ambulu',      lng: 113.620, lat: -8.320, area: 103.5, elev: 30 },
+    { name: 'Puger',       lng: 113.480, lat: -8.300, area: 142.6, elev: 10 },
+    { name: 'Tempurejo',   lng: 113.720, lat: -8.350, area: 210.4, elev: 50 },
+    { name: 'Silo',        lng: 113.850, lat: -8.200, area: 206.3, elev: 250 },
+    { name: 'Patrang',     lng: 113.700, lat: -8.130, area: 45.3,  elev: 130 },
+    { name: 'Kaliwates',   lng: 113.700, lat: -8.170, area: 24.7,  elev: 90 },
+    { name: 'Tanggul',     lng: 113.420, lat: -8.050, area: 100.5, elev: 200 },
+    { name: 'Sumberjambe', lng: 113.850, lat: -8.020, area: 96.2,  elev: 500 },
+    { name: 'Bangsalsari', lng: 113.500, lat: -8.100, area: 88.3,  elev: 150 }
+];
+
+/* ============================================================
+   3D BUILDING DEMO
+   ============================================================ */
+const BUILDINGS_GEOJSON = {
+    type: 'FeatureCollection',
+    features: [
+        { type: 'Feature', properties: { height: 40 }, geometry: { type: 'Polygon', coordinates: [[[113.698, -8.132], [113.700, -8.132], [113.700, -8.130], [113.698, -8.130], [113.698, -8.132]]] } },
+        { type: 'Feature', properties: { height: 60 }, geometry: { type: 'Polygon', coordinates: [[[113.702, -8.133], [113.704, -8.133], [113.704, -8.131], [113.702, -8.131], [113.702, -8.133]]] } },
+        { type: 'Feature', properties: { height: 30 }, geometry: { type: 'Polygon', coordinates: [[[113.706, -8.130], [113.708, -8.130], [113.708, -8.128], [113.706, -8.128], [113.706, -8.130]]] } },
+        { type: 'Feature', properties: { height: 80 }, geometry: { type: 'Polygon', coordinates: [[[113.698, -8.172], [113.700, -8.172], [113.700, -8.170], [113.698, -8.170], [113.698, -8.172]]] } },
+        { type: 'Feature', properties: { height: 50 }, geometry: { type: 'Polygon', coordinates: [[[113.702, -8.173], [113.704, -8.173], [113.704, -8.171], [113.702, -8.171], [113.702, -8.173]]] } },
+        { type: 'Feature', properties: { height: 100 }, geometry: { type: 'Polygon', coordinates: [[[113.706, -8.170], [113.708, -8.170], [113.708, -8.168], [113.706, -8.168], [113.706, -8.170]]] } },
+        { type: 'Feature', properties: { height: 70 }, geometry: { type: 'Polygon', coordinates: [[[113.710, -8.168], [113.712, -8.168], [113.712, -8.166], [113.710, -8.166], [113.710, -8.168]]] } }
+    ]
+};
+
+/* ============================================================
+   BASEMAPS
+   ============================================================ */
+const BASEMAPS = {
+    street: {
+        version: 8,
+        sources: {
+            'basemap': {
+                type: 'raster',
+                tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+                tileSize: 256, attribution: '© OpenStreetMap'
+            },
+            'terrain-dem': {
+                type: 'raster-dem',
+                tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+                tileSize: 256, encoding: 'terrarium', maxzoom: 15
+            }
+        },
+        layers: [
+            { id: 'bg', type: 'background', paint: { 'background-color': '#0a1628' } },
+            { id: 'basemap', type: 'raster', source: 'basemap', minzoom: 0, maxzoom: 19 },
+            { id: 'hillshade', type: 'hillshade', source: 'terrain-dem',
+              paint: { 'hillshade-exaggeration': 0.4, 'hillshade-accent-color': '#34d399' } }
+        ]
+    },
+    satellite: {
+        version: 8,
+        sources: {
+            'basemap': {
+                type: 'raster',
+                tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+                tileSize: 256, attribution: '© Esri, Maxar'
+            },
+            'terrain-dem': {
+                type: 'raster-dem',
+                tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+                tileSize: 256, encoding: 'terrarium', maxzoom: 15
+            }
+        },
+        layers: [
+            { id: 'bg', type: 'background', paint: { 'background-color': '#000000' } },
+            { id: 'basemap', type: 'raster', source: 'basemap', minzoom: 0, maxzoom: 19 },
+            { id: 'hillshade', type: 'hillshade', source: 'terrain-dem',
+              paint: { 'hillshade-exaggeration': 0.5 } }
+        ]
+    },
+    terrain: {
+        version: 8,
+        sources: {
+            'basemap': {
+                type: 'raster',
+                tiles: ['https://tile.opentopomap.org/{z}/{x}/{y}.png'],
+                tileSize: 256, attribution: '© OpenTopoMap'
+            },
+            'terrain-dem': {
+                type: 'raster-dem',
+                tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+                tileSize: 256, encoding: 'terrarium', maxzoom: 15
+            }
+        },
+        layers: [
+            { id: 'bg', type: 'background', paint: { 'background-color': '#0a1628' } },
+            { id: 'basemap', type: 'raster', source: 'basemap', minzoom: 0, maxzoom: 17 },
+            { id: 'hillshade', type: 'hillshade', source: 'terrain-dem',
+              paint: { 'hillshade-exaggeration': 0.6 } }
+        ]
+    },
+    dark: {
+        version: 8,
+        sources: {
+            'basemap': {
+                type: 'raster',
+                tiles: ['https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'],
+                tileSize: 256, attribution: '© CARTO'
+            },
+            'terrain-dem': {
+                type: 'raster-dem',
+                tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+                tileSize: 256, encoding: 'terrarium', maxzoom: 15
+            }
+        },
+        layers: [
+            { id: 'bg', type: 'background', paint: { 'background-color': '#050b18' } },
+            { id: 'basemap', type: 'raster', source: 'basemap', minzoom: 0, maxzoom: 19 },
+            { id: 'hillshade', type: 'hillshade', source: 'terrain-dem',
+              paint: { 'hillshade-exaggeration': 0.3, 'hillshade-highlight-color': '#34d399' } }
+        ]
+    }
+};
+
+/* ============================================================
+   INIT MAP
+   ============================================================ */
+const map = new maplibregl.Map({
+    container: 'map',
+    style: BASEMAPS.satellite,
+    center: [113.6681, -8.1845],
+    zoom: 11.5,
+    pitch: 60,
+    bearing: -20,
+    antialias: true,
+    maxPitch: 85,
+    dragRotate: true,
+    pitchWithRotate: true,
+    touchPitch: true,
+    touchZoomRotate: true,
+    fadeDuration: 100,
+    attributionControl: { compact: true }
+});
+
+map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+map.addControl(new maplibregl.ScaleControl({ maxWidth: 80, unit: 'metric' }), 'bottom-right');
+
+/* ============================================================
+   GOOGLE-EARTH HANDLER
+   ============================================================ */
+class GoogleEarthHandler {
+    constructor(map) {
+        this.map = map;
+        this.isActive = false;
+        this.startPos = null;
+        this.startPitch = 0;
+        this.startBearing = 0;
+        this.el = map.getCanvasContainer();
+        this.onDown = this.onDown.bind(this);
+        this.onMove = this.onMove.bind(this);
+        this.onUp = this.onUp.bind(this);
+        this.el.addEventListener('mousedown', this.onDown);
+        document.addEventListener('mousemove', this.onMove);
+        document.addEventListener('mouseup', this.onUp);
+    }
+    onDown(e) {
+        if (e.button === 2 || (e.button === 0 && e.ctrlKey)) {
+            e.preventDefault();
+            this.isActive = true;
+            this.startPos = { x: e.clientX, y: e.clientY };
+            this.startPitch = this.map.getPitch();
+            this.startBearing = this.map.getBearing();
+            this.el.style.cursor = 'grabbing';
+        }
+    }
+    onMove(e) {
+        if (!this.isActive) return;
+        const dx = e.clientX - this.startPos.x;
+        const dy = e.clientY - this.startPos.y;
+        const newBearing = this.startBearing - dx * 0.5;
+        const newPitch = Math.max(0, Math.min(85, this.startPitch + dy * 0.5));
+        this.map.jumpTo({ bearing: newBearing, pitch: newPitch });
+    }
+    onUp() {
+        if (this.isActive) {
+            this.isActive = false;
+            this.el.style.cursor = '';
+        }
+    }
+}
+
+function setupTouch() {
+    const el = map.getCanvasContainer();
+    let touchState = null;
+    el.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+            e.preventDefault();
+            touchState = {
+                x1: e.touches[0].clientX, y1: e.touches[0].clientY,
+                x2: e.touches[1].clientX, y2: e.touches[1].clientY,
+                startDist: Math.hypot(
+                    e.touches[1].clientX - e.touches[0].clientX,
+                    e.touches[1].clientY - e.touches[0].clientY),
+                startPitch: map.getPitch(),
+                startBearing: map.getBearing(),
+                startZoom: map.getZoom(),
+                startCenter: {
+                    x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+                    y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+                }
+            };
+        }
+    }, { passive: false });
+    el.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2 && touchState) {
+            e.preventDefault();
+            const cur = {
+                x1: e.touches[0].clientX, y1: e.touches[0].clientY,
+                x2: e.touches[1].clientX, y2: e.touches[1].clientY
+            };
+            const curDist = Math.hypot(cur.x2 - cur.x1, cur.y2 - cur.y1);
+            const curCenter = { x: (cur.x1 + cur.x2) / 2, y: (cur.y1 + cur.y2) / 2 };
+            const dx = curCenter.x - touchState.startCenter.x;
+            const dy = curCenter.y - touchState.startCenter.y;
+            const scale = curDist / touchState.startDist;
+            const newBearing = touchState.startBearing - dx * 0.4;
+            const newPitch = Math.max(0, Math.min(85, touchState.startPitch + dy * 0.4));
+            const newZoom = Math.max(0, Math.min(20, touchState.startZoom + Math.log2(scale) * 1.2));
+            map.jumpTo({ bearing: newBearing, pitch: newPitch, zoom: newZoom });
+        }
+    }, { passive: false });
+    el.addEventListener('touchend', () => { touchState = null; });
+}
+
+map.getCanvasContainer().addEventListener('contextmenu', (e) => e.preventDefault());
+
+/* ============================================================
+   LOAD SHP GeoJSON
+   ============================================================ */
+async function loadSHP() {
+    try {
+        // SUNGAI
+        const sungai = await fetch('/static/data/sungai_jember.geojson').then(r => r.json());
+        console.log('[SHP] Sungai:', sungai.features.length, 'fitur');
+        map.addSource('shp-sungai', { type: 'geojson', data: sungai });
+        map.addLayer({
+            id: 'shp-sungai-glow', type: 'line', source: 'shp-sungai',
+            paint: { 'line-color': '#38bdf8', 'line-width': 8, 'line-opacity': 0.2, 'line-blur': 6 }
+        });
+        map.addLayer({
+            id: 'shp-sungai-line', type: 'line', source: 'shp-sungai',
+            paint: { 'line-color': '#0ea5e9', 'line-width': 1.5, 'line-opacity': 0.9 }
+        });
+
+        // DAS
+        const das = await fetch('/static/data/das_jember.geojson').then(r => r.json());
+        console.log('[SHP] DAS:', das.features.length, 'fitur');
+        map.addSource('shp-das', { type: 'geojson', data: das });
+        map.addLayer({
+            id: 'shp-das-fill', type: 'fill', source: 'shp-das',
+            paint: { 'fill-color': '#10b981', 'fill-opacity': 0.15 }
+        });
+        map.addLayer({
+            id: 'shp-das-line', type: 'line', source: 'shp-das',
+            paint: { 'line-color': '#38bdf8', 'line-width': 2, 'line-dasharray': [4, 3], 'line-opacity': 0.8 }
+        });
+
+        // IRIGASI
+        const irigasi = await fetch('/static/data/irigasi_jember.geojson').then(r => r.json());
+        console.log('[SHP] Irigasi:', irigasi.features.length, 'fitur');
+        map.addSource('shp-irigasi', { type: 'geojson', data: irigasi });
+        map.addLayer({
+            id: 'shp-irigasi-line', type: 'line', source: 'shp-irigasi',
+            paint: { 'line-color': '#f59e0b', 'line-width': 1.5, 'line-opacity': 0.85 }
+        });
+
+        // POPUP
+        ['shp-sungai-line', 'shp-das-fill', 'shp-irigasi-line'].forEach(layerId => {
+            map.on('click', layerId, (e) => {
+                const props = e.features[0].properties;
+                const coords = e.lngLat;
+                let rows = '';
+                Object.entries(props).slice(0, 6).forEach(([k, v]) => {
+                    if (v && k !== 'OBJECTID') {
+                        rows += `<div class="popup-row"><span>${k}</span><span>${v}</span></div>`;
+                    }
+                });
+                new maplibregl.Popup({ offset: 15 })
+                    .setLngLat(coords)
+                    .setHTML(`<div class="popup-title">Data SHP</div>${rows || '<div class="popup-row"><span>Info</span><span>-</span></div>'}`)
+                    .addTo(map);
+            });
+            map.on('mouseenter', layerId, () => { map.getCanvas().style.cursor = 'pointer'; });
+            map.on('mouseleave', layerId, () => { map.getCanvas().style.cursor = ''; });
+        });
+
+        console.log('[AGROTEK] Semua SHP loaded.');
+    } catch (err) {
+        console.error('[AGROTEK] Gagal load SHP:', err);
+    }
+}
+
+/* ============================================================
+   LOAD MAP
+   ============================================================ */
+map.on('load', () => {
+    map.setTerrain({ source: 'terrain-dem', exaggeration: 1.5 });
+    map.setSky({
+        'sky-color': '#0a1628', 'horizon-color': '#1e3a5f', 'fog-color': '#0a1628',
+        'sky-horizon-blend': 0.6, 'horizon-fog-blend': 0.5, 'fog-ground-blend': 0.5
+    });
+
+    // 3D Building
+    map.addSource('buildings', { type: 'geojson', data: BUILDINGS_GEOJSON });
+    map.addLayer({
+        id: 'building-3d', type: 'fill-extrusion', source: 'buildings',
+        paint: {
+            'fill-extrusion-color': [
+                'interpolate', ['linear'], ['get', 'height'],
+                20, '#10b981', 50, '#0ea5e9', 100, '#a855f7'
+            ],
+            'fill-extrusion-height': ['get', 'height'],
+            'fill-extrusion-base': 0,
+            'fill-extrusion-opacity': 0.85,
+            'fill-extrusion-vertical-gradient': true
+        }
+    });
+
+    // Markers Kecamatan
+    DISTRICTS.forEach(d => {
+        const el = document.createElement('div');
+        el.className = 'marker-3d';
+        new maplibregl.Marker({ element: el })
+            .setLngLat([d.lng, d.lat])
+            .setPopup(new maplibregl.Popup({ offset: 20, closeButton: false })
+                .setHTML(`<div class="popup-title">Kecamatan ${d.name}</div>
+                    <div class="popup-row"><span>Luas</span><span>${d.area} km²</span></div>
+                    <div class="popup-row"><span>Elevasi</span><span>~${d.elev} m</span></div>`))
+            .addTo(map);
+    });
+
+    // Load SHP
+    loadSHP();
+
+    // Hide loading
+    document.getElementById('loading').classList.add('hide');
+    setTimeout(() => document.getElementById('loading').classList.add('hide'), 3000);
+
+    new GoogleEarthHandler(map);
+    setupTouch();
+
+    console.log('[AGROTEK] Map ready.');
+});
+
+function updateIndicators() {
+    document.getElementById('pitchVal').textContent = Math.round(map.getPitch()) + '°';
+    document.getElementById('bearingVal').textContent = Math.round(map.getBearing()) + '°';
+    document.getElementById('zoomVal').textContent = map.getZoom().toFixed(1);
+}
+map.on('move', updateIndicators);
+map.on('zoom', updateIndicators);
+
+/* SIDEBAR */
+const sidebar = document.getElementById('sidebar');
+const menuToggle = document.getElementById('menuToggle');
+function isMobile() { return window.innerWidth <= 768; }
+if (isMobile()) sidebar.classList.add('closed');
+menuToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('closed');
+    menuToggle.classList.toggle('open', !sidebar.classList.contains('closed'));
+});
+window.addEventListener('resize', () => {
+    if (!isMobile() && sidebar.classList.contains('closed')) {
+        sidebar.classList.remove('closed');
+        menuToggle.classList.remove('open');
+    }
+});
+
+/* CONTROLS */
+let terrainActive = true;
+let autoRotating = false;
+let rotInterval = null;
+
+function toggleTerrain() {
+    terrainActive = !terrainActive;
+    document.getElementById('btnTerrain').classList.toggle('active', terrainActive);
+    document.getElementById('btnTerrainMini').classList.toggle('active', terrainActive);
+    if (terrainActive) {
+        map.setTerrain({ source: 'terrain-dem', exaggeration: 1.5 });
+        map.easeTo({ pitch: 60, duration: 1000 });
+    } else {
+        map.setTerrain(null);
+        map.easeTo({ pitch: 0, duration: 1000 });
+    }
+}
+
+function toggleRotate() {
+    autoRotating = !autoRotating;
+    document.getElementById('btnRotate').classList.toggle('active', autoRotating);
+    document.getElementById('btnRotateMini').classList.toggle('active', autoRotating);
+    if (autoRotating) {
+        rotInterval = setInterval(() => {
+            map.easeTo({ bearing: map.getBearing() + 0.3, duration: 100, easing: t => t });
+        }, 100);
+    } else {
+        clearInterval(rotInterval);
+    }
+}
+
+function resetView() {
+    map.easeTo({
+        center: [113.6681, -8.1845], zoom: 11.5,
+        pitch: 60, bearing: -20, duration: 1200
+    });
+    if (isMobile()) {
+        sidebar.classList.add('closed');
+        menuToggle.classList.remove('open');
+    }
+}
+
+function toggleFullscreen() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+    else document.exitFullscreen?.();
+}
+
+document.getElementById('btnTerrain').addEventListener('click', toggleTerrain);
+document.getElementById('btnRotate').addEventListener('click', toggleRotate);
+document.getElementById('btnReset').addEventListener('click', resetView);
+document.getElementById('btnTerrainMini').addEventListener('click', toggleTerrain);
+document.getElementById('btnRotateMini').addEventListener('click', toggleRotate);
+document.getElementById('btnResetMini').addEventListener('click', resetView);
+document.getElementById('btnFullscreen').addEventListener('click', toggleFullscreen);
+
+/* BASEMAP */
+document.querySelectorAll('.basemap-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.basemap-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const key = btn.dataset.basemap;
+        const state = {
+            center: map.getCenter(), zoom: map.getZoom(),
+            pitch: map.getPitch(), bearing: map.getBearing(),
+            terrain: terrainActive,
+            sungai: document.getElementById('layerSHP_Sungai').checked,
+            das: document.getElementById('layerSHP_DAS').checked,
+            irigasi: document.getElementById('layerSHP_Irigasi').checked,
+            building: document.getElementById('layerBuilding').checked,
+        };
+        map.setStyle(BASEMAPS[key]);
+        map.once('styledata', () => {
+            if (state.terrain) map.setTerrain({ source: 'terrain-dem', exaggeration: 1.5 });
+            map.setSky({ 'sky-color': '#0a1628', 'horizon-color': '#1e3a5f', 'fog-color': '#0a1628' });
+            setTimeout(() => {
+                reAddLayers(state);
+                map.jumpTo({
+                    center: state.center, zoom: state.zoom,
+                    pitch: state.pitch, bearing: state.bearing
+                });
+            }, 100);
+        });
+    });
+});
+
+async function reAddLayers(state) {
+    try {
+        const sungai = await fetch('/static/data/sungai_jember.geojson').then(r => r.json());
+        const das = await fetch('/static/data/das_jember.geojson').then(r => r.json());
+        const irigasi = await fetch('/static/data/irigasi_jember.geojson').then(r => r.json());
+
+        if (!map.getSource('shp-sungai')) {
+            map.addSource('shp-sungai', { type: 'geojson', data: sungai });
+            map.addLayer({ id: 'shp-sungai-glow', type: 'line', source: 'shp-sungai',
+                paint: { 'line-color': '#38bdf8', 'line-width': 8, 'line-opacity': 0.2, 'line-blur': 6 } });
+            map.addLayer({ id: 'shp-sungai-line', type: 'line', source: 'shp-sungai',
+                paint: { 'line-color': '#0ea5e9', 'line-width': 1.5, 'line-opacity': 0.9 } });
+        }
+        if (!map.getSource('shp-das')) {
+            map.addSource('shp-das', { type: 'geojson', data: das });
+            map.addLayer({ id: 'shp-das-fill', type: 'fill', source: 'shp-das',
+                paint: { 'fill-color': '#10b981', 'fill-opacity': 0.15 } });
+            map.addLayer({ id: 'shp-das-line', type: 'line', source: 'shp-das',
+                paint: { 'line-color': '#38bdf8', 'line-width': 2, 'line-dasharray': [4, 3], 'line-opacity': 0.8 } });
+        }
+        if (!map.getSource('shp-irigasi')) {
+            map.addSource('shp-irigasi', { type: 'geojson', data: irigasi });
+            map.addLayer({ id: 'shp-irigasi-line', type: 'line', source: 'shp-irigasi',
+                paint: { 'line-color': '#f59e0b', 'line-width': 1.5, 'line-opacity': 0.85 } });
+        }
+        if (!map.getSource('buildings')) {
+            map.addSource('buildings', { type: 'geojson', data: BUILDINGS_GEOJSON });
+            map.addLayer({ id: 'building-3d', type: 'fill-extrusion', source: 'buildings',
+                paint: { 'fill-extrusion-color': ['interpolate', ['linear'], ['get', 'height'],
+                    20, '#10b981', 50, '#0ea5e9', 100, '#a855f7'],
+                    'fill-extrusion-height': ['get', 'height'], 'fill-extrusion-base': 0,
+                    'fill-extrusion-opacity': 0.85, 'fill-extrusion-vertical-gradient': true } });
+        }
+
+        ['shp-sungai-glow', 'shp-sungai-line'].forEach(id => {
+            if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', state.sungai ? 'visible' : 'none');
+        });
+        ['shp-das-fill', 'shp-das-line'].forEach(id => {
+            if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', state.das ? 'visible' : 'none');
+        });
+        if (map.getLayer('shp-irigasi-line')) {
+            map.setLayoutProperty('shp-irigasi-line', 'visibility', state.irigasi ? 'visible' : 'none');
+        }
+        if (map.getLayer('building-3d')) {
+            map.setLayoutProperty('building-3d', 'visibility', state.building ? 'visible' : 'none');
+        }
+    } catch (err) {
+        console.error('[AGROTEK] reAddLayers error:', err);
+    }
+}
+
+/* LAYER TOGGLE */
+function toggleLayer(ids, show) {
+    ids.forEach(id => {
+        if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', show ? 'visible' : 'none');
+    });
+}
+
+document.getElementById('layerSHP_Sungai').addEventListener('change', (e) =>
+    toggleLayer(['shp-sungai-glow', 'shp-sungai-line'], e.target.checked));
+document.getElementById('layerSHP_DAS').addEventListener('change', (e) =>
+    toggleLayer(['shp-das-fill', 'shp-das-line'], e.target.checked));
+document.getElementById('layerSHP_Irigasi').addEventListener('change', (e) =>
+    toggleLayer(['shp-irigasi-line'], e.target.checked));
+document.getElementById('layerBuilding').addEventListener('change', (e) =>
+    toggleLayer(['building-3d'], e.target.checked));
+document.getElementById('layerMarker').addEventListener('change', (e) =>
+    document.querySelectorAll('.marker-3d').forEach(el => {
+        el.style.display = e.target.checked ? 'block' : 'none';
+    }));
+
+/* OPACITY */
+function bindOpacity(sliderId, valId, layerId, propName) {
+    const s = document.getElementById(sliderId);
+    const v = document.getElementById(valId);
+    s.addEventListener('input', () => {
+        const val = s.value / 100;
+        v.textContent = s.value + '%';
+        if (map.getLayer(layerId)) map.setPaintProperty(layerId, propName, val);
+    });
+}
+bindOpacity('opSungai', 'opSungaiVal', 'shp-sungai-line', 'line-opacity');
+bindOpacity('opDAS', 'opDASVal', 'shp-das-fill', 'fill-opacity');
+bindOpacity('opBuilding', 'opBuildingVal', 'building-3d', 'fill-extrusion-opacity');
+
+/* KEYBOARD */
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'r' || e.key === 'R') resetView();
+    if (e.key === '3') toggleTerrain();
+    if (e.key === 'f' || e.key === 'F') toggleFullscreen();
+    if (e.key === 'ArrowUp') map.easeTo({ pitch: Math.min(85, map.getPitch() + 5), duration: 200 });
+    if (e.key === 'ArrowDown') map.easeTo({ pitch: Math.max(0, map.getPitch() - 5), duration: 200 });
+    if (e.key === 'ArrowLeft') map.easeTo({ bearing: map.getBearing() - 10, duration: 200 });
+    if (e.key === 'ArrowRight') map.easeTo({ bearing: map.getBearing() + 10, duration: 200 });
+});
+
+console.log('[AGROTEK] Full 3D WebGIS + SHP ready.');
+</script>
+
+</body>
+</html>

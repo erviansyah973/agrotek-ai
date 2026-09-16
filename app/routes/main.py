@@ -1,7 +1,6 @@
 """
 AGROTEK AI — Main Routes
 ========================
-Landing, demo, peta, data center, modul, dan endpoint export CSV.
 """
 
 import csv
@@ -115,6 +114,25 @@ def demo():
         modules=MODULES_DEMO)
 
 
+# ============================================================
+# PETA 3D (BARU!)
+# ============================================================
+@main_bp.route("/peta3d")
+def peta3d():
+    """3D WebGIS Google-Earth style dengan SHP asli Jember."""
+    return render_template(
+        "peta3d.html",
+        app_name=current_app.config["APP_NAME"],
+        app_subtitle=current_app.config["APP_SUBTITLE"],
+        app_region=current_app.config["APP_REGION"],
+        user=current_user(),
+        is_logged_in=current_user() is not None,
+    )
+
+
+# ============================================================
+# PETA 2D
+# ============================================================
 @main_bp.route("/peta")
 def peta():
     return render_template("peta.html",
@@ -291,10 +309,9 @@ def api_data_request():
 
 
 # ============================================================
-# EXPORT CSV (Reports)
+# EXPORT CSV
 # ============================================================
 def _csv_response(rows, headers, filename):
-    """Helper: build CSV response dari list of dict."""
     buf = io.StringIO()
     writer = csv.DictWriter(buf, fieldnames=headers)
     writer.writeheader()

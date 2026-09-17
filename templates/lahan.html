@@ -1,296 +1,99 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kesesuaian Lahan — AGROTEK AI</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <style>
-        .page-modul { min-height: 100vh; background: #f8fafc; }
-        .modul-nav {
-            position: sticky; top: 0; z-index: 100;
-            background: rgba(10,22,40,.95);
-            backdrop-filter: blur(14px);
-            border-bottom: 1px solid rgba(255,255,255,.06);
-            height: 72px; display: flex; align-items: center;
-        }
-        .modul-nav-inner { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 20px; }
-        .modul-nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-        .modul-nav-links a {
-            color: #cbd5e1; font-size: .85rem; padding: 8px 12px;
-            border-radius: 8px; transition: all .2s; text-decoration: none;
-        }
-        .modul-nav-links a:hover { color: #fff; background: rgba(255,255,255,.06); }
-        .modul-nav-links a.active { color: #6ee7b7; }
-        .modul-back { color: #6ee7b7 !important; }
+{% extends "base.html" %}
+{% block title %}Kesesuaian Lahan — AGROTEK AI{% endblock %}
+{% block body_class %}page-module{% endblock %}
 
-        .modul-hero {
-            padding: 60px 0 48px;
-            background: linear-gradient(180deg, #0a1628, #0f1e35);
-            color: #f1f5f9; position: relative; overflow: hidden;
-        }
-        .modul-hero::before {
-            content: ''; position: absolute; inset: 0;
-            background:
-                radial-gradient(700px 400px at 15% 50%, rgba(6,182,212,.20), transparent 60%),
-                radial-gradient(700px 400px at 85% 50%, rgba(16,185,129,.14), transparent 60%);
-            pointer-events: none;
-        }
-        .modul-hero-inner { position: relative; }
-        .modul-hero h1 {
-            font-size: clamp(1.6rem, 3vw, 2.4rem);
-            font-weight: 800; color: #fff;
-            margin: 10px 0 8px; letter-spacing: -.02em;
-        }
-        .modul-hero p { color: #cbd5e1; max-width: 720px; font-size: .95rem; line-height: 1.6; }
+{% block head_extra %}
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules.css') }}">
+<style>
+    .tabs {
+        display: flex; gap: 6px; margin-bottom: 24px; padding: 6px;
+        background: rgba(15,30,53,.6); border: 1px solid rgba(255,255,255,.06);
+        border-radius: 999px; width: fit-content;
+    }
+    .tab {
+        padding: 10px 24px; border-radius: 999px; font-size: .85rem;
+        font-weight: 600; color: #94a3b8; transition: all .25s;
+        cursor: pointer; text-decoration: none;
+        display: inline-flex; align-items: center; gap: 6px;
+    }
+    .tab:hover { color: #fff; }
+    .tab.active {
+        background: linear-gradient(135deg, #10b981, #34d399);
+        color: #050b18;
+        box-shadow: 0 4px 20px rgba(16,185,129,.4);
+    }
+    .legend-kelas {
+        display: flex; gap: 20px; flex-wrap: wrap; padding: 16px 22px;
+        background: rgba(255,255,255,.03); border-radius: 14px;
+        margin-bottom: 22px; font-size: .82rem; color: #cbd5e1;
+        border: 1px solid rgba(255,255,255,.05);
+    }
+    .legend-kelas span { display: inline-flex; align-items: center; gap: 8px; }
+    .legend-kelas i { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+    .kelas-badge {
+        display: inline-block; padding: 5px 12px; border-radius: 999px;
+        font-size: .72rem; font-weight: 700; letter-spacing: .05em;
+    }
+    .kelas-S1 { background: rgba(52,211,153,.15); color: #6ee7b7; }
+    .kelas-S2 { background: rgba(56,189,248,.15); color: #7dd3fc; }
+    .kelas-S3 { background: rgba(251,191,36,.15); color: #fcd34d; }
+    .kelas-N  { background: rgba(239,68,68,.15);  color: #f87171; }
+    .score-bar { display: inline-block; width: 80px; height: 8px; background: rgba(255,255,255,.08); border-radius: 999px; margin-right: 8px; vertical-align: middle; overflow: hidden; }
+    .score-bar i { display: block; height: 100%; border-radius: 999px; }
+    .method-box {
+        margin-top: 24px; padding: 24px; border-radius: 18px;
+        background: linear-gradient(135deg, rgba(6,182,212,.06), rgba(16,185,129,.06));
+        border: 1px solid rgba(52,211,153,.2); font-size: .88rem; color: #cbd5e1; line-height: 1.7;
+    }
+    .method-box strong { color: #6ee7b7; }
+    .bobot-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+    .bobot-pill {
+        padding: 6px 14px; background: rgba(255,255,255,.05);
+        border-radius: 999px; font-size: .78rem; color: #cbd5e1;
+        border: 1px solid rgba(255,255,255,.08);
+    }
+    .bobot-pill strong { color: #6ee7b7; margin-left: 4px; }
+    @media (max-width: 640px) { .tabs { overflow-x: auto; width: 100%; flex-wrap: nowrap; } .tab { white-space: nowrap; } }
+</style>
+{% endblock %}
 
-        .modul-content { padding: 40px 0 80px; }
-
-        /* TABS */
-        .tabs {
-            display: flex; gap: 8px; flex-wrap: wrap;
-            margin-bottom: 26px;
-            background: #fff;
-            padding: 8px;
-            border-radius: 14px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 1px 2px rgba(15,23,42,.06);
-        }
-        .tab {
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-size: .88rem;
-            font-weight: 600;
-            color: #334155;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            transition: all .2s;
-            text-decoration: none;
-            display: inline-flex; align-items: center; gap: 6px;
-        }
-        .tab:hover { background: #f1f5f9; }
-        .tab.active {
-            background: linear-gradient(135deg, #06b6d4, #0891b2);
-            color: #fff;
-            box-shadow: 0 4px 14px rgba(6,182,212,.3);
-        }
-
-        /* KPI */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 16px; margin-bottom: 26px;
-        }
-        .kpi-card {
-            background: #fff; border: 1px solid #e2e8f0;
-            border-radius: 14px; padding: 20px;
-            position: relative; overflow: hidden;
-            box-shadow: 0 1px 2px rgba(15,23,42,.06);
-            transition: all .25s;
-        }
-        .kpi-card::before {
-            content: ''; position: absolute; left: 0; top: 0; bottom: 0;
-            width: 4px;
-            background: linear-gradient(180deg, #06b6d4, #0891b2);
-        }
-        .kpi-card.k1::before { background: linear-gradient(180deg, #10b981, #059669); }
-        .kpi-card.k2::before { background: linear-gradient(180deg, #0ea5e9, #0284c7); }
-        .kpi-card.k3::before { background: linear-gradient(180deg, #f59e0b, #d97706); }
-        .kpi-card.k4::before { background: linear-gradient(180deg, #a855f7, #7c3aed); }
-        .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(15,23,42,.08); }
-        .kpi-label { font-size: .75rem; color: #64748b; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .06em; }
-        .kpi-value {
-            display: flex; align-items: baseline; gap: 6px;
-            font-size: 1.85rem; font-weight: 800;
-            color: #0f172a; letter-spacing: -.02em; line-height: 1.1;
-        }
-        .kpi-value small { font-size: .78rem; font-weight: 600; color: #64748b; }
-
-        /* Charts */
-        .chart-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px; margin-bottom: 30px;
-        }
-        .chart-card {
-            background: #fff; border: 1px solid #e2e8f0;
-            border-radius: 14px; padding: 22px;
-            box-shadow: 0 1px 2px rgba(15,23,42,.06);
-        }
-        .chart-card header {
-            display: flex; justify-content: space-between;
-            align-items: baseline; margin-bottom: 16px; gap: 12px;
-            flex-wrap: wrap;
-        }
-        .chart-card h3 { font-size: 1rem; font-weight: 700; color: #0f172a; }
-        .chart-tag {
-            font-size: .7rem; color: #64748b;
-            font-family: monospace;
-            padding: 3px 8px; background: #f1f5f9;
-            border-radius: 6px;
-        }
-        .chart-wrap { position: relative; height: 280px; }
-
-        /* Panel + Table */
-        .panel {
-            background: #fff; border: 1px solid #e2e8f0;
-            border-radius: 14px; padding: 22px;
-            box-shadow: 0 1px 2px rgba(15,23,42,.06);
-            margin-bottom: 22px;
-            overflow: hidden;
-        }
-        .panel header { margin-bottom: 16px; }
-        .panel h3 { font-size: 1rem; font-weight: 700; color: #0f172a; }
-
-        .data-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
-        .data-table th {
-            text-align: left;
-            font-size: .72rem; text-transform: uppercase;
-            letter-spacing: .08em; color: #64748b;
-            font-weight: 600; padding: 10px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .data-table td {
-            padding: 12px 10px;
-            border-bottom: 1px solid #e2e8f0;
-            color: #334155;
-        }
-        .data-table tr:last-child td { border-bottom: none; }
-        .data-table tr:hover td { background: rgba(6,182,212,.03); }
-        .mono { font-family: monospace; font-size: .82rem; color: #64748b; }
-        .num { font-weight: 700; color: #0f172a; }
-
-        /* Class badges */
-        .kelas-badge {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 999px;
-            font-size: .75rem;
-            font-weight: 700;
-            letter-spacing: .05em;
-        }
-        .kelas-S1 { background: rgba(16,185,129,.15); color: #059669; }
-        .kelas-S2 { background: rgba(14,165,233,.15); color: #0284c7; }
-        .kelas-S3 { background: rgba(245,158,11,.15); color: #b45309; }
-        .kelas-N  { background: rgba(239,68,68,.12);  color: #dc2626; }
-
-        .score-bar {
-            display: inline-block; width: 80px; height: 8px;
-            background: #e2e8f0; border-radius: 999px;
-            margin-right: 8px; vertical-align: middle; overflow: hidden;
-        }
-        .score-bar i {
-            display: block; height: 100%;
-            border-radius: 999px;
-        }
-
-        /* Legend kelas */
-        .legend-kelas {
-            display: flex; gap: 20px; flex-wrap: wrap;
-            padding: 16px 20px;
-            background: #f8fafc;
-            border-radius: 12px;
-            margin-bottom: 22px;
-            font-size: .82rem;
-            color: #334155;
-        }
-        .legend-kelas span {
-            display: inline-flex; align-items: center; gap: 8px;
-        }
-        .legend-kelas i {
-            width: 14px; height: 14px;
-            border-radius: 4px;
-            display: inline-block;
-        }
-
-        /* Metode box */
-        .method-box {
-            padding: 18px 22px;
-            background: linear-gradient(135deg, rgba(6,182,212,.06), rgba(16,185,129,.06));
-            border: 1px solid rgba(6,182,212,.20);
-            border-radius: 14px;
-            font-size: .85rem;
-            color: #334155;
-            line-height: 1.7;
-        }
-        .method-box strong { color: #0891b2; }
-        .method-box code {
-            background: #fff;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: .8rem;
-            color: #7c3aed;
-        }
-        .bobot-pills {
-            display: flex; gap: 8px; flex-wrap: wrap;
-            margin-top: 10px;
-        }
-        .bobot-pill {
-            padding: 4px 12px;
-            background: #fff;
-            border-radius: 999px;
-            font-size: .75rem;
-            color: #334155;
-            border: 1px solid #e2e8f0;
-        }
-        .bobot-pill strong { color: #0891b2; margin-left: 4px; }
-
-        @media (max-width: 900px) {
-            .chart-grid { grid-template-columns: 1fr; }
-        }
-        @media (max-width: 640px) {
-            .modul-nav-links { display: none; }
-            .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-            .kpi-value { font-size: 1.4rem; }
-            .panel { overflow-x: auto; }
-            .data-table { min-width: 620px; }
-            .tabs { overflow-x: auto; flex-wrap: nowrap; }
-            .tab { white-space: nowrap; }
-        }
-    </style>
-</head>
-<body class="page-modul">
+{% block content %}
 
 <header class="modul-nav">
     <div class="container modul-nav-inner">
         <a href="/hub" class="brand">
             <span class="brand-mark">AG</span>
-            <span class="brand-text">
-                <strong>AGROTEK AI</strong>
-                <small>Spatial Agriculture Intelligence Platform</small>
-            </span>
+            <span class="brand-text"><strong>AGROTEK AI</strong><small>SPATIAL AGRICULTURE INTELLIGENCE</small></span>
         </a>
         <nav class="modul-nav-links">
             <a href="/statistik">Statistik</a>
             <a href="/pertanian">Pertanian</a>
-            <a href="/irigasi">Irigasi</a>
             <a href="/hidrologi">Hidrologi</a>
             <a href="/risiko">Risiko</a>
+            <a href="/ndvi">NDVI</a>
             <a href="/lahan" class="active">Lahan</a>
-            <a href="/ai">AGROTEK AI</a>
             <a href="/hub" class="modul-back">← Hub</a>
         </nav>
     </div>
 </header>
 
 <section class="modul-hero">
+    <div class="modul-hero-grid" aria-hidden="true"></div>
     <div class="container modul-hero-inner">
-        <span class="eyebrow eyebrow-light">Kesesuaian Lahan</span>
-        <h1>Analisis Kesesuaian Lahan</h1>
-        <p>Evaluasi kesesuaian lahan per kecamatan untuk komoditas utama menggunakan metode weighted overlay. Klasifikasi: S1 (Sangat Sesuai), S2 (Sesuai), S3 (Cukup Sesuai), N (Tidak Sesuai).</p>
+        <span class="modul-eyebrow">Analisis Spasial</span>
+        <h1>Kesesuaian <span class="grad">Lahan</span></h1>
+        <p>Evaluasi kesesuaian lahan per kecamatan dengan metode weighted overlay. Klasifikasi: S1 (Sangat Sesuai), S2 (Sesuai), S3 (Cukup Sesuai), N (Tidak Sesuai).</p>
     </div>
 </section>
 
 <section class="modul-content">
     <div class="container">
 
-        <!-- TABS KOMODITAS -->
+        <!-- TABS -->
         <div class="tabs">
             {% for code, item in all_summary.items() %}
-            <a href="{{ url_for('lahan.index', crop=code) }}"
-               class="tab {% if code == crop %}active{% endif %}">
+            <a href="{{ url_for('lahan.index', crop=code) }}" class="tab {% if code == crop %}active{% endif %}">
                 {{ item.icon }} {{ item.label }}
             </a>
             {% endfor %}
@@ -298,28 +101,25 @@
 
         <!-- KPI -->
         <div class="kpi-grid">
-            <div class="kpi-card k1">
+            <div class="kpi-card">
                 <div class="kpi-label">Sangat Sesuai (S1)</div>
-                <div class="kpi-value">{{ summary.count.S1 }} <small>kecamatan</small></div>
+                <div class="kpi-value" style="color:#34d399;">{{ summary.count.S1 }} <small>kecamatan</small></div>
             </div>
-            <div class="kpi-card k2">
+            <div class="kpi-card">
                 <div class="kpi-label">Sesuai (S2)</div>
-                <div class="kpi-value">{{ summary.count.S2 }} <small>kecamatan</small></div>
+                <div class="kpi-value" style="color:#38bdf8;">{{ summary.count.S2 }} <small>kecamatan</small></div>
             </div>
-            <div class="kpi-card k3">
+            <div class="kpi-card">
                 <div class="kpi-label">Cukup Sesuai (S3)</div>
-                <div class="kpi-value">{{ summary.count.S3 }} <small>kecamatan</small></div>
+                <div class="kpi-value" style="color:#fbbf24;">{{ summary.count.S3 }} <small>kecamatan</small></div>
             </div>
-            <div class="kpi-card k4">
+            <div class="kpi-card">
                 <div class="kpi-label">Total Luas Sesuai</div>
-                <div class="kpi-value">
-                    {{ "{:,.0f}".format(summary.total_luas_sesuai)|replace(",", ".") }}
-                    <small>ha</small>
-                </div>
+                <div class="kpi-value">{{ "{:,.0f}".format(summary.total_luas_sesuai)|replace(",", ".") }} <small>ha</small></div>
             </div>
         </div>
 
-        <!-- LEGEND KELAS -->
+        <!-- LEGEND -->
         <div class="legend-kelas">
             <span><i style="background:#10b981"></i> S1 — Sangat Sesuai</span>
             <span><i style="background:#0ea5e9"></i> S2 — Sesuai</span>
@@ -330,62 +130,44 @@
         <!-- CHARTS -->
         <div class="chart-grid">
             <div class="chart-card">
-                <header>
-                    <h3>Distribusi Kelas Kesesuaian</h3>
-                    <span class="chart-tag">{{ data.label }} · DEMO</span>
-                </header>
+                <header><h3>Distribusi Kelas Kesesuaian</h3><span class="chart-tag">{{ data.label|upper }} · DEMO</span></header>
                 <div class="chart-wrap"><canvas id="chartDistribusi"></canvas></div>
             </div>
             <div class="chart-card">
-                <header>
-                    <h3>Luas Potensial per Kelas</h3>
-                    <span class="chart-tag">hektar · DEMO</span>
-                </header>
+                <header><h3>Luas Potensial per Kelas</h3><span class="chart-tag">HEKTAR · DEMO</span></header>
                 <div class="chart-wrap"><canvas id="chartLuas"></canvas></div>
             </div>
         </div>
 
-        <!-- TABEL DETAIL -->
+        <!-- TABLE -->
         <div class="panel">
-            <header><h3>Detail Kesesuaian {{ data.label }} per Kecamatan</h3></header>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Kecamatan</th>
-                        <th>Kelas</th>
-                        <th>Skor</th>
-                        <th>Luas Potensial (ha)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for r in data.rows %}
-                    <tr>
-                        <td><strong>{{ r.kecamatan }}</strong></td>
-                        <td><span class="kelas-badge kelas-{{ r.kelas }}">{{ r.kelas }}</span></td>
-                        <td>
-                            <span class="score-bar">
-                                <i style="width: {{ r.skor }}%; background:
-                                    {% if r.kelas == 'S1' %}#10b981
-                                    {% elif r.kelas == 'S2' %}#0ea5e9
-                                    {% elif r.kelas == 'S3' %}#f59e0b
-                                    {% else %}#ef4444{% endif %};"></i>
-                            </span>
-                            <strong>{{ r.skor }}</strong>
-                        </td>
-                        <td class="num">
-                            {% if r.luas_ha > 0 %}
-                                {{ "{:,.0f}".format(r.luas_ha)|replace(",", ".") }}
-                            {% else %}
-                                <span style="color:#94a3b8;">—</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <header>
+                <h3>Detail Kesesuaian {{ data.label }} per Kecamatan</h3>
+                <span class="chart-tag">{{ data.rows|length }} KECAMATAN</span>
+            </header>
+            <div style="overflow-x:auto;">
+                <table class="data-table">
+                    <thead><tr><th>Kecamatan</th><th>Kelas</th><th>Skor</th><th>Luas Potensial (ha)</th></tr></thead>
+                    <tbody>
+                        {% for r in data.rows %}
+                        <tr>
+                            <td><strong>{{ r.kecamatan }}</strong></td>
+                            <td><span class="kelas-badge kelas-{{ r.kelas }}">{{ r.kelas }}</span></td>
+                            <td>
+                                <span class="score-bar"><i style="width: {{ r.skor }}%; background: {% if r.kelas == 'S1' %}#10b981{% elif r.kelas == 'S2' %}#0ea5e9{% elif r.kelas == 'S3' %}#f59e0b{% else %}#ef4444{% endif %};"></i></span>
+                                <strong>{{ r.skor }}</strong>
+                            </td>
+                            <td class="num">
+                                {% if r.luas_ha > 0 %}{{ "{:,.0f}".format(r.luas_ha)|replace(",", ".") }}{% else %}—{% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <!-- METODE -->
+        <!-- METHOD -->
         <div class="method-box">
             <strong>⚙️ Metode Weighted Overlay.</strong>
             Skor kesesuaian dihitung dari kombinasi 5 parameter lingkungan dengan bobot transparan.
@@ -398,19 +180,20 @@
                 <span class="bobot-pill">Elevasi <strong>15%</strong></span>
                 <span class="bobot-pill">Risiko Bencana <strong>15%</strong></span>
             </div>
-            <p style="margin-top:14px;font-size:.82rem;color:#64748b;">
-                <strong>Catatan:</strong> Data saat ini DEMO. Setelah PostGIS dan SHP pertanian tersinkronisasi,
+            <p style="margin-top:16px;font-size:.82rem;color:#94a3b8;margin-bottom:0;">
+                <strong style="color:#6ee7b7;">Catatan:</strong> Data saat ini DEMO. Setelah PostGIS dan SHP pertanian tersinkronisasi,
                 nilai akan dihitung otomatis dari raster DEM, curah hujan, dan jenis tanah.
                 Untuk analisis per titik (lokasi spesifik), gunakan modul
-                <a href="/ai" style="color:#0891b2;font-weight:700;">AGROTEK AI →</a>
+                <a href="/ai" style="color:#6ee7b7;font-weight:700;">AGROTEK AI →</a>
             </p>
         </div>
 
     </div>
 </section>
 
+{% endblock %}
+
+{% block body_extra %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="{{ url_for('static', filename='js/lahan.js') }}"></script>
-
-</body>
-</html>
+{% endblock %}

@@ -1,190 +1,13 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hidrologi — AGROTEK AI</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <style>
-        .page-modul { min-height: 100vh; background: #f8fafc; }
-        .modul-nav {
-            position: sticky; top: 0; z-index: 100;
-            background: rgba(10,22,40,.95);
-            backdrop-filter: blur(14px);
-            border-bottom: 1px solid rgba(255,255,255,.06);
-            height: 72px; display: flex; align-items: center;
-        }
-        .modul-nav-inner { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 20px; }
-        .modul-nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-        .modul-nav-links a {
-            color: #cbd5e1; font-size: .85rem; padding: 8px 12px;
-            border-radius: 8px; transition: all .2s; text-decoration: none;
-        }
-        .modul-nav-links a:hover { color: #fff; background: rgba(255,255,255,.06); }
-        .modul-nav-links a.active { color: #6ee7b7; }
-        .modul-back { color: #6ee7b7 !important; }
+{% extends "base.html" %}
+{% block title %}Hidrologi — AGROTEK AI{% endblock %}
+{% block body_class %}page-module{% endblock %}
 
-        .modul-hero {
-            padding: 60px 0 48px;
-            background: linear-gradient(180deg, #0a1628, #0f1e35);
-            color: #f1f5f9; position: relative; overflow: hidden;
-        }
-        .modul-hero::before {
-            content: ''; position: absolute; inset: 0;
-            background:
-                radial-gradient(700px 400px at 15% 50%, rgba(6,182,212,.20), transparent 60%),
-                radial-gradient(700px 400px at 85% 50%, rgba(14,165,233,.14), transparent 60%);
-            pointer-events: none;
-        }
-        .modul-hero-inner { position: relative; }
-        .modul-hero h1 {
-            font-size: clamp(1.6rem, 3vw, 2.4rem);
-            font-weight: 800; color: #fff;
-            margin: 10px 0 8px; letter-spacing: -.02em;
-        }
-        .modul-hero p { color: #cbd5e1; max-width: 640px; font-size: .95rem; line-height: 1.6; }
+{% block head_extra %}
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules.css') }}">
+{% endblock %}
 
-        .modul-content { padding: 40px 0 80px; }
-
-        /* KPI */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 18px; margin-bottom: 30px;
-        }
-        .kpi-card {
-            background: #fff; border: 1px solid #e2e8f0;
-            border-radius: 14px; padding: 22px;
-            position: relative; overflow: hidden;
-            box-shadow: 0 1px 2px rgba(15,23,42,.06);
-            transition: all .25s;
-        }
-        .kpi-card::before {
-            content: ''; position: absolute; left: 0; top: 0; bottom: 0;
-            width: 4px; background: linear-gradient(180deg, #06b6d4, #0891b2);
-        }
-        .kpi-card.kpi-emerald::before { background: linear-gradient(180deg, #10b981, #059669); }
-        .kpi-card.kpi-amber::before   { background: linear-gradient(180deg, #f59e0b, #d97706); }
-        .kpi-card.kpi-purple::before  { background: linear-gradient(180deg, #a855f7, #7c3aed); }
-        .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(15,23,42,.08); }
-        .kpi-label { font-size: .78rem; color: #64748b; font-weight: 500; margin-bottom: 8px; }
-        .kpi-value {
-            display: flex; align-items: baseline; gap: 6px;
-            font-size: 1.85rem; font-weight: 800;
-            color: #0f172a; letter-spacing: -.02em; line-height: 1.1;
-        }
-        .kpi-value small { font-size: .78rem; font-weight: 600; color: #64748b; }
-
-        /* Charts */
-        .chart-grid {
-            display: grid; grid-template-columns: 1fr 1fr;
-            gap: 20px; margin-bottom: 30px;
-        }
-        .chart-grid-3 {
-            display: grid; grid-template-columns: 1fr 1fr 1fr;
-            gap: 20px; margin-bottom: 30px;
-        }
-        .chart-card {
-            background: #fff; border: 1px solid #e2e8f0;
-            border-radius: 14px; padding: 22px;
-            box-shadow: 0 1px 2px rgba(15,23,42,.06);
-        }
-        .chart-card header {
-            display: flex; justify-content: space-between;
-            align-items: baseline; margin-bottom: 16px; gap: 12px;
-            flex-wrap: wrap;
-        }
-        .chart-card h3 { font-size: 1rem; font-weight: 700; color: #0f172a; }
-        .chart-tag {
-            font-size: .7rem; color: #64748b;
-            font-family: monospace;
-            padding: 3px 8px; background: #f1f5f9;
-            border-radius: 6px;
-        }
-        .chart-wrap { position: relative; height: 280px; }
-
-        /* Panel */
-        .panel {
-            background: #fff; border: 1px solid #e2e8f0;
-            border-radius: 14px; padding: 22px;
-            box-shadow: 0 1px 2px rgba(15,23,42,.06);
-            margin-bottom: 22px;
-            overflow: hidden;
-        }
-        .panel header { margin-bottom: 16px; }
-        .panel h3 { font-size: 1rem; font-weight: 700; color: #0f172a; }
-
-        .data-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
-        .data-table th {
-            text-align: left;
-            font-size: .72rem; text-transform: uppercase;
-            letter-spacing: .08em; color: #64748b;
-            font-weight: 600; padding: 10px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .data-table td {
-            padding: 12px 10px;
-            border-bottom: 1px solid #e2e8f0;
-            color: #334155;
-        }
-        .data-table tr:last-child td { border-bottom: none; }
-        .data-table tr:hover td { background: rgba(6,182,212,.03); }
-        .mono { font-family: monospace; font-size: .82rem; color: #64748b; }
-        .num { font-weight: 700; color: #0f172a; }
-
-        .badge {
-            display: inline-block; padding: 3px 10px;
-            font-size: .7rem; font-weight: 700;
-            border-radius: 999px; letter-spacing: .05em;
-        }
-        .badge-awlr { background: rgba(16,185,129,.12); color: #059669; }
-        .badge-arr  { background: rgba(14,165,233,.12); color: #0284c7; }
-        .badge-aws  { background: rgba(245,158,11,.14); color: #b45309; }
-
-        .badge-utama    { background: rgba(16,185,129,.12); color: #059669; }
-        .badge-sekunder { background: rgba(14,165,233,.12); color: #0284c7; }
-
-        .badge-rendah { background: rgba(16,185,129,.12); color: #059669; }
-        .badge-sedang { background: rgba(251,191,36,.14); color: #b45309; }
-        .badge-tinggi { background: rgba(239,68,68,.12);  color: #dc2626; }
-
-        .score-bar {
-            display: inline-block; width: 60px; height: 6px;
-            background: #e2e8f0; border-radius: 999px;
-            margin-right: 8px; vertical-align: middle; overflow: hidden;
-        }
-        .score-bar i {
-            display: block; height: 100%;
-            background: linear-gradient(90deg, #10b981, #f59e0b);
-            border-radius: 999px;
-        }
-
-        .dot-sm {
-            display: inline-block; width: 8px; height: 8px;
-            border-radius: 50%; margin-left: 6px; vertical-align: middle;
-        }
-        .dot-sm.status-normal  { background: #10b981; }
-        .dot-sm.status-warning { background: #f59e0b; }
-        .dot-sm.status-alert   { background: #ef4444; }
-
-        .two-col {
-            display: grid; grid-template-columns: 1fr 1fr;
-            gap: 22px;
-        }
-
-        @media (max-width: 900px) {
-            .chart-grid, .chart-grid-3, .two-col { grid-template-columns: 1fr; }
-        }
-        @media (max-width: 640px) {
-            .modul-nav-links { display: none; }
-            .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-            .kpi-value { font-size: 1.4rem; }
-            .panel { overflow-x: auto; }
-            .data-table { min-width: 560px; }
-        }
-    </style>
-</head>
-<body class="page-modul">
+{% block content %}
 
 <header class="modul-nav">
     <div class="container modul-nav-inner">
@@ -192,7 +15,7 @@
             <span class="brand-mark">AG</span>
             <span class="brand-text">
                 <strong>AGROTEK AI</strong>
-                <small>Spatial Agriculture Intelligence Platform</small>
+                <small>SPATIAL AGRICULTURE INTELLIGENCE</small>
             </span>
         </a>
         <nav class="modul-nav-links">
@@ -200,17 +23,19 @@
             <a href="/pertanian">Pertanian</a>
             <a href="/irigasi">Irigasi</a>
             <a href="/hidrologi" class="active">Hidrologi</a>
-            <a href="/peta">Peta</a>
+            <a href="/peta3d">Peta 3D</a>
+            <a href="/ai">AI</a>
             <a href="/hub" class="modul-back">← Hub</a>
         </nav>
     </div>
 </header>
 
 <section class="modul-hero">
+    <div class="modul-hero-grid" aria-hidden="true"></div>
     <div class="container modul-hero-inner">
-        <span class="eyebrow eyebrow-light">Hidrologi</span>
-        <h1>Monitoring Hidrologi</h1>
-        <p>Curah hujan, tinggi muka air, debit, DAS, dan sungai Kabupaten Jember. Arsitektur siap menerima data sensor IoT.</p>
+        <span class="modul-eyebrow">Hidrologi</span>
+        <h1>Monitoring <span class="grad">Hidrologi</span></h1>
+        <p>Curah hujan, tinggi muka air, debit sungai, dan DAS Kabupaten Jember. Arsitektur siap menerima data sensor IoT.</p>
     </div>
 </section>
 
@@ -221,54 +46,42 @@
         <div class="kpi-grid">
             <div class="kpi-card">
                 <div class="kpi-label">Stasiun Pemantauan</div>
-                <div class="kpi-value">
-                    {{ kpi.total_stasiun }}
-                    <small>stasiun</small>
-                </div>
+                <div class="kpi-value">{{ kpi.total_stasiun }} <small>stasiun</small></div>
             </div>
-            <div class="kpi-card kpi-emerald">
+            <div class="kpi-card">
                 <div class="kpi-label">Jaringan Sungai</div>
-                <div class="kpi-value">
-                    {{ kpi.total_sungai }}
-                    <small>sungai</small>
-                </div>
+                <div class="kpi-value">{{ kpi.total_sungai }} <small>sungai</small></div>
             </div>
-            <div class="kpi-card kpi-amber">
+            <div class="kpi-card">
                 <div class="kpi-label">Daerah Aliran Sungai</div>
-                <div class="kpi-value">
-                    {{ kpi.total_das }}
-                    <small>DAS</small>
-                </div>
+                <div class="kpi-value">{{ kpi.total_das }} <small>DAS</small></div>
             </div>
-            <div class="kpi-card kpi-purple">
+            <div class="kpi-card">
                 <div class="kpi-label">Total Luas DAS</div>
-                <div class="kpi-value">
-                    {{ "{:,.0f}".format(kpi.total_das_luas)|replace(",", ".") }}
-                    <small>km²</small>
-                </div>
+                <div class="kpi-value">{{ "{:,.0f}".format(kpi.total_das_luas)|replace(",", ".") }} <small>km²</small></div>
             </div>
         </div>
 
-        <!-- CHARTS 3 kolom -->
+        <!-- CHARTS -->
         <div class="chart-grid-3">
             <div class="chart-card">
                 <header>
                     <h3>Curah Hujan Bulanan</h3>
-                    <span class="chart-tag">mm · 12 bulan</span>
+                    <span class="chart-tag">MM · 12 BULAN</span>
                 </header>
                 <div class="chart-wrap"><canvas id="chartRainfall"></canvas></div>
             </div>
             <div class="chart-card">
                 <header>
                     <h3>Tinggi Muka Air</h3>
-                    <span class="chart-tag">cm · 30 hari</span>
+                    <span class="chart-tag">CM · 30 HARI</span>
                 </header>
                 <div class="chart-wrap"><canvas id="chartTMA"></canvas></div>
             </div>
             <div class="chart-card">
                 <header>
                     <h3>Debit Sungai</h3>
-                    <span class="chart-tag">m³/s · 30 hari</span>
+                    <span class="chart-tag">M³/S · 30 HARI</span>
                 </header>
                 <div class="chart-wrap"><canvas id="chartDebit"></canvas></div>
             </div>
@@ -276,77 +89,35 @@
 
         <!-- STASIUN -->
         <div class="panel">
-            <header><h3>Stasiun Pemantauan</h3></header>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Kode</th>
-                        <th>Nama Stasiun</th>
-                        <th>Tipe</th>
-                        <th>Kecamatan</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for s in stasiun %}
-                    <tr>
-                        <td class="mono">{{ s.code }}</td>
-                        <td><strong>{{ s.name }}</strong></td>
-                        <td><span class="badge badge-{{ s.type|lower }}">{{ s.type }}</span></td>
-                        <td>{{ s.kecamatan }}</td>
-                        <td>
-                            {% if s.status == 'Aktif' %}
-                                <span class="badge badge-rendah">Aktif</span>
-                            {% else %}
-                                <span class="badge badge-sedang">{{ s.status }}</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <!-- SUNGAI & DAS (2 kolom) -->
-        <div class="two-col">
-            <div class="panel">
-                <header><h3>Jaringan Sungai</h3></header>
+            <header>
+                <h3>Stasiun Pemantauan</h3>
+                <span class="chart-tag">{{ stasiun|length }} STASIUN</span>
+            </header>
+            <div style="overflow-x:auto;">
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Nama Sungai</th>
-                            <th>Kelas</th>
-                            <th>Panjang (km)</th>
+                            <th>Kode</th>
+                            <th>Nama Stasiun</th>
+                            <th>Tipe</th>
+                            <th>Kecamatan</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for s in sungai %}
+                        {% for s in stasiun %}
                         <tr>
+                            <td class="mono">{{ s.code }}</td>
                             <td><strong>{{ s.name }}</strong></td>
-                            <td><span class="badge badge-{{ s.class|lower }}">{{ s.class }}</span></td>
-                            <td class="num">{{ "%.1f"|format(s.panjang_km) }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="panel">
-                <header><h3>Daerah Aliran Sungai (DAS)</h3></header>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Nama DAS</th>
-                            <th>Sungai Utama</th>
-                            <th>Luas (km²)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for d in das %}
-                        <tr>
-                            <td><strong>{{ d.name }}</strong></td>
-                            <td>{{ d.sungai }}</td>
-                            <td class="num">{{ "{:,.1f}".format(d.luas_km2)|replace(",", ".") }}</td>
+                            <td><span class="badge badge-sky">{{ s.type }}</span></td>
+                            <td>{{ s.kecamatan }}</td>
+                            <td>
+                                {% if s.status == 'Aktif' %}
+                                    <span class="badge badge-emerald">Aktif</span>
+                                {% else %}
+                                    <span class="badge badge-amber">{{ s.status }}</span>
+                                {% endif %}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -354,81 +125,264 @@
             </div>
         </div>
 
-        <!-- RISIKO (2 kolom) -->
-        <div class="two-col">
+        <!-- SUNGAI & DAS -->
+        <div class="chart-grid">
             <div class="panel">
-                <header><h3>Risiko Banjir</h3></header>
-                <table class="data-table">
-                    <thead>
-                        <tr><th>Kecamatan</th><th>Level</th><th>Skor</th></tr>
-                    </thead>
-                    <tbody>
-                        {% for r in risiko_banjir %}
-                        <tr>
-                            <td><strong>{{ r.district }}</strong></td>
-                            <td><span class="badge badge-{{ r.level|lower }}">{{ r.level }}</span></td>
-                            <td><span class="score-bar"><i style="width: {{ r.score }}%"></i></span>{{ r.score }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <header>
+                    <h3>Jaringan Sungai</h3>
+                    <span class="chart-tag">{{ sungai|length }} SUNGAI</span>
+                </header>
+                <div style="overflow-x:auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Nama Sungai</th><th>Kelas</th><th>Panjang (km)</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for s in sungai %}
+                            <tr>
+                                <td><strong>{{ s.name }}</strong></td>
+                                <td>
+                                    {% if s.class == 'Utama' %}
+                                        <span class="badge badge-emerald">{{ s.class }}</span>
+                                    {% else %}
+                                        <span class="badge badge-sky">{{ s.class }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="num">{{ "%.1f"|format(s.panjang_km) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="panel">
-                <header><h3>Risiko Kekeringan</h3></header>
-                <table class="data-table">
-                    <thead>
-                        <tr><th>Kecamatan</th><th>Level</th><th>Skor</th></tr>
-                    </thead>
-                    <tbody>
-                        {% for r in risiko_kering %}
-                        <tr>
-                            <td><strong>{{ r.district }}</strong></td>
-                            <td><span class="badge badge-{{ r.level|lower }}">{{ r.level }}</span></td>
-                            <td><span class="score-bar"><i style="width: {{ r.score }}%"></i></span>{{ r.score }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <header>
+                    <h3>Daerah Aliran Sungai</h3>
+                    <span class="chart-tag">{{ das|length }} DAS</span>
+                </header>
+                <div style="overflow-x:auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Nama DAS</th><th>Sungai Utama</th><th>Luas (km²)</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for d in das %}
+                            <tr>
+                                <td><strong>{{ d.name }}</strong></td>
+                                <td>{{ d.sungai }}</td>
+                                <td class="num">{{ "{:,.1f}".format(d.luas_km2)|replace(",", ".") }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- RISIKO -->
+        <div class="chart-grid">
+            <div class="panel">
+                <header>
+                    <h3>Risiko Banjir</h3>
+                    <span class="chart-tag">PER KECAMATAN</span>
+                </header>
+                <div style="overflow-x:auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Kecamatan</th><th>Level</th><th>Skor</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for r in risiko_banjir %}
+                            <tr>
+                                <td><strong>{{ r.district }}</strong></td>
+                                <td>
+                                    <span class="badge badge-{% if r.level == 'tinggi' %}red{% elif r.level == 'sedang' %}amber{% else %}emerald{% endif %}">
+                                        {{ r.level|capitalize }}
+                                    </span>
+                                </td>
+                                <td class="num">{{ r.score }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel">
+                <header>
+                    <h3>Risiko Kekeringan</h3>
+                    <span class="chart-tag">PER KECAMATAN</span>
+                </header>
+                <div style="overflow-x:auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Kecamatan</th><th>Level</th><th>Skor</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for r in risiko_kering %}
+                            <tr>
+                                <td><strong>{{ r.district }}</strong></td>
+                                <td>
+                                    <span class="badge badge-{% if r.level == 'tinggi' %}red{% elif r.level == 'sedang' %}amber{% else %}emerald{% endif %}">
+                                        {{ r.level|capitalize }}
+                                    </span>
+                                </td>
+                                <td class="num">{{ r.score }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
         <!-- MONITORING SENSOR -->
         <div class="panel">
-            <header><h3>Monitoring Sensor Terkini</h3></header>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Waktu</th>
-                        <th>Sensor</th>
-                        <th>Parameter</th>
-                        <th>Nilai</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for m in monitoring_table %}
-                    <tr>
-                        <td class="mono">{{ m.time }}</td>
-                        <td>{{ m.sensor }}</td>
-                        <td style="color:#94a3b8;">{{ m.param }}</td>
-                        <td>
-                            <strong>{{ m.value }}</strong>
-                            <span class="dot-sm status-{{ m.status }}"></span>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <p style="margin-top:14px;font-size:.78rem;color:#94a3b8;font-style:italic;">
-                Arsitektur time-series siap menerima data sensor IoT (FASE 13).
+            <header>
+                <h3>Monitoring Sensor Terkini</h3>
+                <span class="chart-tag">LIVE · DEMO</span>
+            </header>
+            <div style="overflow-x:auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Waktu</th>
+                            <th>Sensor</th>
+                            <th>Parameter</th>
+                            <th>Nilai</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in monitoring_table %}
+                        <tr>
+                            <td class="mono">{{ m.time }}</td>
+                            <td>{{ m.sensor }}</td>
+                            <td class="muted-sm">{{ m.param }}</td>
+                            <td>
+                                <strong>{{ m.value }}</strong>
+                                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:8px;vertical-align:middle;
+                                    background:{% if m.status == 'normal' %}#34d399{% elif m.status == 'warning' %}#fbbf24{% else %}#ef4444{% endif %};
+                                    box-shadow:0 0 8px {% if m.status == 'normal' %}#34d399{% elif m.status == 'warning' %}#fbbf24{% else %}#ef4444{% endif %};"></span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p class="muted-sm" style="margin-top:14px;font-style:italic;">
+                Arsitektur time-series siap menerima data sensor IoT.
             </p>
         </div>
 
     </div>
 </section>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="{{ url_for('static', filename='js/hidrologi.js') }}"></script>
+{% endblock %}
 
-</body>
-</html>
+{% block body_extra %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+    'use strict';
+    if (typeof Chart === 'undefined') return;
+
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.font.size = 11;
+    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.maintainAspectRatio = false;
+    Chart.defaults.plugins.legend.labels.usePointStyle = true;
+    Chart.defaults.plugins.legend.labels.boxWidth = 8;
+    Chart.defaults.plugins.legend.labels.color = '#cbd5e1';
+
+    const grid = 'rgba(148,163,184,.1)';
+    const axis = (o = {}) => Object.assign({
+        grid: { color: grid, drawBorder: false },
+        ticks: { color: '#94a3b8' }
+    }, o);
+
+    // Rainfall
+    fetch('/hidrologi/data/rainfall').then(r => r.json()).then(d => {
+        const el = document.getElementById('chartRainfall');
+        if (!el) return;
+        new Chart(el, {
+            type: 'line',
+            data: {
+                labels: d.labels,
+                datasets: [{
+                    data: d.data,
+                    borderColor: '#38bdf8',
+                    backgroundColor: 'rgba(56,189,248,.15)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2.5,
+                    pointRadius: 3,
+                    pointBackgroundColor: '#38bdf8',
+                    pointBorderColor: '#0a1628',
+                    pointBorderWidth: 2,
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: { x: axis(), y: axis({ beginAtZero: true }) },
+                interaction: { intersect: false, mode: 'index' },
+            }
+        });
+    });
+
+    // TMA
+    fetch('/hidrologi/data/tma').then(r => r.json()).then(d => {
+        const el = document.getElementById('chartTMA');
+        if (!el) return;
+        new Chart(el, {
+            type: 'line',
+            data: {
+                labels: d.labels,
+                datasets: [{
+                    data: d.data,
+                    borderColor: '#34d399',
+                    backgroundColor: 'rgba(52,211,153,.15)',
+                    fill: true,
+                    tension: 0.35,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: { x: axis(), y: axis({ beginAtZero: false }) },
+                interaction: { intersect: false, mode: 'index' },
+            }
+        });
+    });
+
+    // Debit
+    fetch('/hidrologi/data/debit').then(r => r.json()).then(d => {
+        const el = document.getElementById('chartDebit');
+        if (!el) return;
+        new Chart(el, {
+            type: 'line',
+            data: {
+                labels: d.labels,
+                datasets: [{
+                    data: d.data,
+                    borderColor: '#fbbf24',
+                    backgroundColor: 'rgba(251,191,36,.15)',
+                    fill: true,
+                    tension: 0.35,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: { x: axis(), y: axis({ beginAtZero: true }) },
+                interaction: { intersect: false, mode: 'index' },
+            }
+        });
+    });
+})();
+</script>
+{% endblock %}

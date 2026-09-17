@@ -1,233 +1,115 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan — AGROTEK AI</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <style>
-        .page-modul { min-height: 100vh; background: #f8fafc; }
-        .modul-nav {
-            position: sticky; top: 0; z-index: 100;
-            background: rgba(10,22,40,.95);
-            backdrop-filter: blur(14px);
-            border-bottom: 1px solid rgba(255,255,255,.06);
-            height: 72px; display: flex; align-items: center;
-        }
-        .modul-nav-inner { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 20px; }
-        .modul-nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-        .modul-nav-links a {
-            color: #cbd5e1; font-size: .85rem; padding: 8px 12px;
-            border-radius: 8px; transition: all .2s; text-decoration: none;
-        }
-        .modul-nav-links a:hover { color: #fff; background: rgba(255,255,255,.06); }
-        .modul-nav-links a.active { color: #6ee7b7; }
-        .modul-back { color: #6ee7b7 !important; }
+{% extends "base.html" %}
+{% block title %}Laporan — AGROTEK AI{% endblock %}
+{% block body_class %}page-module{% endblock %}
 
-        .modul-hero {
-            padding: 60px 0 48px;
-            background: linear-gradient(180deg, #0a1628, #0f1e35);
-            color: #f1f5f9; position: relative; overflow: hidden;
-        }
-        .modul-hero::before {
-            content: ''; position: absolute; inset: 0;
-            background:
-                radial-gradient(700px 400px at 15% 50%, rgba(239,68,68,.16), transparent 60%),
-                radial-gradient(700px 400px at 85% 50%, rgba(16,185,129,.14), transparent 60%);
-            pointer-events: none;
-        }
-        .modul-hero-inner { position: relative; }
-        .modul-hero h1 {
-            font-size: clamp(1.6rem, 3vw, 2.4rem);
-            font-weight: 800; color: #fff;
-            margin: 10px 0 8px; letter-spacing: -.02em;
-        }
-        .modul-hero p { color: #cbd5e1; max-width: 720px; font-size: .95rem; line-height: 1.6; }
+{% block head_extra %}
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules.css') }}">
+<style>
+    .report-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+    .report-card {
+        background: linear-gradient(180deg, rgba(15,30,53,.7), rgba(10,22,40,.5));
+        border: 1px solid rgba(255,255,255,.06);
+        border-radius: 20px;
+        padding: 26px;
+        transition: all .4s var(--ease);
+        display: flex; flex-direction: column;
+        position: relative; overflow: hidden;
+        backdrop-filter: blur(10px);
+    }
+    .report-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(52,211,153,.3), transparent);
+    }
+    .report-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(52,211,153,.35);
+        box-shadow: 0 20px 50px rgba(0,0,0,.4);
+    }
+    .report-icon {
+        width: 52px; height: 52px;
+        border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.5rem; margin-bottom: 18px;
+    }
+    .ri-emerald { background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 8px 24px rgba(16,185,129,.4); }
+    .ri-sky     { background: linear-gradient(135deg, #0ea5e9, #0284c7); box-shadow: 0 8px 24px rgba(14,165,233,.4); }
+    .ri-amber   { background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 8px 24px rgba(245,158,11,.4); }
+    .ri-red     { background: linear-gradient(135deg, #ef4444, #dc2626); box-shadow: 0 8px 24px rgba(239,68,68,.4); }
+    .ri-purple  { background: linear-gradient(135deg, #a855f7, #7c3aed); box-shadow: 0 8px 24px rgba(168,85,247,.4); }
+    .ri-cyan    { background: linear-gradient(135deg, #06b6d4, #0891b2); box-shadow: 0 8px 24px rgba(6,182,212,.4); }
 
-        .modul-content { padding: 40px 0 80px; }
+    .report-card h3 {
+        font-family: var(--font-display);
+        font-size: 1.05rem; font-weight: 700;
+        color: #fff; margin: 0 0 8px;
+    }
+    .report-card p {
+        font-size: .85rem; color: #94a3b8;
+        line-height: 1.6; margin-bottom: 18px;
+        flex-grow: 1;
+    }
+    .report-meta {
+        display: flex; gap: 8px; flex-wrap: wrap;
+        margin-bottom: 18px; font-size: .72rem;
+    }
+    .report-meta span {
+        padding: 3px 10px; background: rgba(255,255,255,.05);
+        border-radius: 6px; font-family: 'JetBrains Mono', monospace;
+        color: #94a3b8;
+    }
+    .report-card.disabled { opacity: .55; }
 
-        /* Info banner */
-        .info-banner {
-            background: linear-gradient(135deg, rgba(16,185,129,.06), rgba(14,165,233,.06));
-            border: 1px solid rgba(16,185,129,.20);
-            border-radius: 14px;
-            padding: 18px 22px;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            font-size: .88rem;
-            color: #334155;
-            line-height: 1.6;
-        }
-        .info-banner-icon {
-            width: 42px; height: 42px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #10b981, #0ea5e9);
-            color: #fff;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem;
-            flex-shrink: 0;
-            box-shadow: 0 6px 16px rgba(16,185,129,.3);
-        }
-        .info-banner strong { color: #059669; }
+    .info-banner {
+        padding: 22px 26px;
+        background: linear-gradient(135deg, rgba(16,185,129,.06), rgba(14,165,233,.06));
+        border: 1px solid rgba(52,211,153,.2);
+        border-radius: 20px;
+        display: flex; align-items: center; gap: 18px;
+        margin-bottom: 26px;
+        font-size: .9rem; color: #cbd5e1; line-height: 1.6;
+    }
+    .info-icon {
+        width: 46px; height: 46px; border-radius: 14px;
+        background: linear-gradient(135deg, #10b981, #0ea5e9);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.3rem; flex-shrink: 0;
+        box-shadow: 0 8px 20px rgba(16,185,129,.35);
+    }
+    .info-banner strong { color: #6ee7b7; }
+</style>
+{% endblock %}
 
-        /* Grid Laporan */
-        .report-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-        .report-card {
-            background: #fff; border: 1px solid #e2e8f0;
-            border-radius: 14px; padding: 24px;
-            box-shadow: 0 1px 2px rgba(15,23,42,.06);
-            transition: all .25s;
-            display: flex; flex-direction: column;
-            position: relative;
-            overflow: hidden;
-        }
-        .report-card::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #10b981, #0ea5e9);
-            opacity: 0;
-            transition: opacity .3s;
-        }
-        .report-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 50px rgba(15,23,42,.12);
-            border-color: rgba(16,185,129,.35);
-        }
-        .report-card:hover::before { opacity: 1; }
-
-        .report-icon {
-            width: 52px; height: 52px;
-            border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem;
-            color: #fff;
-            margin-bottom: 16px;
-        }
-        .ri-emerald { background: linear-gradient(135deg, #10b981, #059669); }
-        .ri-sky     { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
-        .ri-amber   { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .ri-red     { background: linear-gradient(135deg, #ef4444, #dc2626); }
-        .ri-purple  { background: linear-gradient(135deg, #a855f7, #7c3aed); }
-        .ri-cyan    { background: linear-gradient(135deg, #06b6d4, #0891b2); }
-
-        .report-card h3 {
-            font-size: 1.02rem;
-            font-weight: 700;
-            color: #0f172a;
-            margin-bottom: 8px;
-        }
-        .report-card p {
-            font-size: .85rem;
-            color: #64748b;
-            line-height: 1.6;
-            margin-bottom: 18px;
-            flex-grow: 1;
-        }
-
-        .report-meta {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
-            font-size: .72rem;
-            color: #94a3b8;
-        }
-        .report-meta span {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 3px 8px;
-            background: #f1f5f9;
-            border-radius: 6px;
-            font-family: monospace;
-        }
-
-        .btn-download {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 12px 18px;
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            font: inherit;
-            font-size: .88rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all .2s;
-            text-decoration: none;
-            width: 100%;
-            box-shadow: 0 4px 14px rgba(16,185,129,.25);
-        }
-        .btn-download:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 20px rgba(16,185,129,.35);
-        }
-        .btn-download svg { flex-shrink: 0; }
-
-        /* Footer info */
-        .footer-info {
-            margin-top: 30px;
-            padding: 20px 24px;
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            box-shadow: 0 1px 2px rgba(15,23,42,.06);
-            font-size: .85rem;
-            color: #64748b;
-            line-height: 1.7;
-        }
-        .footer-info strong { color: #0f172a; }
-        .footer-info code {
-            background: #f1f5f9;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: .82rem;
-            color: #7c3aed;
-        }
-
-        @media (max-width: 640px) {
-            .modul-nav-links { display: none; }
-            .report-grid { grid-template-columns: 1fr; }
-            .info-banner { flex-direction: column; text-align: center; }
-        }
-    </style>
-</head>
-<body class="page-modul">
+{% block content %}
 
 <header class="modul-nav">
     <div class="container modul-nav-inner">
         <a href="/hub" class="brand">
             <span class="brand-mark">AG</span>
-            <span class="brand-text">
-                <strong>AGROTEK AI</strong>
-                <small>Spatial Agriculture Intelligence Platform</small>
-            </span>
+            <span class="brand-text"><strong>AGROTEK AI</strong><small>SPATIAL AGRICULTURE INTELLIGENCE</small></span>
         </a>
         <nav class="modul-nav-links">
             <a href="/statistik">Statistik</a>
             <a href="/pertanian">Pertanian</a>
-            <a href="/irigasi">Irigasi</a>
-            <a href="/hidrologi">Hidrologi</a>
-            <a href="/risiko">Risiko</a>
-            <a href="/ai">AGROTEK AI</a>
+            <a href="/iot">IoT</a>
+            <a href="/data">Data</a>
+            <a href="/laporan" class="active">Laporan</a>
+            <a href="/ai">AI</a>
             <a href="/hub" class="modul-back">← Hub</a>
         </nav>
     </div>
 </header>
 
 <section class="modul-hero">
+    <div class="modul-hero-grid" aria-hidden="true"></div>
     <div class="container modul-hero-inner">
-        <span class="eyebrow eyebrow-light">Laporan</span>
-        <h1>Laporan &amp; Ekspor Data</h1>
+        <span class="modul-eyebrow">Laporan</span>
+        <h1>Laporan &amp; <span class="grad">Ekspor Data</span></h1>
         <p>Unduh data analitik dalam format CSV untuk kebutuhan analisis, publikasi, dan pelaporan institusi.</p>
     </div>
 </section>
@@ -235,139 +117,85 @@
 <section class="modul-content">
     <div class="container">
 
-        <!-- Info banner -->
         <div class="info-banner">
-            <div class="info-banner-icon">📊</div>
+            <div class="info-icon">📊</div>
             <div>
                 <strong>Data DEMO siap diunduh.</strong>
                 File CSV dapat dibuka di Excel, Google Sheets, QGIS, atau tools analisis lainnya.
-                Setelah database PostGIS tersinkronisasi, data akan otomatis ter-update.
+                Setelah PostGIS tersinkronisasi, data akan otomatis ter-update.
             </div>
         </div>
 
-        <!-- Grid Laporan -->
         <div class="report-grid">
-
-            <!-- Curah Hujan -->
             <div class="report-card">
                 <div class="report-icon ri-sky">🌧️</div>
                 <h3>Curah Hujan Bulanan</h3>
                 <p>Data curah hujan bulanan Kabupaten Jember — 12 bulan, satuan mm.</p>
-                <div class="report-meta">
-                    <span>CSV</span>
-                    <span>12 baris</span>
-                    <span>3 kolom</span>
-                </div>
-                <a href="{{ url_for('main.export_rainfall') }}" class="btn-download">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
-                    </svg>
+                <div class="report-meta"><span>CSV</span><span>12 baris</span><span>3 kolom</span></div>
+                <a href="{{ url_for('main.export_rainfall') }}" class="btn btn-primary" style="justify-content:center;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                     Unduh CSV
                 </a>
             </div>
 
-            <!-- Risiko Banjir -->
             <div class="report-card">
                 <div class="report-icon ri-red">🌊</div>
                 <h3>Risiko Banjir</h3>
                 <p>Data risiko banjir per kecamatan — level, skor, curah hujan, elevasi.</p>
-                <div class="report-meta">
-                    <span>CSV</span>
-                    <span>7 baris</span>
-                    <span>5 kolom</span>
-                </div>
-                <a href="{{ url_for('main.export_banjir') }}" class="btn-download">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
-                    </svg>
+                <div class="report-meta"><span>CSV</span><span>7 baris</span><span>5 kolom</span></div>
+                <a href="{{ url_for('main.export_banjir') }}" class="btn btn-primary" style="justify-content:center;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                     Unduh CSV
                 </a>
             </div>
 
-            <!-- Risiko Kekeringan -->
             <div class="report-card">
                 <div class="report-icon ri-amber">🏜️</div>
                 <h3>Risiko Kekeringan</h3>
                 <p>Data risiko kekeringan per kecamatan — level, skor, curah hujan, elevasi.</p>
-                <div class="report-meta">
-                    <span>CSV</span>
-                    <span>6 baris</span>
-                    <span>5 kolom</span>
-                </div>
-                <a href="{{ url_for('main.export_kekeringan') }}" class="btn-download">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
-                    </svg>
+                <div class="report-meta"><span>CSV</span><span>6 baris</span><span>5 kolom</span></div>
+                <a href="{{ url_for('main.export_kekeringan') }}" class="btn btn-primary" style="justify-content:center;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                     Unduh CSV
                 </a>
             </div>
 
-            <!-- Komoditas Pertanian -->
             <div class="report-card">
                 <div class="report-icon ri-emerald">🌾</div>
                 <h3>Komoditas Pertanian</h3>
                 <p>Data produksi &amp; produktivitas per komoditas — luas tanam, produksi, produktivitas.</p>
-                <div class="report-meta">
-                    <span>CSV</span>
-                    <span>6 baris</span>
-                    <span>5 kolom</span>
-                </div>
-                <a href="{{ url_for('main.export_komoditas') }}" class="btn-download">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
-                    </svg>
+                <div class="report-meta"><span>CSV</span><span>6 baris</span><span>5 kolom</span></div>
+                <a href="{{ url_for('main.export_komoditas') }}" class="btn btn-primary" style="justify-content:center;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                     Unduh CSV
                 </a>
             </div>
 
-            <!-- Neraca Air -->
             <div class="report-card">
                 <div class="report-icon ri-cyan">💧</div>
                 <h3>Neraca Air</h3>
                 <p>Data neraca air per kecamatan — ketersediaan, kebutuhan, surplus/defisit.</p>
-                <div class="report-meta">
-                    <span>CSV</span>
-                    <span>8 baris</span>
-                    <span>5 kolom</span>
-                </div>
-                <a href="{{ url_for('main.export_neraca_air') }}" class="btn-download">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
-                    </svg>
+                <div class="report-meta"><span>CSV</span><span>8 baris</span><span>5 kolom</span></div>
+                <a href="{{ url_for('main.export_neraca_air') }}" class="btn btn-primary" style="justify-content:center;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                     Unduh CSV
                 </a>
             </div>
 
-            <!-- PDF Coming Soon -->
-            <div class="report-card" style="opacity:.7;">
+            <div class="report-card disabled">
                 <div class="report-icon ri-purple">📄</div>
                 <h3>Laporan PDF Komprehensif</h3>
                 <p>Laporan lengkap dalam format PDF — semua modul dalam 1 dokumen.</p>
-                <div class="report-meta">
-                    <span>PDF</span>
-                    <span>Segera</span>
-                </div>
-                <button class="btn-download" disabled style="opacity:.5;cursor:not-allowed;box-shadow:none;">
-                    🚧 Segera Hadir
-                </button>
+                <div class="report-meta"><span>PDF</span><span>SEGERA</span></div>
+                <button class="btn btn-outline" style="justify-content:center;cursor:not-allowed;" disabled>🚧 Segera Hadir</button>
             </div>
-
-        </div>
-
-        <!-- Footer info -->
-        <div class="footer-info">
-            <strong>💡 Tips Penggunaan:</strong>
-            <ul style="margin-top:8px;padding-left:20px;line-height:1.8;">
-                <li>File CSV bisa langsung dibuka di <strong>Excel</strong>, <strong>Google Sheets</strong>, atau <strong>LibreOffice</strong>.</li>
-                <li>Untuk analisis spasial lanjutan, gunakan <strong>QGIS</strong> atau <strong>Python Pandas</strong>.</li>
-                <li>Endpoint API tersedia di <code>/export/*.csv</code> — bisa diintegrasikan dengan sistem lain.</li>
-                <li>Data saat ini <strong>DEMO</strong> — akan otomatis ter-update setelah database PostGIS tersinkronisasi.</li>
-            </ul>
         </div>
 
     </div>
 </section>
 
+{% endblock %}
+
+{% block body_extra %}
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-</body>
-</html>
+{% endblock %}

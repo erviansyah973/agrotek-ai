@@ -1,214 +1,169 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Center — AGROTEK AI</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <style>
-        .page-modul { min-height: 100vh; background: #f8fafc; }
-        .modul-nav {
-            position: sticky; top: 0; z-index: 100;
-            background: rgba(10,22,40,.95);
-            backdrop-filter: blur(14px);
-            border-bottom: 1px solid rgba(255,255,255,.06);
-            height: 72px; display: flex; align-items: center;
-        }
-        .modul-nav-inner { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 20px; }
-        .modul-nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-        .modul-nav-links a {
-            color: #cbd5e1; font-size: .85rem; padding: 8px 12px;
-            border-radius: 8px; transition: all .2s; text-decoration: none;
-        }
-        .modul-nav-links a:hover { color: #fff; background: rgba(255,255,255,.06); }
-        .modul-nav-links a.active { color: #6ee7b7; }
-        .modul-back { color: #6ee7b7 !important; }
+{% extends "base.html" %}
+{% block title %}Data Center — AGROTEK AI{% endblock %}
+{% block body_class %}page-module{% endblock %}
 
-        .modul-hero {
-            padding: 60px 0 48px;
-            background: linear-gradient(180deg, #0a1628, #0f1e35);
-            color: #f1f5f9; position: relative; overflow: hidden;
-        }
-        .modul-hero::before {
-            content: ''; position: absolute; inset: 0;
-            background:
-                radial-gradient(700px 400px at 15% 50%, rgba(168,85,247,.18), transparent 60%),
-                radial-gradient(700px 400px at 85% 50%, rgba(14,165,233,.14), transparent 60%);
-            pointer-events: none;
-        }
-        .modul-hero-inner { position: relative; }
-        .modul-hero h1 {
-            font-size: clamp(1.6rem, 3vw, 2.4rem);
-            font-weight: 800; color: #fff;
-            margin: 10px 0 8px; letter-spacing: -.02em;
-        }
-        .modul-hero p { color: #cbd5e1; max-width: 640px; font-size: .95rem; line-height: 1.6; }
+{% block head_extra %}
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules.css') }}">
+<style>
+    .filter-bar {
+        background: linear-gradient(180deg, rgba(15,30,53,.7), rgba(10,22,40,.5));
+        border: 1px solid rgba(255,255,255,.06);
+        border-radius: 20px;
+        padding: 20px;
+        margin-bottom: 26px;
+        display: flex; flex-direction: column; gap: 16px;
+        backdrop-filter: blur(10px);
+    }
+    .filter-search {
+        display: flex; align-items: center; gap: 12px;
+        padding: 12px 16px;
+        border: 1px solid rgba(255,255,255,.1);
+        border-radius: 12px;
+        background: rgba(255,255,255,.03);
+        transition: all .2s;
+    }
+    .filter-search:focus-within {
+        border-color: #34d399;
+        background: rgba(52,211,153,.04);
+        box-shadow: 0 0 0 4px rgba(52,211,153,.1);
+    }
+    .filter-search input {
+        flex: 1; border: none; background: transparent;
+        font-family: var(--font-body);
+        font-size: .95rem; color: #fff; outline: none;
+    }
+    .filter-search input::placeholder { color: #64748b; }
 
-        .modul-content { padding: 40px 0 80px; }
+    .filter-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill {
+        padding: 8px 16px; border-radius: 999px;
+        font-size: .82rem; font-weight: 600;
+        color: #cbd5e1; background: rgba(255,255,255,.04);
+        border: 1px solid rgba(255,255,255,.08);
+        cursor: pointer; transition: all .2s;
+        text-decoration: none;
+    }
+    .pill:hover { background: rgba(52,211,153,.1); color: #6ee7b7; border-color: rgba(52,211,153,.3); }
+    .pill.active {
+        background: linear-gradient(135deg, #10b981, #34d399);
+        color: #050b18; border-color: #10b981;
+        box-shadow: 0 4px 20px rgba(16,185,129,.4);
+    }
 
-        .filter-bar {
-            background: #fff; border: 1px solid #e2e8f0;
-            border-radius: 14px; padding: 18px;
-            box-shadow: 0 1px 2px rgba(15,23,42,.06);
-            margin-bottom: 26px;
-            display: flex; flex-direction: column; gap: 14px;
-        }
-        .filter-search {
-            display: flex; align-items: center; gap: 12px;
-            padding: 10px 14px; border: 1px solid #e2e8f0;
-            border-radius: 10px; background: #f8fafc;
-            transition: all .2s;
-        }
-        .filter-search:focus-within {
-            border-color: #10b981; background: #fff;
-            box-shadow: 0 0 0 4px rgba(16,185,129,.1);
-        }
-        .filter-search input {
-            flex: 1; border: none; background: transparent;
-            font: inherit; font-size: .9rem; color: #0f172a; outline: none;
-        }
-        .filter-pills { display: flex; flex-wrap: wrap; gap: 8px; }
-        .pill {
-            padding: 6px 14px; border-radius: 999px;
-            font-size: .8rem; font-weight: 500; color: #334155;
-            background: #f1f5f9; border: 1px solid #e2e8f0;
-            cursor: pointer; transition: all .2s;
-        }
-        .pill:hover { background: #fff; border-color: #10b981; color: #059669; }
-        .pill.active {
-            background: #10b981; border-color: #10b981; color: #fff;
-            box-shadow: 0 4px 14px rgba(16,185,129,.3);
-        }
+    .dataset-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+    }
+    .dataset-card {
+        background: linear-gradient(180deg, rgba(15,30,53,.7), rgba(10,22,40,.5));
+        border: 1px solid rgba(255,255,255,.06);
+        border-radius: 20px;
+        padding: 24px;
+        transition: all .4s var(--ease);
+        position: relative; overflow: hidden;
+        display: flex; flex-direction: column;
+        text-decoration: none; color: inherit;
+        backdrop-filter: blur(10px);
+    }
+    .dataset-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(52,211,153,.3), transparent);
+    }
+    .dataset-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(52,211,153,.35);
+        box-shadow: 0 20px 50px rgba(0,0,0,.4);
+    }
+    .dataset-head {
+        display: flex; justify-content: space-between; align-items: center;
+        gap: 12px; margin-bottom: 16px;
+    }
+    .dataset-cat {
+        display: inline-block; padding: 4px 12px;
+        font-size: .68rem; font-weight: 700;
+        letter-spacing: .05em; text-transform: uppercase;
+        border-radius: 6px; color: #fff;
+    }
+    .cat-administrasi    { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+    .cat-hidrologi       { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+    .cat-irigasi         { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .cat-pertanian       { background: linear-gradient(135deg, #10b981, #059669); }
+    .cat-analisis        { background: linear-gradient(135deg, #a855f7, #7c3aed); }
+    .cat-remote-sensing  { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+    .cat-iklim           { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+    .cat-iot             { background: linear-gradient(135deg, #64748b, #475569); }
 
-        .dataset-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-        .dataset-card {
-            background: #fff; border: 1px solid #e2e8f0;
-            border-radius: 14px; padding: 22px;
-            box-shadow: 0 1px 2px rgba(15,23,42,.06);
-            transition: all .25s; position: relative;
-            overflow: hidden; display: flex; flex-direction: column;
-        }
-        .dataset-card::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0;
-            height: 3px; background: linear-gradient(90deg, #10b981, #0ea5e9);
-            opacity: 0; transition: opacity .3s;
-        }
-        .dataset-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 50px rgba(15,23,42,.12);
-            border-color: rgba(16,185,129,.35);
-        }
-        .dataset-card:hover::before { opacity: 1; }
+    .status-badge {
+        display: inline-block; padding: 4px 12px;
+        font-size: .65rem; font-weight: 700;
+        letter-spacing: .05em; border-radius: 999px;
+        border: 1px solid transparent;
+    }
+    .status-badge.public { background: rgba(52,211,153,.12); color: #6ee7b7; border-color: rgba(52,211,153,.25); }
+    .status-badge.restricted { background: rgba(251,191,36,.12); color: #fcd34d; border-color: rgba(251,191,36,.25); }
+    .status-badge.internal { background: rgba(239,68,68,.12); color: #f87171; border-color: rgba(239,68,68,.25); }
 
-        .dataset-head {
-            display: flex; justify-content: space-between;
-            align-items: center; gap: 12px; margin-bottom: 14px;
-        }
-        .dataset-cat {
-            display: inline-block; padding: 4px 10px;
-            font-size: .68rem; font-weight: 700;
-            letter-spacing: .06em; text-transform: uppercase;
-            border-radius: 6px; color: #fff;
-        }
-        .cat-administrasi   { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
-        .cat-hidrologi      { background: linear-gradient(135deg, #06b6d4, #0891b2); }
-        .cat-irigasi        { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .cat-pertanian      { background: linear-gradient(135deg, #10b981, #059669); }
-        .cat-analisis       { background: linear-gradient(135deg, #a855f7, #7c3aed); }
-        .cat-remote-sensing { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+    .dataset-card h3 {
+        font-family: var(--font-display);
+        font-size: 1.05rem; font-weight: 700;
+        color: #fff; margin: 0 0 8px; line-height: 1.35;
+    }
+    .dataset-desc {
+        font-size: .85rem; color: #94a3b8;
+        line-height: 1.6; margin-bottom: 18px;
+        flex-grow: 1;
+    }
+    .dataset-meta {
+        display: grid; grid-template-columns: 1fr 1fr;
+        gap: 10px 18px;
+        padding: 14px 0;
+        border-top: 1px dashed rgba(255,255,255,.08);
+        border-bottom: 1px dashed rgba(255,255,255,.08);
+        margin-bottom: 16px;
+    }
+    .dataset-meta > div { display: flex; flex-direction: column; gap: 2px; }
+    .dataset-meta span { font-size: .65rem; text-transform: uppercase; letter-spacing: .06em; color: #64748b; font-weight: 600; }
+    .dataset-meta strong { font-size: .82rem; color: #fff; font-weight: 600; }
+    .dataset-arrow {
+        color: #34d399; font-weight: 700; font-size: .85rem;
+        display: inline-flex; align-items: center; gap: 6px;
+        transition: all .2s;
+    }
+    .dataset-card:hover .dataset-arrow { transform: translateX(4px); }
 
-        .status-badge {
-            display: inline-block; padding: 3px 10px;
-            font-size: .65rem; font-weight: 700;
-            letter-spacing: .06em; border-radius: 999px;
-        }
-        .badge-public     { background: rgba(16,185,129,.12); color: #059669; border: 1px solid rgba(16,185,129,.25); }
-        .badge-restricted { background: rgba(251,191,36,.14); color: #b45309; border: 1px solid rgba(251,191,36,.3); }
-        .badge-internal   { background: rgba(239,68,68,.1);   color: #ef4444; border: 1px solid rgba(239,68,68,.25); }
+    @media (max-width: 640px) { .dataset-grid { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
 
-        .dataset-card h3 {
-            font-size: 1.02rem; font-weight: 700;
-            margin-bottom: 8px; color: #0f172a; line-height: 1.35;
-        }
-        .dataset-desc {
-            font-size: .84rem; color: #64748b;
-            line-height: 1.6; margin-bottom: 16px;
-            flex-grow: 1;
-        }
-        .dataset-meta {
-            display: grid; grid-template-columns: 1fr 1fr;
-            gap: 8px 16px; padding: 12px 0;
-            margin-bottom: 12px;
-            border-top: 1px dashed #e2e8f0;
-            border-bottom: 1px dashed #e2e8f0;
-        }
-        .dataset-meta > div { display: flex; flex-direction: column; gap: 2px; }
-        .dataset-meta span {
-            font-size: .65rem; text-transform: uppercase;
-            letter-spacing: .06em; color: #94a3b8;
-        }
-        .dataset-meta strong { font-size: .8rem; color: #0f172a; font-weight: 600; }
-
-        .btn-detail {
-            display: inline-flex; align-items: center;
-            justify-content: center; gap: 6px;
-            padding: 10px 16px;
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: #fff; border: none; border-radius: 10px;
-            font: inherit; font-size: .85rem; font-weight: 600;
-            cursor: pointer; transition: all .2s;
-            width: 100%; text-decoration: none;
-        }
-        .btn-detail:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(16,185,129,.35);
-        }
-
-        .empty-state {
-            grid-column: 1 / -1;
-            padding: 60px 20px; text-align: center;
-            background: #fff; border: 1px dashed #e2e8f0;
-            border-radius: 14px; color: #94a3b8;
-            font-size: .9rem;
-        }
-
-        @media (max-width: 640px) {
-            .modul-nav-links { display: none; }
-            .dataset-grid { grid-template-columns: 1fr; }
-        }
-    </style>
-</head>
-<body class="page-modul">
+{% block content %}
 
 <header class="modul-nav">
     <div class="container modul-nav-inner">
         <a href="/hub" class="brand">
             <span class="brand-mark">AG</span>
-            <span class="brand-text">
-                <strong>AGROTEK AI</strong>
-                <small>Spatial Agriculture Intelligence Platform</small>
-            </span>
+            <span class="brand-text"><strong>AGROTEK AI</strong><small>SPATIAL AGRICULTURE INTELLIGENCE</small></span>
         </a>
         <nav class="modul-nav-links">
             <a href="/statistik">Statistik</a>
-            <a href="/hidrologi">Hidrologi</a>
-            <a href="/peta">Peta</a>
-            <a href="/analisis">Analisis</a>
+            <a href="/pertanian">Pertanian</a>
+            <a href="/iot">IoT</a>
             <a href="/data" class="active">Data</a>
+            <a href="/laporan">Laporan</a>
+            <a href="/ai">AI</a>
             <a href="/hub" class="modul-back">← Hub</a>
         </nav>
     </div>
 </header>
 
 <section class="modul-hero">
+    <div class="modul-hero-grid" aria-hidden="true"></div>
     <div class="container modul-hero-inner">
-        <span class="eyebrow eyebrow-light">Data Center</span>
-        <h1>Katalog Dataset Spasial</h1>
-        <p>Kumpulan data spasial, statistik, dan hasil analisis untuk Kabupaten Jember. Klik dataset untuk melihat detail dan metadata.</p>
+        <span class="modul-eyebrow">Data Center</span>
+        <h1>Katalog <span class="grad">Dataset Spasial</span></h1>
+        <p>Kumpulan data spasial, statistik, dan hasil analisis untuk Kabupaten Jember. Klik dataset untuk melihat metadata lengkap.</p>
     </div>
 </section>
 
@@ -216,82 +171,89 @@
     <div class="container">
 
         <div class="filter-bar">
-            <div class="filter-search">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>
-                </svg>
-                <input type="text" id="searchDataset" placeholder="Cari dataset, sumber, deskripsi...">
-            </div>
-            <div class="filter-pills" id="filterPills">
-                <button class="pill active" data-filter="all">Semua</button>
+            <form method="get" action="/data" style="display:contents;">
+                <div class="filter-search">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input type="text" name="q" value="{{ current_q }}" placeholder="Cari dataset, sumber, deskripsi..." autocomplete="off">
+                </div>
+                {% if current_category != 'all' %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
+                {% if current_status != 'all' %}<input type="hidden" name="status" value="{{ current_status }}">{% endif %}
+            </form>
+
+            <div class="filter-pills">
+                <a href="{{ url_for('data_center.index') }}" class="pill {% if current_category == 'all' %}active{% endif %}">Semua</a>
                 {% for c in categories %}
-                <button class="pill" data-filter="{{ c.key }}">{{ c.label }}</button>
+                <a href="{{ url_for('data_center.index', category=c.key, status=current_status if current_status != 'all' else None) }}"
+                   class="pill {% if current_category == c.key %}active{% endif %}">
+                    {{ c.label }} <span style="opacity:.6;font-family:monospace;margin-left:4px;">{{ c.count }}</span>
+                </a>
                 {% endfor %}
+            </div>
+
+            <div class="filter-pills" style="padding-top:12px;border-top:1px dashed rgba(255,255,255,.06);">
+                <a href="{{ url_for('data_center.index', category=current_category if current_category != 'all' else None) }}"
+                   class="pill {% if current_status == 'all' %}active{% endif %}">Semua Status</a>
+                <a href="{{ url_for('data_center.index', category=current_category if current_category != 'all' else None, status='PUBLIC') }}"
+                   class="pill {% if current_status == 'PUBLIC' %}active{% endif %}">
+                    Public <span style="opacity:.6;font-family:monospace;margin-left:4px;">{{ status_counts.PUBLIC }}</span>
+                </a>
+                <a href="{{ url_for('data_center.index', category=current_category if current_category != 'all' else None, status='RESTRICTED') }}"
+                   class="pill {% if current_status == 'RESTRICTED' %}active{% endif %}">
+                    Restricted <span style="opacity:.6;font-family:monospace;margin-left:4px;">{{ status_counts.RESTRICTED }}</span>
+                </a>
+                <a href="{{ url_for('data_center.index', category=current_category if current_category != 'all' else None, status='INTERNAL') }}"
+                   class="pill {% if current_status == 'INTERNAL' %}active{% endif %}">
+                    Internal <span style="opacity:.6;font-family:monospace;margin-left:4px;">{{ status_counts.INTERNAL }}</span>
+                </a>
             </div>
         </div>
 
-        <div class="dataset-grid" id="datasetGrid">
+        {% if datasets %}
+        <div class="dataset-grid">
             {% for d in datasets %}
-            <div class="dataset-card" data-cat="{{ d.category }}">
+            <a href="{{ url_for('data_center.detail', slug=d.slug) }}" class="dataset-card">
                 <div class="dataset-head">
-                    <span class="dataset-cat cat-{{ d.category }}">{{ d.category_label }}</span>
-                    <span class="status-badge badge-{{ d.status|lower }}">{{ d.status }}</span>
+                    <span class="dataset-cat cat-{{ d.category }}">{{ d.category.replace('-', ' ')|title }}</span>
+                    <span class="status-badge {{ d.status|lower }}">{{ d.status }}</span>
                 </div>
                 <h3>{{ d.name }}</h3>
-                <p class="dataset-desc">{{ d.desc }}</p>
+                <p class="dataset-desc">{{ d.description }}</p>
                 <div class="dataset-meta">
                     <div><span>Sumber</span><strong>{{ d.source }}</strong></div>
                     <div><span>Tahun</span><strong>{{ d.year }}</strong></div>
                     <div><span>Format</span><strong>{{ d.format }}</strong></div>
                     <div><span>Resolusi</span><strong>{{ d.resolution }}</strong></div>
                 </div>
-                <a href="{{ url_for('main.data_detail', slug=d.slug) }}" class="btn-detail">
-                    Lihat Detail →
-                </a>
-            </div>
+                <span class="dataset-arrow">Lihat Detail →</span>
+            </a>
             {% endfor %}
+        </div>
+        {% else %}
+        <div class="panel" style="text-align:center;padding:60px 20px;">
+            <div style="font-size:3rem;margin-bottom:16px;opacity:.5;">📁</div>
+            <h3 style="font-family:var(--font-display);font-size:1.15rem;color:#fff;margin-bottom:8px;">Tidak Ada Dataset</h3>
+            <p style="color:#94a3b8;font-size:.9rem;">Coba ubah filter atau kata kunci pencarian.</p>
+            <a href="{{ url_for('data_center.index') }}" class="btn btn-outline" style="margin-top:20px;">Reset Filter</a>
+        </div>
+        {% endif %}
+
+        <div class="panel" style="margin-top:32px;background:linear-gradient(135deg,rgba(52,211,153,.06),rgba(14,165,233,.06));border-color:rgba(52,211,153,.2);display:grid;grid-template-columns:60px 1fr;gap:20px;align-items:start;">
+            <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#10b981,#0ea5e9);display:flex;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 8px 24px rgba(16,185,129,.35);">🛡️</div>
+            <div>
+                <h3 style="font-family:var(--font-display);font-size:1.05rem;color:#fff;margin-bottom:6px;">Data Provenance</h3>
+                <p style="font-size:.88rem;color:#cbd5e1;line-height:1.7;margin:0;">
+                    Semua dataset mencantumkan <strong style="color:#6ee7b7;">sumber resmi</strong>
+                    (BIG, BPS, BMKG, PUPR, KLHK, ESA Copernicus) atau penanda
+                    <em>hasil analisis internal</em>.
+                </p>
+            </div>
         </div>
 
     </div>
 </section>
 
-<script>
-(function () {
-    'use strict';
-    const searchInput = document.getElementById('searchDataset');
-    const pills = document.querySelectorAll('#filterPills .pill');
-    const cards = document.querySelectorAll('#datasetGrid .dataset-card');
+{% endblock %}
 
-    let currentCat = 'all';
-    let currentQuery = '';
-
-    function applyFilter() {
-        cards.forEach(card => {
-            const cat = card.dataset.cat || '';
-            const text = card.textContent.toLowerCase();
-            const catOk = (currentCat === 'all' || cat === currentCat);
-            const queryOk = (!currentQuery || text.includes(currentQuery));
-            card.style.display = (catOk && queryOk) ? '' : 'none';
-        });
-    }
-
-    pills.forEach(pill => {
-        pill.addEventListener('click', () => {
-            pills.forEach(p => p.classList.remove('active'));
-            pill.classList.add('active');
-            currentCat = pill.dataset.filter;
-            applyFilter();
-        });
-    });
-
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            currentQuery = e.target.value.toLowerCase().trim();
-            applyFilter();
-        });
-    }
-})();
-</script>
-
-</body>
-</html>
+{% block body_extra %}
+<script src="{{ url_for('static', filename='js/data_center.js') }}"></script>
+{% endblock %}

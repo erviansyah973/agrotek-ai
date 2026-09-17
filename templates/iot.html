@@ -1,269 +1,124 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IoT Monitoring — AGROTEK AI</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <style>
-        .page-modul { min-height: 100vh; background: #f8fafc; }
-        .modul-nav {
-            position: sticky; top: 0; z-index: 100;
-            background: rgba(10,22,40,.95);
-            backdrop-filter: blur(14px);
-            border-bottom: 1px solid rgba(255,255,255,.06);
-            height: 72px; display: flex; align-items: center;
-        }
-        .modul-nav-inner { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 20px; }
-        .modul-nav-links { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-        .modul-nav-links a {
-            color: #cbd5e1; font-size: .85rem; padding: 8px 12px;
-            border-radius: 8px; transition: all .2s; text-decoration: none;
-        }
-        .modul-nav-links a:hover { color: #fff; background: rgba(255,255,255,.06); }
-        .modul-nav-links a.active { color: #6ee7b7; }
-        .modul-back { color: #6ee7b7 !important; }
+{% extends "base.html" %}
+{% block title %}IoT Monitoring — AGROTEK AI{% endblock %}
+{% block body_class %}page-module{% endblock %}
 
-        .modul-hero {
-            padding: 60px 0 48px;
-            background: linear-gradient(180deg, #0a1628, #0f1e35);
-            color: #f1f5f9; position: relative; overflow: hidden;
-        }
-        .modul-hero::before {
-            content: ''; position: absolute; inset: 0;
-            background:
-                radial-gradient(700px 400px at 15% 50%, rgba(168,85,247,.20), transparent 60%),
-                radial-gradient(700px 400px at 85% 50%, rgba(16,185,129,.14), transparent 60%);
-            pointer-events: none;
-        }
-        .modul-hero-inner { position: relative; }
-        .modul-hero h1 {
-            font-size: clamp(1.6rem, 3vw, 2.4rem);
-            font-weight: 800; color: #fff;
-            margin: 10px 0 8px; letter-spacing: -.02em;
-        }
-        .modul-hero p { color: #cbd5e1; max-width: 720px; font-size: .95rem; line-height: 1.6; }
+{% block head_extra %}
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules.css') }}">
+<style>
+    .flow-box {
+        margin-bottom: 24px; padding: 26px; border-radius: 20px;
+        background: linear-gradient(180deg, rgba(15,30,53,.7), rgba(10,22,40,.5));
+        border: 1px solid rgba(255,255,255,.06);
+        backdrop-filter: blur(10px);
+    }
+    .flow {
+        display: flex; align-items: center; gap: 10px;
+        flex-wrap: wrap; padding: 8px 0;
+    }
+    .flow-node {
+        padding: 10px 16px;
+        background: rgba(168,85,247,.1);
+        border: 1px solid rgba(168,85,247,.3);
+        border-radius: 10px;
+        font-size: .82rem; font-weight: 600;
+        color: #c084fc;
+        font-family: var(--font-display);
+    }
+    .flow-arrow { color: #a855f7; font-weight: 700; font-size: 1.1rem; }
+    .flow-note { margin-top: 16px; font-size: .85rem; color: #94a3b8; line-height: 1.7; }
+    .flow-note code {
+        background: rgba(168,85,247,.15);
+        padding: 2px 8px; border-radius: 4px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: .78rem; color: #c084fc;
+    }
 
-        .modul-content { padding: 40px 0 80px; }
+    .live-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: .68rem; font-weight: 700; color: #6ee7b7;
+        padding: 3px 10px; background: rgba(52,211,153,.1);
+        border: 1px solid rgba(52,211,153,.25);
+        border-radius: 999px; letter-spacing: .08em;
+    }
+    .live-badge::before {
+        content: ''; width: 6px; height: 6px;
+        background: #34d399; border-radius: 50%;
+        box-shadow: 0 0 8px #34d399;
+        animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
 
-        /* KPI */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 16px; margin-bottom: 30px;
-        }
-        .kpi-card {
-            background: #fff; border: 1px solid #e2e8f0;
-            border-radius: 14px; padding: 20px;
-            position: relative; overflow: hidden;
-            box-shadow: 0 1px 2px rgba(15,23,42,.06);
-            transition: all .25s;
-        }
-        .kpi-card::before {
-            content: ''; position: absolute; left: 0; top: 0; bottom: 0;
-            width: 4px;
-            background: linear-gradient(180deg, #a855f7, #7c3aed);
-        }
-        .kpi-card.kpi-emerald::before { background: linear-gradient(180deg, #10b981, #059669); }
-        .kpi-card.kpi-red::before     { background: linear-gradient(180deg, #ef4444, #dc2626); }
-        .kpi-card.kpi-amber::before   { background: linear-gradient(180deg, #f59e0b, #d97706); }
-        .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(15,23,42,.08); }
-        .kpi-label { font-size: .75rem; color: #64748b; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .06em; }
-        .kpi-value {
-            display: flex; align-items: baseline; gap: 6px;
-            font-size: 1.9rem; font-weight: 800;
-            color: #0f172a; letter-spacing: -.02em; line-height: 1.1;
-        }
-        .kpi-value small { font-size: .78rem; font-weight: 600; color: #64748b; }
+    .battery-bar {
+        display: inline-block; width: 44px; height: 6px;
+        background: rgba(255,255,255,.08);
+        border-radius: 999px; margin-right: 8px;
+        vertical-align: middle; overflow: hidden;
+    }
+    .battery-bar i { display: block; height: 100%; border-radius: 999px; transition: width .3s; }
 
-        /* Flow diagram */
-        .flow-box {
-            background: #fff; border: 1px solid #e2e8f0;
-            border-radius: 14px; padding: 24px;
-            box-shadow: 0 1px 2px rgba(15,23,42,.06);
-            margin-bottom: 30px;
-        }
-        .flow-box h3 {
-            font-size: 1rem; font-weight: 700; color: #0f172a;
-            margin-bottom: 18px;
-        }
-        .flow {
-            display: flex; align-items: center; gap: 10px;
-            flex-wrap: wrap; padding: 8px 0;
-        }
-        .flow-node {
-            padding: 10px 16px;
-            background: linear-gradient(135deg, rgba(168,85,247,.10), rgba(16,185,129,.10));
-            border: 1px solid rgba(168,85,247,.25);
-            border-radius: 10px;
-            font-size: .82rem;
-            font-weight: 600;
-            color: #7c3aed;
-        }
-        .flow-arrow {
-            color: #a855f7;
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-        .flow-note {
-            margin-top: 14px;
-            font-size: .82rem;
-            color: #64748b;
-            line-height: 1.6;
-        }
-        .flow-note code {
-            background: #f1f5f9;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: .78rem;
-            color: #7c3aed;
-            font-family: monospace;
-        }
+    .device-icon {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 4px 12px; border-radius: 999px;
+        font-size: .72rem; font-weight: 600;
+    }
+    .device-icon.water_level { background: rgba(14,165,233,.12); color: #7dd3fc; }
+    .device-icon.rain_gauge { background: rgba(6,182,212,.12); color: #67e8f9; }
+    .device-icon.weather_station { background: rgba(245,158,11,.12); color: #fcd34d; }
+    .device-icon.soil_moisture { background: rgba(16,185,129,.12); color: #6ee7b7; }
 
-        /* Panel + Table */
-        .panel {
-            background: #fff; border: 1px solid #e2e8f0;
-            border-radius: 14px; padding: 22px;
-            box-shadow: 0 1px 2px rgba(15,23,42,.06);
-            margin-bottom: 22px;
-            overflow: hidden;
-        }
-        .panel header {
-            display: flex; justify-content: space-between;
-            align-items: center; gap: 12px;
-            margin-bottom: 16px; flex-wrap: wrap;
-        }
-        .panel h3 { font-size: 1rem; font-weight: 700; color: #0f172a; }
+    .status-dot {
+        display: inline-block; width: 8px; height: 8px;
+        border-radius: 50%; margin-right: 6px;
+        vertical-align: middle;
+    }
+    .status-dot.online { background: #34d399; box-shadow: 0 0 8px #34d399; }
+    .status-dot.offline { background: #64748b; }
+    .status-dot.warning { background: #fbbf24; box-shadow: 0 0 8px #fbbf24; }
 
-        .live-badge {
-            display: inline-flex; align-items: center; gap: 6px;
-            font-size: .7rem; font-weight: 700;
-            color: #059669;
-            padding: 3px 10px;
-            background: rgba(16,185,129,.10);
-            border-radius: 999px;
-            letter-spacing: .08em;
-        }
-        .live-badge::before {
-            content: '';
-            width: 6px; height: 6px;
-            background: #10b981;
-            border-radius: 50%;
-            animation: pulseDot 1.5s infinite;
-        }
-        @keyframes pulseDot {
-            0%,100% { opacity: 1; }
-            50%     { opacity: .3; }
-        }
+    .endpoint-table code {
+        background: rgba(255,255,255,.05);
+        padding: 3px 10px; border-radius: 6px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: .78rem; color: #7dd3fc;
+    }
+    .pre-payload {
+        margin-top: 16px; padding: 18px 22px;
+        background: #050b18;
+        border: 1px solid rgba(52,211,153,.2);
+        border-radius: 12px; font-family: 'JetBrains Mono', monospace;
+        font-size: .78rem; color: #6ee7b7;
+        line-height: 1.7; overflow-x: auto;
+    }
+</style>
+{% endblock %}
 
-        .data-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
-        .data-table th {
-            text-align: left;
-            font-size: .72rem; text-transform: uppercase;
-            letter-spacing: .08em; color: #64748b;
-            font-weight: 600; padding: 10px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .data-table td {
-            padding: 12px 10px;
-            border-bottom: 1px solid #e2e8f0;
-            color: #334155;
-        }
-        .data-table tr:last-child td { border-bottom: none; }
-        .data-table tr:hover td { background: rgba(168,85,247,.03); }
-        .mono { font-family: monospace; font-size: .82rem; color: #64748b; }
-        .num { font-weight: 700; color: #0f172a; }
-
-        .badge {
-            display: inline-block; padding: 3px 10px;
-            font-size: .7rem; font-weight: 700;
-            border-radius: 999px; letter-spacing: .05em;
-        }
-        .badge-online   { background: rgba(16,185,129,.12); color: #059669; }
-        .badge-offline  { background: rgba(100,116,139,.12); color: #475569; }
-        .badge-warning  { background: rgba(251,191,36,.14); color: #b45309; }
-        .badge-good     { background: rgba(16,185,129,.12); color: #059669; }
-        .badge-suspect  { background: rgba(251,191,36,.14); color: #b45309; }
-
-        /* Battery bar */
-        .battery-bar {
-            display: inline-block;
-            width: 40px; height: 6px;
-            background: #e2e8f0;
-            border-radius: 999px;
-            margin-right: 6px;
-            vertical-align: middle;
-            overflow: hidden;
-        }
-        .battery-bar i {
-            display: block; height: 100%;
-            border-radius: 999px;
-            transition: width .3s;
-        }
-
-        /* Device type tag */
-        .type-tag {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 3px 10px;
-            border-radius: 999px;
-            font-size: .72rem;
-            font-weight: 600;
-        }
-        .type-water_level     { background: rgba(14,165,233,.12); color: #0284c7; }
-        .type-rain_gauge      { background: rgba(6,182,212,.12); color: #0891b2; }
-        .type-weather_station { background: rgba(245,158,11,.14); color: #b45309; }
-        .type-soil_moisture   { background: rgba(16,185,129,.12); color: #059669; }
-
-        .dot-sm {
-            display: inline-block;
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            margin-left: 6px;
-            vertical-align: middle;
-        }
-        .dot-sm.status-good    { background: #10b981; }
-        .dot-sm.status-suspect { background: #f59e0b; }
-
-        @media (max-width: 640px) {
-            .modul-nav-links { display: none; }
-            .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-            .kpi-value { font-size: 1.4rem; }
-            .panel { overflow-x: auto; }
-            .data-table { min-width: 640px; }
-            .flow { flex-direction: column; align-items: flex-start; }
-            .flow-arrow { transform: rotate(90deg); }
-        }
-    </style>
-</head>
-<body class="page-modul">
+{% block content %}
 
 <header class="modul-nav">
     <div class="container modul-nav-inner">
         <a href="/hub" class="brand">
             <span class="brand-mark">AG</span>
-            <span class="brand-text">
-                <strong>AGROTEK AI</strong>
-                <small>Spatial Agriculture Intelligence Platform</small>
-            </span>
+            <span class="brand-text"><strong>AGROTEK AI</strong><small>SPATIAL AGRICULTURE INTELLIGENCE</small></span>
         </a>
         <nav class="modul-nav-links">
             <a href="/statistik">Statistik</a>
             <a href="/pertanian">Pertanian</a>
-            <a href="/irigasi">Irigasi</a>
             <a href="/hidrologi">Hidrologi</a>
-            <a href="/risiko">Risiko</a>
             <a href="/iot" class="active">IoT</a>
-            <a href="/ai">AGROTEK AI</a>
+            <a href="/ndvi">NDVI</a>
+            <a href="/ai">AI</a>
             <a href="/hub" class="modul-back">← Hub</a>
         </nav>
     </div>
 </header>
 
 <section class="modul-hero">
+    <div class="modul-hero-grid" aria-hidden="true"></div>
     <div class="container modul-hero-inner">
-        <span class="eyebrow eyebrow-light">IoT Ready</span>
-        <h1>IoT Monitoring Platform</h1>
-        <p>Monitoring sensor real-time: tinggi muka air, curah hujan, kelembapan tanah, dan cuaca. Arsitektur siap menerima perangkat sensor fisik di masa depan.</p>
+        <span class="modul-eyebrow">IoT Ready</span>
+        <h1>IoT <span class="grad">Monitoring Platform</span></h1>
+        <p>Monitoring sensor real-time: tinggi muka air, curah hujan, kelembapan tanah, dan cuaca. Arsitektur siap menerima perangkat sensor fisik.</p>
     </div>
 </section>
 
@@ -276,29 +131,32 @@
                 <div class="kpi-label">Total Device</div>
                 <div class="kpi-value">{{ kpi.total }} <small>device</small></div>
             </div>
-            <div class="kpi-card kpi-emerald">
+            <div class="kpi-card">
                 <div class="kpi-label">Online</div>
-                <div class="kpi-value">{{ kpi.online }} <small>device</small></div>
+                <div class="kpi-value" style="color:#34d399;">{{ kpi.online }} <small>device</small></div>
             </div>
-            <div class="kpi-card kpi-amber">
+            <div class="kpi-card">
                 <div class="kpi-label">Warning</div>
-                <div class="kpi-value">{{ kpi.warning }} <small>device</small></div>
+                <div class="kpi-value" style="color:#fbbf24;">{{ kpi.warning }} <small>device</small></div>
             </div>
-            <div class="kpi-card kpi-red">
+            <div class="kpi-card">
                 <div class="kpi-label">Offline</div>
-                <div class="kpi-value">{{ kpi.offline }} <small>device</small></div>
+                <div class="kpi-value" style="color:#94a3b8;">{{ kpi.offline }} <small>device</small></div>
             </div>
         </div>
 
-        <!-- FLOW DIAGRAM -->
+        <!-- FLOW -->
         <div class="flow-box">
-            <h3>🔗 Alur Data IoT</h3>
+            <header style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
+                <h3 style="font-family:var(--font-display);font-size:1.1rem;color:#fff;margin:0;">🔗 Alur Data IoT</h3>
+                <span class="live-badge">LIVE</span>
+            </header>
             <div class="flow">
                 <span class="flow-node">📡 Sensor</span>
                 <span class="flow-arrow">→</span>
                 <span class="flow-node">🌐 Gateway</span>
                 <span class="flow-arrow">→</span>
-                <span class="flow-node">🔌 API <code style="background:transparent;color:#fff;font-size:.72rem;">/api/iot/ingest</code></span>
+                <span class="flow-node">🔌 API</span>
                 <span class="flow-arrow">→</span>
                 <span class="flow-node">💾 Database</span>
                 <span class="flow-arrow">→</span>
@@ -309,156 +167,128 @@
                 <span class="flow-node">🤖 AI</span>
             </div>
             <p class="flow-note">
-                <strong>Endpoint siap pakai:</strong>
-                <code>POST /api/iot/ingest</code> · <code>GET /iot/data/devices</code> · <code>GET /iot/data/readings</code> · <code>GET /api/iot/status</code>
+                <strong style="color:#6ee7b7;">Endpoint siap pakai:</strong>
+                <code>POST /api/iot/ingest</code>
+                <code>GET /iot/data/devices</code>
+                <code>GET /iot/data/readings</code>
+                <code>GET /api/iot/status</code>
             </p>
         </div>
 
-        <!-- DAFTAR DEVICE -->
+        <!-- DEVICES -->
         <div class="panel">
             <header>
                 <h3>Daftar Device IoT</h3>
-                <span class="live-badge">LIVE</span>
+                <span class="chart-tag">{{ devices|length }} DEVICE</span>
             </header>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Kode</th>
-                        <th>Nama Device</th>
-                        <th>Tipe</th>
-                        <th>Kecamatan</th>
-                        <th>Baterai</th>
-                        <th>Status</th>
-                        <th>Terakhir</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for d in devices %}
-                    <tr>
-                        <td class="mono">{{ d.code }}</td>
-                        <td><strong>{{ d.name }}</strong></td>
-                        <td>
-                            <span class="type-tag type-{{ d.type }}">
-                                {{ device_types[d.type].icon }} {{ device_types[d.type].label }}
-                            </span>
-                        </td>
-                        <td>{{ d.kecamatan }}</td>
-                        <td>
-                            <span class="battery-bar">
-                                <i style="width: {{ d.battery }}%; background:
-                                    {% if d.battery >= 60 %}#10b981
-                                    {% elif d.battery >= 30 %}#f59e0b
-                                    {% else %}#ef4444{% endif %};"></i>
-                            </span>
-                            <span class="mono">{{ d.battery }}%</span>
-                        </td>
-                        <td>
-                            {% if d.status == 'online' %}
-                                <span class="badge badge-online">● Online</span>
-                            {% elif d.status == 'warning' %}
-                                <span class="badge badge-warning">⚠ Warning</span>
-                            {% else %}
-                                <span class="badge badge-offline">● Offline</span>
-                            {% endif %}
-                        </td>
-                        <td style="color:#64748b;font-size:.82rem;">{{ d.last_seen }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div style="overflow-x:auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Kode</th><th>Nama</th><th>Tipe</th><th>Kecamatan</th><th>Baterai</th><th>Status</th><th>Terakhir</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for d in devices %}
+                        <tr>
+                            <td class="mono">{{ d.code }}</td>
+                            <td><strong>{{ d.name }}</strong></td>
+                            <td>
+                                <span class="device-icon {{ d.type }}">
+                                    {{ device_types[d.type].icon }} {{ device_types[d.type].label }}
+                                </span>
+                            </td>
+                            <td>{{ d.kecamatan }}</td>
+                            <td>
+                                <span class="battery-bar"><i style="width: {{ d.battery }}%; background: {% if d.battery >= 60 %}#34d399{% elif d.battery >= 30 %}#fbbf24{% else %}#ef4444{% endif %};"></i></span>
+                                <span class="mono">{{ d.battery }}%</span>
+                            </td>
+                            <td>
+                                {% if d.status == 'online' %}<span class="badge badge-emerald"><span class="status-dot online"></span>Online</span>
+                                {% elif d.status == 'warning' %}<span class="badge badge-amber"><span class="status-dot warning"></span>Warning</span>
+                                {% else %}<span class="badge badge-slate"><span class="status-dot offline"></span>Offline</span>{% endif %}
+                            </td>
+                            <td class="muted-sm">{{ d.last_seen }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <!-- PEMBACAAN SENSOR -->
+        <!-- READINGS -->
         <div class="panel">
             <header>
                 <h3>Pembacaan Sensor Terkini</h3>
-                <span class="live-badge">REAL-TIME</span>
+                <span class="chart-tag">REAL-TIME</span>
             </header>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Device</th>
-                        <th>Parameter</th>
-                        <th>Nilai</th>
-                        <th>Waktu</th>
-                        <th>Kualitas</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for r in readings %}
-                    <tr>
-                        <td class="mono">{{ r.device_code }}</td>
-                        <td style="color:#64748b;">{{ r.parameter }}</td>
-                        <td class="num">{{ r.value }} {{ r.unit }}</td>
-                        <td class="mono">{{ r.time }}</td>
-                        <td>
-                            {% if r.quality == 'good' %}
-                                <span class="badge badge-good">Baik</span>
-                                <span class="dot-sm status-good"></span>
-                            {% else %}
-                                <span class="badge badge-suspect">Perlu Cek</span>
-                                <span class="dot-sm status-suspect"></span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <p style="margin-top:14px;font-size:.78rem;color:#94a3b8;font-style:italic;">
-                Data sensor di atas adalah DEMO. Untuk integrasi dengan sensor fisik, gunakan endpoint <code>POST /api/iot/ingest</code>.
+            <div style="overflow-x:auto;">
+                <table class="data-table">
+                    <thead><tr><th>Device</th><th>Parameter</th><th>Nilai</th><th>Waktu</th><th>Kualitas</th></tr></thead>
+                    <tbody>
+                        {% for r in readings %}
+                        <tr>
+                            <td class="mono">{{ r.device_code }}</td>
+                            <td class="muted-sm">{{ r.parameter }}</td>
+                            <td class="num">{{ r.value }} {{ r.unit }}</td>
+                            <td class="mono">{{ r.time }}</td>
+                            <td>
+                                {% if r.quality == 'good' %}<span class="badge badge-emerald">Baik</span>
+                                {% else %}<span class="badge badge-amber">Perlu Cek</span>{% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p class="muted-sm" style="margin-top:14px;font-style:italic;">
+                Data DEMO. Untuk integrasi sensor fisik, gunakan <code style="background:rgba(255,255,255,.05);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;color:#c084fc;">POST /api/iot/ingest</code>.
             </p>
         </div>
 
-        <!-- INFO ENDPOINT -->
+        <!-- API -->
         <div class="panel">
             <header><h3>🔌 API Endpoint untuk Integrasi</h3></header>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Method</th>
-                        <th>Endpoint</th>
-                        <th>Fungsi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><span class="badge badge-online">POST</span></td>
-                        <td class="mono">/api/iot/ingest</td>
-                        <td>Terima data sensor dari gateway</td>
-                    </tr>
-                    <tr>
-                        <td><span class="badge badge-warning">GET</span></td>
-                        <td class="mono">/api/iot/status</td>
-                        <td>Cek status IoT server</td>
-                    </tr>
-                    <tr>
-                        <td><span class="badge badge-warning">GET</span></td>
-                        <td class="mono">/iot/data/devices</td>
-                        <td>Daftar semua device</td>
-                    </tr>
-                    <tr>
-                        <td><span class="badge badge-warning">GET</span></td>
-                        <td class="mono">/iot/data/readings</td>
-                        <td>Pembacaan sensor terbaru</td>
-                    </tr>
-                </tbody>
-            </table>
-            <p style="margin-top:14px;font-size:.82rem;color:#64748b;line-height:1.6;">
-                <strong>Contoh payload POST</strong> ke <code>/api/iot/ingest</code>:
-            </p>
-            <pre style="margin-top:8px;padding:14px 16px;background:#0a1628;color:#6ee7b7;border-radius:10px;font-size:.78rem;overflow-x:auto;font-family:monospace;line-height:1.6;">{
+            <div style="overflow-x:auto;">
+                <table class="data-table endpoint-table">
+                    <thead><tr><th>Method</th><th>Endpoint</th><th>Fungsi</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge badge-emerald">POST</span></td>
+                            <td><code>/api/iot/ingest</code></td>
+                            <td>Terima data sensor dari gateway</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-amber">GET</span></td>
+                            <td><code>/api/iot/status</code></td>
+                            <td>Cek status IoT server</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-amber">GET</span></td>
+                            <td><code>/iot/data/devices</code></td>
+                            <td>Daftar semua device</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-amber">GET</span></td>
+                            <td><code>/iot/data/readings</code></td>
+                            <td>Pembacaan sensor terbaru</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="muted-sm" style="margin-top:16px;">Contoh payload POST:</p>
+<pre class="pre-payload">{
   "device_code": "AWLR-BDD-01",
   "parameter": "water_level",
   "value": 185.5,
   "unit": "cm",
-  "timestamp": "2026-09-15T08:00:00"
+  "timestamp": "2026-09-17T08:00:00"
 }</pre>
         </div>
 
     </div>
 </section>
 
-<script src="{{ url_for('static', filename='js/iot.js') }}"></script>
+{% endblock %}
 
-</body>
-</html>
+{% block body_extra %}
+<script src="{{ url_for('static', filename='js/iot.js') }}"></script>
+{% endblock %}

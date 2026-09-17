@@ -1,57 +1,311 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Peta GIS — AGROTEK AI</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/peta.css') }}">
-</head>
-<body class="page-peta">
+{% extends "base.html" %}
+{% block title %}Peta GIS — AGROTEK AI{% endblock %}
+{% block body_class %}page-module{% endblock %}
 
-<!-- NAVBAR -->
+{% block head_extra %}
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules.css') }}">
+<style>
+    .peta-layout {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        height: calc(100vh - 72px);
+        overflow: hidden;
+    }
+    .peta-side {
+        background: linear-gradient(180deg, rgba(15,30,53,.95), rgba(10,22,40,.95));
+        border-right: 1px solid rgba(255,255,255,.06);
+        padding: 24px 20px;
+        overflow-y: auto;
+        display: flex; flex-direction: column; gap: 22px;
+    }
+    .peta-side h2 {
+        font-family: var(--font-display);
+        font-size: 1.15rem; font-weight: 700; color: #fff;
+        margin: 0 0 4px;
+    }
+    .peta-side .sub { font-size: .78rem; color: #94a3b8; margin: 0; }
+    .peta-section h3 {
+        font-size: .68rem; text-transform: uppercase;
+        letter-spacing: .14em; color: #6ee7b7;
+        margin: 0 0 12px; font-weight: 700;
+    }
+    .search-box {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 14px;
+        background: rgba(255,255,255,.04);
+        border: 1px solid rgba(255,255,255,.10);
+        border-radius: 10px;
+        transition: all .2s;
+    }
+    .search-box:focus-within {
+        border-color: #34d399;
+        background: rgba(52,211,153,.05);
+        box-shadow: 0 0 0 4px rgba(52,211,153,.1);
+    }
+    .search-box input {
+        flex: 1; background: transparent; border: none; outline: none;
+        color: #fff; font-family: var(--font-body); font-size: .88rem;
+    }
+    .search-box input::placeholder { color: #64748b; }
+    .search-results {
+        margin-top: 8px; max-height: 180px; overflow-y: auto;
+        list-style: none; padding: 0;
+    }
+    .search-results li {
+        padding: 8px 12px; font-size: .85rem;
+        cursor: pointer; border-radius: 8px;
+        color: #cbd5e1; transition: all .15s;
+    }
+    .search-results li:hover { background: rgba(52,211,153,.1); color: #6ee7b7; }
+    .layer-list { display: flex; flex-direction: column; gap: 4px; list-style: none; padding: 0; }
+    .layer-item {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 12px; border-radius: 10px;
+        font-size: .88rem; color: #cbd5e1;
+        cursor: pointer; transition: background .15s;
+    }
+    .layer-item:hover { background: rgba(255,255,255,.04); }
+    .layer-item input {
+        appearance: none; -webkit-appearance: none;
+        width: 16px; height: 16px;
+        border: 2px solid rgba(255,255,255,.25);
+        border-radius: 4px; cursor: pointer; position: relative;
+    }
+    .layer-item input:checked {
+        background: #10b981; border-color: #10b981;
+    }
+    .layer-item input:checked::after {
+        content: '✓'; color: #fff; font-size: .7rem;
+        position: absolute; top: 50%; left: 50%;
+        transform: translate(-50%, -50%); font-weight: 700;
+    }
+    .layer-swatch { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+    .basemap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .basemap-btn {
+        padding: 10px 8px; text-align: center;
+        background: rgba(255,255,255,.04);
+        border: 1px solid rgba(255,255,255,.08);
+        border-radius: 10px; color: #cbd5e1;
+        font-size: .78rem; font-family: var(--font-body);
+        font-weight: 600; cursor: pointer;
+        transition: all .2s;
+    }
+    .basemap-btn:hover { background: rgba(255,255,255,.08); }
+    .basemap-btn.active {
+        background: linear-gradient(135deg, #10b981, #059669);
+        border-color: #10b981; color: #fff;
+        box-shadow: 0 4px 20px rgba(16,185,129,.4);
+    }
+
+    .tool-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .tool-btn {
+        padding: 12px 8px; border-radius: 10px;
+        background: rgba(255,255,255,.04);
+        border: 1px solid rgba(255,255,255,.08);
+        color: #cbd5e1; font-family: var(--font-body);
+        font-size: .78rem; font-weight: 600;
+        cursor: pointer; transition: all .2s;
+        display: flex; flex-direction: column;
+        align-items: center; gap: 4px;
+    }
+    .tool-btn:hover {
+        background: rgba(52,211,153,.1);
+        color: #6ee7b7; border-color: rgba(52,211,153,.3);
+    }
+    .tool-btn.active {
+        background: linear-gradient(135deg, #10b981, #059669);
+        border-color: #10b981; color: #fff;
+    }
+
+    .peta-map-wrap {
+        position: relative;
+        background: #0a1628;
+    }
+    #map { width: 100%; height: 100%; background: #0a1628; }
+
+    .peta-side-toggle {
+        display: none;
+        position: absolute;
+        top: 16px; left: 16px; z-index: 500;
+        width: 44px; height: 44px;
+        border-radius: 12px;
+        background: rgba(10,22,40,.9);
+        border: 1px solid rgba(255,255,255,.12);
+        color: #fff; font-size: 1.1rem;
+        backdrop-filter: blur(8px);
+        cursor: pointer;
+    }
+
+    .map-legend {
+        position: absolute;
+        bottom: 24px; left: 24px;
+        z-index: 400;
+        padding: 16px 18px;
+        background: rgba(10,22,40,.9);
+        border: 1px solid rgba(255,255,255,.1);
+        border-radius: 14px;
+        color: #f1f5f9;
+        backdrop-filter: blur(10px);
+        min-width: 180px;
+    }
+    .map-legend h4 {
+        font-family: var(--font-display);
+        font-size: .72rem; text-transform: uppercase;
+        letter-spacing: .1em; color: #6ee7b7;
+        margin: 0 0 10px;
+    }
+    .map-legend ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+    .map-legend li { display: flex; align-items: center; gap: 8px; font-size: .8rem; color: #cbd5e1; }
+    .legend-swatch { width: 12px; height: 12px; border-radius: 3px; }
+
+    .map-info {
+        position: absolute;
+        bottom: 24px; right: 24px;
+        z-index: 400;
+        padding: 10px 16px;
+        background: rgba(10,22,40,.9);
+        border: 1px solid rgba(255,255,255,.1);
+        border-radius: 12px;
+        color: #cbd5e1;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: .78rem;
+        backdrop-filter: blur(10px);
+    }
+    .map-info .sep { color: #64748b; margin: 0 6px; }
+
+    /* Leaflet dark overrides */
+    .leaflet-container { background: #0a1628; font-family: var(--font-body); }
+    .leaflet-control-attribution {
+        background: rgba(10,22,40,.8) !important;
+        color: #94a3b8 !important;
+        font-size: .7rem !important;
+        backdrop-filter: blur(6px);
+    }
+    .leaflet-control-attribution a { color: #6ee7b7 !important; }
+    .leaflet-bar { border: none !important; box-shadow: 0 4px 16px rgba(0,0,0,.4) !important; }
+    .leaflet-bar a {
+        background: rgba(10,22,40,.92) !important;
+        color: #fff !important;
+        border-bottom-color: rgba(255,255,255,.08) !important;
+        backdrop-filter: blur(8px);
+    }
+    .leaflet-bar a:hover { background: #059669 !important; color: #fff !important; }
+
+    .leaflet-popup-content-wrapper {
+        background: #0f1e35; color: #f1f5f9;
+        border: 1px solid rgba(52,211,153,.3);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.5);
+    }
+    .leaflet-popup-content { margin: 16px 18px; font-size: .85rem; line-height: 1.55; }
+    .leaflet-popup-tip { background: #0f1e35; border: 1px solid rgba(52,211,153,.3); }
+    .leaflet-popup-close-button { color: #94a3b8 !important; }
+
+    .popup-title {
+        font-family: var(--font-display);
+        font-weight: 700; font-size: 1rem;
+        color: #fff; margin-bottom: 10px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(255,255,255,.1);
+        display: flex; align-items: center; gap: 8px;
+    }
+    .popup-title::before {
+        content: ''; width: 6px; height: 6px;
+        background: #34d399; border-radius: 50%;
+        box-shadow: 0 0 8px #34d399;
+    }
+    .popup-row {
+        display: flex; justify-content: space-between;
+        gap: 12px; font-size: .82rem; padding: 4px 0;
+    }
+    .popup-row span:first-child { color: #94a3b8; }
+    .popup-row span:last-child { color: #fff; font-weight: 500; }
+    .popup-action {
+        display: inline-block; margin-top: 12px;
+        padding: 8px 14px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: #fff; font-size: .8rem; font-weight: 700;
+        border-radius: 8px; text-decoration: none;
+    }
+
+    .agrotek-marker {
+        background: transparent !important;
+        border: none !important;
+    }
+    .agrotek-marker span {
+        display: block;
+        width: 12px; height: 12px;
+        background: #38bdf8;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        box-shadow: 0 0 0 4px rgba(56,189,248,.25), 0 0 16px rgba(56,189,248,.8);
+        transition: all .2s;
+    }
+    .agrotek-marker:hover span {
+        background: #10b981;
+        transform: scale(1.4);
+        box-shadow: 0 0 0 6px rgba(16,185,129,.3), 0 0 24px rgba(16,185,129,1);
+    }
+    .agrotek-tooltip {
+        background: rgba(10,22,40,.95) !important;
+        border: 1px solid rgba(52,211,153,.4) !important;
+        color: #fff !important;
+        font-size: .78rem !important;
+        padding: 5px 10px !important;
+        border-radius: 6px !important;
+    }
+    .agrotek-tooltip::before { display: none !important; }
+
+    @media (max-width: 900px) {
+        .peta-layout { grid-template-columns: 1fr; }
+        .peta-side {
+            position: absolute;
+            top: 72px; left: 0; bottom: 0;
+            width: 290px; z-index: 700;
+            transform: translateX(-100%);
+            transition: transform .3s var(--ease);
+        }
+        .peta-side.open { transform: translateX(0); }
+        .peta-side-toggle { display: flex; align-items: center; justify-content: center; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
 <header class="modul-nav">
     <div class="container modul-nav-inner">
         <a href="/hub" class="brand">
             <span class="brand-mark">AG</span>
-            <span class="brand-text">
-                <strong>AGROTEK AI</strong>
-                <small>Spatial Agriculture Intelligence Platform</small>
-            </span>
+            <span class="brand-text"><strong>AGROTEK AI</strong><small>SPATIAL AGRICULTURE INTELLIGENCE</small></span>
         </a>
         <nav class="modul-nav-links">
             <a href="/statistik">Statistik</a>
+            <a href="/pertanian">Pertanian</a>
             <a href="/hidrologi">Hidrologi</a>
             <a href="/peta" class="active">Peta</a>
-            <a href="/analisis">Analisis</a>
-            <a href="/data">Data</a>
-            {% if is_logged_in %}
-                <a href="/hub" class="modul-back">← Hub</a>
-            {% else %}
-                <a href="/" class="modul-back">← Beranda</a>
-            {% endif %}
+            <a href="/peta3d">Peta 3D</a>
+            <a href="/ai">AI</a>
+            <a href="/hub" class="modul-back">← Hub</a>
         </nav>
     </div>
 </header>
 
-<!-- LAYOUT -->
 <div class="peta-layout">
 
-    <!-- SIDEBAR -->
     <aside class="peta-side" id="petaSide">
-
         <div class="peta-side-head">
             <h2>Peta GIS Jember</h2>
-            <p class="peta-subtitle">Layer spasial &amp; analisis wilayah</p>
+            <p class="sub">Layer spasial &amp; analisis wilayah</p>
         </div>
 
         <div class="peta-section">
             <h3>Pencarian</h3>
             <div class="search-box">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>
-                </svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
                 <input type="text" id="searchInput" placeholder="Cari kecamatan...">
             </div>
             <ul class="search-results" id="searchResults"></ul>
@@ -59,78 +313,69 @@
 
         <div class="peta-section">
             <h3>Layer</h3>
-            <ul class="layer-toggles">
-                <li>
-                    <label class="layer-toggle">
-                        <input type="checkbox" data-layer="districts" checked>
-                        <span class="layer-swatch" style="background:#38bdf8"></span>
-                        <span>Kecamatan</span>
-                    </label>
+            <ul class="layer-list">
+                <li class="layer-item">
+                    <input type="checkbox" data-layer="boundary" checked>
+                    <span class="layer-swatch" style="background:#34d399"></span>
+                    <span>Batas Kabupaten</span>
                 </li>
-                <li>
-                    <label class="layer-toggle">
-                        <input type="checkbox" data-layer="rivers" checked>
-                        <span class="layer-swatch" style="background:#0ea5e9"></span>
-                        <span>Sungai</span>
-                    </label>
+                <li class="layer-item">
+                    <input type="checkbox" data-layer="districts" checked>
+                    <span class="layer-swatch" style="background:#38bdf8"></span>
+                    <span>Kecamatan</span>
                 </li>
-                <li>
-                    <label class="layer-toggle">
-                        <input type="checkbox" data-layer="irrigation" checked>
-                        <span class="layer-swatch" style="background:#f59e0b"></span>
-                        <span>Jaringan Irigasi</span>
-                    </label>
+                <li class="layer-item">
+                    <input type="checkbox" data-layer="rivers" checked>
+                    <span class="layer-swatch" style="background:#0ea5e9"></span>
+                    <span>Sungai</span>
+                </li>
+                <li class="layer-item">
+                    <input type="checkbox" data-layer="irrigation" checked>
+                    <span class="layer-swatch" style="background:#f59e0b"></span>
+                    <span>Jaringan Irigasi</span>
                 </li>
             </ul>
         </div>
 
         <div class="peta-section">
             <h3>Basemap</h3>
-            <ul class="basemap-toggles">
-                <li><label><input type="radio" name="basemap" value="osm" checked> OpenStreetMap</label></li>
-                <li><label><input type="radio" name="basemap" value="satellite"> Satellite</label></li>
-                <li><label><input type="radio" name="basemap" value="terrain"> Terrain</label></li>
-            </ul>
+            <div class="basemap-grid">
+                <button class="basemap-btn active" data-basemap="osm">🗺️ OSM</button>
+                <button class="basemap-btn" data-basemap="satellite">🛰️ Satelit</button>
+                <button class="basemap-btn" data-basemap="terrain">⛰️ Terrain</button>
+                <button class="basemap-btn" data-basemap="dark">🌙 Dark</button>
+            </div>
         </div>
 
         <div class="peta-section">
             <h3>Alat</h3>
             <div class="tool-buttons">
-                <button class="tool-btn" id="btnLocate" title="Lokasi saya">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="3"/>
-                        <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
-                    </svg>
+                <button class="tool-btn" id="btnLocate">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
                     Lokasi
                 </button>
-                <button class="tool-btn" id="btnReset" title="Reset tampilan">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 12a9 9 0 1 0 3-6.7L3 8"/>
-                        <path d="M3 3v5h5"/>
-                    </svg>
+                <button class="tool-btn" id="btnReset">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
                     Reset
                 </button>
             </div>
         </div>
-
     </aside>
 
-    <!-- PETA -->
     <div class="peta-map-wrap">
         <button class="peta-side-toggle" id="btnSideToggle" aria-label="Buka panel">☰</button>
         <div id="map"></div>
 
-        <!-- Legend -->
         <div class="map-legend">
             <h4>Legenda</h4>
             <ul>
+                <li><span class="legend-swatch" style="background:#34d399"></span> Batas Kabupaten</li>
                 <li><span class="legend-swatch" style="background:#38bdf8"></span> Kecamatan</li>
                 <li><span class="legend-swatch" style="background:#0ea5e9"></span> Sungai</li>
                 <li><span class="legend-swatch" style="background:#f59e0b"></span> Jaringan Irigasi</li>
             </ul>
         </div>
 
-        <!-- Info bawah -->
         <div class="map-info">
             <span id="coordDisplay">—, —</span>
             <span class="sep">•</span>
@@ -140,14 +385,19 @@
 
 </div>
 
+{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% block body_extra %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     window.AGROTEK_MAP = {
         center: [-8.1845, 113.6681],
         zoom: 10,
+        tileUrl: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        dataUrl: "/peta/data/__LAYER__"
     };
 </script>
 <script src="{{ url_for('static', filename='js/peta.js') }}"></script>
-
-</body>
-</html>
+{% endblock %}

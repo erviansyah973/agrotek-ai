@@ -537,10 +537,46 @@
         .score-row { grid-template-columns: 120px 1fr 50px; gap: 10px; font-size: .82rem; }
     }
     @media (max-width: 600px) {
-        .ai-chat { padding: 18px; }
-        .ai-chat-form { align-items: stretch; flex-direction: column; }
-        .ai-chat-form button { width: 100%; }
-        .ai-chat-message { max-width: 95%; }
+        .ai-chat {
+            padding: 16px;
+            border-radius: 16px;
+        }
+        .ai-chat-header {
+            align-items: center;
+            gap: 10px;
+        }
+        .ai-chat-header h2 { font-size: 1.1rem; }
+        .ai-chat-clear { padding: 8px 9px; }
+        .ai-chat-messages {
+            min-height: 220px;
+            max-height: 45svh;
+            padding: 12px;
+        }
+        .ai-chat-message {
+            max-width: 94%;
+            padding: 11px 13px;
+        }
+        .ai-chat-suggestions {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+        .ai-chat-suggestions::-webkit-scrollbar { display: none; }
+        .ai-chat-suggestions button { flex: 0 0 auto; }
+        .ai-chat-form { align-items: flex-end; }
+        .ai-chat-form textarea {
+            min-width: 0;
+            min-height: 48px;
+            padding: 12px;
+            font-size: 16px;
+        }
+        .ai-chat-form button {
+            flex: 0 0 auto;
+            min-height: 48px;
+            padding: 0 14px;
+        }
+        .ai-chat-note { font-size: .74rem; }
     }
 </style>
 {% endblock %}

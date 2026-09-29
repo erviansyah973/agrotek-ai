@@ -25,6 +25,15 @@
     letter-spacing: .07em;
     line-height: 1.5;
 }
+.data-disclosure--map .data-disclosure-label {
+    color: #bfdbfe;
+    border-color: rgba(96, 165, 250, .45);
+}
+.data-disclosure--map {
+    color: #dbeafe;
+    background: rgba(30, 64, 120, .22);
+    border-color: rgba(96, 165, 250, .38);
+}
 .data-disclosure p { min-width: 0; margin: 0; overflow-wrap: anywhere; }
 .data-disclosure--landing,
 .data-disclosure--dashboard {

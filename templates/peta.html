@@ -8,9 +8,11 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/modules.css') }}">
 <style>
     .peta-layout {
+        position: relative;
         display: grid;
         grid-template-columns: 320px 1fr;
-        height: calc(100vh - 72px);
+        height: calc(100vh - 160px);
+        min-height: 420px;
         overflow: hidden;
     }
     .peta-side {
@@ -82,6 +84,19 @@
         transform: translate(-50%, -50%); font-weight: 700;
     }
     .layer-swatch { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+    .layer-note {
+        margin: -12px 0 0;
+        color: #94a3b8;
+        font-size: .74rem;
+        line-height: 1.5;
+    }
+    .layer-status {
+        min-height: 1.2em;
+        margin: -14px 0 0;
+        color: #fcd34d;
+        font-size: .74rem;
+        line-height: 1.5;
+    }
 
     .basemap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
     .basemap-btn {
@@ -263,13 +278,32 @@
         .peta-layout { grid-template-columns: 1fr; }
         .peta-side {
             position: absolute;
-            top: 72px; left: 0; bottom: 0;
+            top: 0; left: 0; bottom: 0;
             width: 290px; z-index: 700;
             transform: translateX(-100%);
             transition: transform .3s var(--ease);
         }
         .peta-side.open { transform: translateX(0); }
         .peta-side-toggle { display: flex; align-items: center; justify-content: center; }
+    }
+    @media (max-width: 640px) {
+        .peta-layout { height: calc(100vh - 320px); min-height: 280px; }
+        .map-legend {
+            left: 12px;
+            right: 12px;
+            bottom: 62px;
+            min-width: 0;
+            padding: 10px 12px;
+        }
+        .map-legend h4 { margin-bottom: 6px; }
+        .map-legend ul {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 5px 8px;
+        }
+        .map-legend li { min-width: 0; gap: 5px; font-size: .68rem; line-height: 1.3; }
+        .map-legend .legend-swatch { width: 9px; height: 9px; }
+        .map-info { right: 12px; bottom: 10px; padding: 8px 10px; font-size: .68rem; }
     }
 </style>
 {% endblock %}
@@ -294,6 +328,11 @@
     </div>
 </header>
 
+{% if user and user.get('role') == 'admin' and epaksi_available %}
+{% set data_notice_variant = 'map' %}
+{% else %}
+{% set data_notice_variant = 'general' %}
+{% endif %}
 {% include "partials/data_disclosure.html" %}
 
 <div class="peta-layout">
@@ -316,38 +355,83 @@
         <div class="peta-section">
             <h3>Layer</h3>
             <ul class="layer-list">
-                <li class="layer-item">
-                    <input type="checkbox" data-layer="boundary" checked>
-                    <span class="layer-swatch" style="background:#34d399"></span>
-                    <span>Batas Kabupaten</span>
+                <li>
+                    <label class="layer-item">
+                        <input type="checkbox" data-layer="districts" checked>
+                        <span class="layer-swatch" style="background:#38bdf8"></span>
+                        <span>Kecamatan</span>
+                    </label>
                 </li>
-                <li class="layer-item">
-                    <input type="checkbox" data-layer="districts" checked>
-                    <span class="layer-swatch" style="background:#38bdf8"></span>
-                    <span>Kecamatan</span>
+                <li>
+                    <label class="layer-item">
+                        <input type="checkbox" data-layer="rivers" checked>
+                        <span class="layer-swatch" style="background:#0ea5e9"></span>
+                        <span>Sungai</span>
+                    </label>
                 </li>
-                <li class="layer-item">
-                    <input type="checkbox" data-layer="rivers" checked>
-                    <span class="layer-swatch" style="background:#0ea5e9"></span>
-                    <span>Sungai</span>
-                </li>
-                <li class="layer-item">
-                    <input type="checkbox" data-layer="irrigation" checked>
-                    <span class="layer-swatch" style="background:#f59e0b"></span>
-                    <span>Jaringan Irigasi</span>
+                <li>
+                    <label class="layer-item">
+                        <input type="checkbox" data-layer="irrigation" checked>
+                        <span class="layer-swatch" style="background:#f59e0b"></span>
+                        <span>Contoh jaringan irigasi (simulasi)</span>
+                    </label>
                 </li>
             </ul>
         </div>
 
+        {% if user and user.get('role') == 'admin' and epaksi_available %}
+        <div class="peta-section">
+            <h3>Aset Irigasi · SHP-Epaksi</h3>
+            <p class="layer-note">4 daerah irigasi · WGS 84 · tahun data tidak dicantumkan. Pilih layer untuk memuat datanya.</p>
+            <ul class="layer-list">
+                <li>
+                    <label class="layer-item">
+                        <input type="checkbox" data-layer="epaksiBuildings">
+                        <span class="layer-swatch" style="background:#ef4444"></span>
+                        <span>Bangunan irigasi (3.926)</span>
+                    </label>
+                </li>
+                <li>
+                    <label class="layer-item">
+                        <input type="checkbox" data-layer="epaksiNetworks">
+                        <span class="layer-swatch" style="background:#f97316"></span>
+                        <span>Jaringan saluran (2.769)</span>
+                    </label>
+                </li>
+                <li>
+                    <label class="layer-item">
+                        <input type="checkbox" data-layer="epaksiParcels">
+                        <span class="layer-swatch" style="background:#22c55e"></span>
+                        <span>Petak irigasi (362)</span>
+                    </label>
+                </li>
+            </ul>
+            <p class="layer-status" id="epaksiLayerStatus" role="status" aria-live="polite"></p>
+        </div>
+
+        {% if user and user.get('role') == 'admin' and epaksi_available %}
+        <div class="peta-section">
+            <h3>Unduh data · Admin</h3>
+            <p class="layer-note">Unduh paket GeoJSON dari tiga layer SHP-Epaksi.</p>
+            <div class="tool-buttons">
+                <a class="tool-btn" href="{{ url_for('main.download_epaksi') }}" style="text-decoration:none">
+                    <span aria-hidden="true">⬇️</span>
+                    Unduh paket GeoJSON
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
         <div class="peta-section">
             <h3>Basemap</h3>
             <div class="basemap-grid">
-                <button class="basemap-btn active" data-basemap="osm">🗺️ OSM</button>
-                <button class="basemap-btn" data-basemap="satellite">🛰️ Satelit</button>
-                <button class="basemap-btn" data-basemap="terrain">⛰️ Terrain</button>
-                <button class="basemap-btn" data-basemap="dark">🌙 Dark</button>
+                <button class="basemap-btn active" data-basemap="osm" aria-pressed="true">🗺️ OSM</button>
+                <button class="basemap-btn" data-basemap="satellite" aria-pressed="false">🛰️ Satelit</button>
+                <button class="basemap-btn" data-basemap="terrain" aria-pressed="false">⛰️ Terrain</button>
+                <button class="basemap-btn" data-basemap="dark" aria-pressed="false">🌙 Dark</button>
             </div>
         </div>
+        {% endif %}
 
         <div class="peta-section">
             <h3>Alat</h3>
@@ -371,10 +455,14 @@
         <div class="map-legend">
             <h4>Legenda</h4>
             <ul>
-                <li><span class="legend-swatch" style="background:#34d399"></span> Batas Kabupaten</li>
                 <li><span class="legend-swatch" style="background:#38bdf8"></span> Kecamatan</li>
                 <li><span class="legend-swatch" style="background:#0ea5e9"></span> Sungai</li>
-                <li><span class="legend-swatch" style="background:#f59e0b"></span> Jaringan Irigasi</li>
+                <li><span class="legend-swatch" style="background:#f59e0b"></span> Contoh irigasi (simulasi)</li>
+                {% if user and user.get('role') == 'admin' %}
+                <li><span class="legend-swatch" style="background:#ef4444"></span> Bangunan irigasi · SHP-Epaksi</li>
+                <li><span class="legend-swatch" style="background:#f97316"></span> Jaringan saluran · SHP-Epaksi</li>
+                <li><span class="legend-swatch" style="background:#22c55e"></span> Petak irigasi · SHP-Epaksi</li>
+                {% endif %}
             </ul>
         </div>
 

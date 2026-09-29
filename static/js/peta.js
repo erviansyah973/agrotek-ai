@@ -41,15 +41,25 @@
             maxZoom: 17,
             attribution: 'Map data &copy; OpenStreetMap | Style &copy; OpenTopoMap',
         }),
+        dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            maxZoom: 20,
+            attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+        }),
     };
 
     basemaps.osm.addTo(map);
 
-    document.querySelectorAll('input[name="basemap"]').forEach(radio => {
-        radio.addEventListener('change', () => {
-            const key = radio.value;
+    document.querySelectorAll('.basemap-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const key = button.dataset.basemap;
+            if (!basemaps[key]) return;
             Object.values(basemaps).forEach(layer => map.removeLayer(layer));
             basemaps[key].addTo(map);
+            document.querySelectorAll('.basemap-btn').forEach(item => {
+                const isActive = item === button;
+                item.classList.toggle('active', isActive);
+                item.setAttribute('aria-pressed', String(isActive));
+            });
         });
     });
 
@@ -64,6 +74,37 @@
         color: '#f59e0b',
         weight: 2.5,
         dashArray: '5 4',
+    };
+
+    const epaksiStyles = {
+        epaksiBuildings: {
+            style: { color: '#ef4444' },
+            pointToLayer: (feature, latlng) => L.circleMarker(latlng, {
+                radius: 4,
+                color: '#fff',
+                weight: 1,
+                fillColor: '#ef4444',
+                fillOpacity: 0.9,
+            }),
+            label: 'bangunan irigasi',
+            url: '/peta/data/epaksi/bangunan',
+        },
+        epaksiNetworks: {
+            style: { color: '#f97316', weight: 2, opacity: 0.9 },
+            label: 'jaringan saluran',
+            url: '/peta/data/epaksi/jaringan',
+        },
+        epaksiParcels: {
+            style: {
+                color: '#22c55e',
+                weight: 1,
+                opacity: 0.85,
+                fillColor: '#22c55e',
+                fillOpacity: 0.12,
+            },
+            label: 'petak irigasi',
+            url: '/peta/data/epaksi/petak',
+        },
     };
 
     /* Custom divIcon untuk marker kecamatan */
@@ -108,9 +149,47 @@
         `);
     }
 
+    function bindEpaksiAsset(feature, layer) {
+        const properties = feature.properties || {};
+        const popup = document.createElement('div');
+        const title = document.createElement('div');
+        title.className = 'popup-title';
+        title.textContent = properties.nama || properties.jenis_aset || 'Aset irigasi';
+        popup.append(title);
+
+        [
+            ['Daerah irigasi', properties.daerah_irigasi],
+            ['Jenis aset', properties.jenis_aset],
+            ['Nomenklatur', properties.nomenklatur],
+            ['Saluran', properties.saluran],
+            ['Panjang', properties.panjang],
+            ['Luas layanan', properties.luas_layanan],
+        ].forEach(([label, value]) => {
+            if (!value) return;
+            const row = document.createElement('div');
+            row.className = 'popup-row';
+            const rowLabel = document.createElement('span');
+            const rowValue = document.createElement('span');
+            rowLabel.textContent = label;
+            rowValue.textContent = value;
+            row.append(rowLabel, rowValue);
+            popup.append(row);
+        });
+
+        layer.bindPopup(popup);
+    }
+
     /* -------------------- LAYER STORAGE -------------------- */
     const activeLayers = {};
+    const epaksiLoads = {};
     const districtData = { features: [] };
+
+    function registerLayer(name, layer) {
+        activeLayers[name] = layer;
+        const checkbox = document.querySelector(`input[data-layer="${name}"]`);
+        if (checkbox && checkbox.checked) layer.addTo(map);
+        return layer;
+    }
 
     /* -------------------- LOAD LAYERS -------------------- */
     function loadDistricts() {
@@ -124,9 +203,7 @@
                     pointToLayer: (feature, latlng) => L.marker(latlng, { icon: districtIcon }),
                 });
 
-                layer.addTo(map);
-                activeLayers.districts = layer;
-                return layer;
+                return registerLayer('districts', layer);
             })
             .catch(err => console.error('[AGROTEK] districts error:', err));
     }
@@ -139,8 +216,7 @@
                     onEachFeature: bindRiver,
                     style: styleRivers,
                 });
-                layer.addTo(map);
-                activeLayers.rivers = layer;
+                registerLayer('rivers', layer);
             })
             .catch(err => console.error('[AGROTEK] rivers error:', err));
     }
@@ -153,10 +229,51 @@
                     onEachFeature: bindIrrigation,
                     style: styleIrrigation,
                 });
-                layer.addTo(map);
-                activeLayers.irrigation = layer;
+                registerLayer('irrigation', layer);
             })
             .catch(err => console.error('[AGROTEK] irrigation error:', err));
+    }
+
+    function loadEpaksiLayer(name) {
+        if (activeLayers[name]) {
+            activeLayers[name].addTo(map);
+            return Promise.resolve(activeLayers[name]);
+        }
+        if (epaksiLoads[name]) return epaksiLoads[name];
+
+        const config = epaksiStyles[name];
+        const status = document.getElementById('epaksiLayerStatus');
+        if (!config) return Promise.resolve(null);
+        if (status) status.textContent = `Memuat ${config.label}...`;
+
+        epaksiLoads[name] = fetch(config.url)
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.json();
+            })
+            .then(geojson => {
+                if (geojson.type !== 'FeatureCollection' || !Array.isArray(geojson.features)) {
+                    throw new Error('Format GeoJSON tidak valid');
+                }
+                const layer = L.geoJSON(geojson, {
+                    onEachFeature: bindEpaksiAsset,
+                    style: config.style,
+                    pointToLayer: config.pointToLayer,
+                });
+                registerLayer(name, layer);
+                if (status) status.textContent = `Layer ${config.label} berhasil dimuat.`;
+                return layer;
+            })
+            .catch(error => {
+                console.error(`[AGROTEK] Gagal memuat ${config.label}:`, error);
+                if (status) status.textContent = `Gagal memuat ${config.label}. Matikan lalu aktifkan lagi untuk mencoba ulang.`;
+                return null;
+            })
+            .finally(() => {
+                delete epaksiLoads[name];
+            });
+
+        return epaksiLoads[name];
     }
 
     // Load semua layer paralel
@@ -169,14 +286,19 @@
     });
 
     /* -------------------- LAYER TOGGLE -------------------- */
-    document.querySelectorAll('.layer-toggle input').forEach(cb => {
+    document.querySelectorAll('.layer-item input[data-layer]').forEach(cb => {
         cb.addEventListener('change', () => {
             const name = cb.dataset.layer;
             const layer = activeLayers[name];
-            if (!layer) return;
-
-            if (cb.checked) layer.addTo(map);
-            else map.removeLayer(layer);
+            if (!cb.checked) {
+                if (layer) map.removeLayer(layer);
+                return;
+            }
+            if (layer) {
+                layer.addTo(map);
+                return;
+            }
+            if (epaksiStyles[name]) loadEpaksiLayer(name);
         });
     });
 

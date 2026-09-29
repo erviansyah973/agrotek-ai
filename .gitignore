@@ -31,3 +31,6 @@ logs/
 
 # Flask
 instance/
+
+# Private irrigation data (kept local; never commit or deploy)
+private_data/irigasi_epaksi/

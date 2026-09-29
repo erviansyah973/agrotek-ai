@@ -5,11 +5,37 @@ AGROTEK AI — Main Routes
 
 import csv
 import io
-from flask import Blueprint, render_template, current_app, jsonify, request, Response
-from app.auth_utils import require_login, current_user
+import os
+import zipfile
+from flask import (
+    Blueprint,
+    current_app,
+    abort,
+    jsonify,
+    render_template,
+    request,
+    Response,
+    send_file,
+)
+from app.auth_utils import require_login, require_role, current_user
 from app import data_catalog as catalog
 
 main_bp = Blueprint("main", __name__)
+
+EPAKSI_LAYERS = {
+    "bangunan": "irigasi_epaksi_bangunan.geojson",
+    "jaringan": "irigasi_epaksi_jaringan.geojson",
+    "petak": "irigasi_epaksi_petak.geojson",
+}
+
+
+def _epaksi_data_dir():
+    configured_path = os.environ.get("EPAKSI_DATA_DIR")
+    if configured_path:
+        return os.path.abspath(configured_path)
+    return os.path.abspath(
+        os.path.join(current_app.root_path, "..", "private_data", "irigasi_epaksi")
+    )
 
 
 # ============================================================
@@ -135,12 +161,64 @@ def peta3d():
 # ============================================================
 @main_bp.route("/peta")
 def peta():
+    data_dir = _epaksi_data_dir()
+    epaksi_available = all(
+        os.path.isfile(os.path.join(data_dir, filename))
+        for filename in EPAKSI_LAYERS.values()
+    )
     return render_template("peta.html",
         app_name=current_app.config["APP_NAME"],
         app_subtitle=current_app.config["APP_SUBTITLE"],
         app_region=current_app.config["APP_REGION"],
         user=current_user(),
+        epaksi_available=epaksi_available,
         is_logged_in=current_user() is not None)
+
+
+@main_bp.route("/peta/unduh/epaksi")
+@require_role("admin")
+def download_epaksi():
+    data_dir = _epaksi_data_dir()
+    if not all(os.path.isfile(os.path.join(data_dir, filename)) for filename in EPAKSI_LAYERS.values()):
+        abort(404)
+
+    archive_buffer = io.BytesIO()
+
+    with zipfile.ZipFile(archive_buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+        for filename in EPAKSI_LAYERS.values():
+            archive.write(os.path.join(data_dir, filename), arcname=filename)
+
+    archive_buffer.seek(0)
+    response = send_file(
+        archive_buffer,
+        mimetype="application/zip",
+        as_attachment=True,
+        download_name="agrotek-shp-epaksi-geojson.zip",
+        max_age=0,
+    )
+    response.headers["Cache-Control"] = "private, no-store"
+    return response
+
+
+@main_bp.route("/peta/data/epaksi/<layer_name>")
+@require_role("admin")
+def data_epaksi(layer_name):
+    filename = EPAKSI_LAYERS.get(layer_name)
+    if filename is None:
+        abort(404)
+
+    data_dir = _epaksi_data_dir()
+    file_path = os.path.join(data_dir, filename)
+    if not os.path.isfile(file_path):
+        abort(404)
+
+    response = send_file(
+        file_path,
+        mimetype="application/geo+json",
+        max_age=0,
+    )
+    response.headers["Cache-Control"] = "private, no-store"
+    return response
 
 
 # ------------------------------------------------------------

@@ -324,6 +324,7 @@
         }
         body { overscroll-behavior: none; }
     </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/data-disclosure.css') }}">
 </head>
 <body>
 
@@ -353,6 +354,8 @@
         </div>
     </div>
     <p class="sub">Terrain · SHP · 3D Building</p>
+    {% set data_notice_variant = 'compact' %}
+    {% include "partials/data_disclosure.html" %}
 
     <div class="section">
         <div class="section-title">View Mode</div>

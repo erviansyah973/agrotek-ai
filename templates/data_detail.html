@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ ds.name }} — Data Center</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/data-disclosure.css') }}">
     <style>
         .page-detail { min-height: 100vh; background: #f8fafc; }
         .modul-nav {
@@ -330,6 +331,8 @@
         </nav>
     </div>
 </header>
+
+{% include "partials/data_disclosure.html" %}
 
 <section class="detail-hero">
     <div class="container detail-hero-inner">

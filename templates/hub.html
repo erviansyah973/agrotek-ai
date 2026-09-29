@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/data-disclosure.css') }}">
 
     <style>
         :root {
@@ -266,6 +267,59 @@
             position: relative;
         }
 
+        .guide-section {
+            padding: 28px 0 18px;
+            border-top: 1px solid rgba(52,211,153,.12);
+            border-bottom: 1px solid rgba(52,211,153,.12);
+            background: linear-gradient(90deg, rgba(16,185,129,.045), rgba(14,165,233,.035));
+        }
+        .guide-heading {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 16px;
+        }
+        .guide-eyebrow {
+            color: var(--emerald-300);
+            font-size: .65rem;
+            font-weight: 700;
+            letter-spacing: .13em;
+        }
+        .guide-heading h2 {
+            margin-top: 4px;
+            color: var(--text-light);
+            font: 700 1.25rem/1.25 var(--font-display);
+        }
+        .guide-heading p { color: var(--muted-light); font-size: .76rem; }
+        .guide-list {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 10px;
+        }
+        .guide-item {
+            min-height: 132px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 10px;
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 13px;
+            background: rgba(15,30,53,.68);
+            transition: border-color .2s var(--ease), background .2s var(--ease), transform .2s var(--ease);
+        }
+        .guide-item:hover {
+            border-color: rgba(52,211,153,.4);
+            background: rgba(20,39,68,.86);
+            transform: translateY(-2px);
+        }
+        .guide-item:focus-visible { outline: 2px solid var(--emerald-300); outline-offset: 3px; }
+        .guide-number { color: var(--emerald-300); font: 700 .68rem/1 var(--font-display); }
+        .guide-item strong { display: block; color: #f8fafc; font-size: .87rem; margin-bottom: 4px; }
+        .guide-item small { display: block; color: #b1bfd0; font-size: .8rem; line-height: 1.5; }
+        .guide-arrow { align-self: end; color: var(--emerald-300); font-size: .95rem; }
+
         .bento {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -426,27 +480,31 @@
         }
         .footer-mini .status .dot {
             width: 6px; height: 6px;
-            background: var(--emerald-400);
+            background: #94a3b8;
             border-radius: 50%;
-            box-shadow: 0 0 8px var(--emerald-400);
-            animation: pulse 2s infinite;
         }
-        @keyframes pulse {
-            0%,100% { opacity: 1; }
-            50% { opacity: .4; }
+        .footer-mini .status { color: var(--muted-light); }
+        .account-indicator {
+            width: 6px;
+            height: 6px;
+            flex: 0 0 auto;
+            border-radius: 50%;
+            background: #94a3b8;
         }
 
         /* ============================================================
            RESPONSIVE
            ============================================================ */
         @media (max-width: 1024px) {
+            .guide-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .hero { padding: 40px 0 28px; }
             .bento {
                 grid-template-columns: repeat(2, 1fr);
                 grid-auto-rows: 180px;
             }
             .bento-card.large { grid-column: span 2; grid-row: span 2; }
-            .hero-inner { grid-template-columns: 1fr; }
-            .hero-stats { margin-top: 20px; }
+            .hero-inner { grid-template-columns: 1fr; gap: 20px; }
+            .hero-stats { margin-top: 12px; }
         }
 
         @media (max-width: 640px) {
@@ -454,10 +512,24 @@
             .nav { height: 64px; }
             .brand-text small { display: none; }
             .user-info { display: none; }
+            .hero { padding: 10px 0 8px; }
+            .hero-inner { gap: 6px; }
+            .hero-badge { margin-bottom: 8px; }
+            .hero-title { font-size: 1.45rem; margin-bottom: 6px; }
+            .hero-sub { font-size: .88rem; line-height: 1.4; }
+            .hero-stats { margin-top: 5px; }
+            .stat-mini { padding: 7px 10px; }
+            .guide-section { padding: 10px 0 8px; }
+            .guide-heading { margin-bottom: 6px; }
+            .guide-heading h2 { font-size: 1.1rem; }
+            .guide-heading p { font-size: .7rem; line-height: 1.3; }
             .bento {
                 grid-template-columns: 1fr;
                 grid-auto-rows: auto;
             }
+            .guide-heading { align-items: start; flex-direction: column; gap: 6px; }
+            .guide-list { grid-template-columns: 1fr; }
+            .guide-item { min-height: 110px; }
             .bento-card.large,
             .bento-card.wide,
             .bento-card.tall {
@@ -467,7 +539,6 @@
                 min-height: 160px;
             }
             .bento-card.large h3 { font-size: 1.25rem; }
-            .hero-title { font-size: 1.6rem; }
             .stat-mini { flex: 1; }
         }
     </style>
@@ -498,6 +569,9 @@
     </div>
 </nav>
 
+{% set data_notice_variant = 'hub' %}
+{% include "partials/data_disclosure.html" %}
+
 <!-- ============================================================
      HERO MINI
      ============================================================ -->
@@ -507,8 +581,8 @@
 
         <div class="hero-left">
             <div class="hero-badge">
-                <span class="dot" style="width:6px;height:6px;background:#34d399;border-radius:50%;box-shadow:0 0 8px #34d399;animation:pulse 2s infinite;"></span>
-                {{ role|upper if role else 'USER' }} · AKUN AKTIF
+                <span class="account-indicator" aria-hidden="true"></span>
+                {{ role|upper if role else 'USER' }} · AKUN
             </div>
 
             <h1 class="hero-title">
@@ -528,11 +602,50 @@
                 <div class="stat-mini-value">{{ modules|length }}</div>
             </div>
             <div class="stat-mini">
-                <div class="stat-mini-label">Status</div>
-                <div class="stat-mini-value" style="color:#34d399;">●</div>
+                <div class="stat-mini-label">Mode</div>
+                <div class="stat-mini-value" style="color:#cbd5e1;font-size:1rem;">DEMO</div>
             </div>
         </div>
 
+    </div>
+</section>
+
+<section class="guide-section" aria-labelledby="guide-title">
+    <div class="container">
+        <div class="guide-heading">
+            <div>
+                <span class="guide-eyebrow">PANDUAN CEPAT</span>
+                <h2 id="guide-title">Mulai dari modul yang Anda perlukan</h2>
+            </div>
+            <p>Semua informasi di bawah ini masih berupa data simulasi.</p>
+        </div>
+        <nav class="guide-list" aria-label="Panduan memilih modul">
+            <a class="guide-item" href="/pertanian">
+                <span class="guide-number">01</span>
+                <span><strong>Pertanian</strong><small>Lihat komoditas, produksi, dan kalender tanam.</small></span>
+                <span class="guide-arrow" aria-hidden="true">→</span>
+            </a>
+            <a class="guide-item" href="/hidrologi">
+                <span class="guide-number">02</span>
+                <span><strong>Hidrologi</strong><small>Jelajahi hujan, sungai, muka air, dan DAS.</small></span>
+                <span class="guide-arrow" aria-hidden="true">→</span>
+            </a>
+            <a class="guide-item" href="/risiko">
+                <span class="guide-number">03</span>
+                <span><strong>Risiko</strong><small>Tinjau contoh risiko banjir dan kekeringan.</small></span>
+                <span class="guide-arrow" aria-hidden="true">→</span>
+            </a>
+            <a class="guide-item" href="/lahan">
+                <span class="guide-number">04</span>
+                <span><strong>Lahan</strong><small>Bandingkan contoh kelas kesesuaian lahan.</small></span>
+                <span class="guide-arrow" aria-hidden="true">→</span>
+            </a>
+            <a class="guide-item" href="/ai">
+                <span class="guide-number">05</span>
+                <span><strong>AGROTEK AI</strong><small>Coba rekomendasi tanaman berbasis parameter lokasi.</small></span>
+                <span class="guide-arrow" aria-hidden="true">→</span>
+            </a>
+        </nav>
     </div>
 </section>
 
@@ -580,7 +693,7 @@
         <div>&copy; 2026 AGROTEK AI — Kabupaten Jember</div>
         <div class="status">
             <span class="dot"></span>
-            System Online
+            Data Simulasi
         </div>
     </div>
 </footer>

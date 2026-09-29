@@ -34,20 +34,17 @@
         font-size: .78rem; color: #c084fc;
     }
 
-    .live-badge {
+    .demo-badge {
         display: inline-flex; align-items: center; gap: 6px;
-        font-size: .68rem; font-weight: 700; color: #6ee7b7;
-        padding: 3px 10px; background: rgba(52,211,153,.1);
-        border: 1px solid rgba(52,211,153,.25);
+        font-size: .68rem; font-weight: 700; color: #cbd5e1;
+        padding: 3px 10px; background: rgba(148,163,184,.1);
+        border: 1px solid rgba(148,163,184,.25);
         border-radius: 999px; letter-spacing: .08em;
     }
-    .live-badge::before {
+    .demo-badge::before {
         content: ''; width: 6px; height: 6px;
-        background: #34d399; border-radius: 50%;
-        box-shadow: 0 0 8px #34d399;
-        animation: pulse 1.5s infinite;
+        background: #94a3b8; border-radius: 50%;
     }
-    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
 
     .battery-bar {
         display: inline-block; width: 44px; height: 6px;
@@ -113,12 +110,14 @@
     </div>
 </header>
 
+{% include "partials/data_disclosure.html" %}
+
 <section class="modul-hero">
     <div class="modul-hero-grid" aria-hidden="true"></div>
     <div class="container modul-hero-inner">
         <span class="modul-eyebrow">IoT Ready</span>
         <h1>IoT <span class="grad">Monitoring Platform</span></h1>
-        <p>Monitoring sensor real-time: tinggi muka air, curah hujan, kelembapan tanah, dan cuaca. Arsitektur siap menerima perangkat sensor fisik.</p>
+        <p>Contoh tampilan monitoring tinggi muka air, curah hujan, kelembapan tanah, dan cuaca dengan data simulasi. Arsitektur disiapkan untuk menerima perangkat sensor fisik.</p>
     </div>
 </section>
 
@@ -149,7 +148,7 @@
         <div class="flow-box">
             <header style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
                 <h3 style="font-family:var(--font-display);font-size:1.1rem;color:#fff;margin:0;">🔗 Alur Data IoT</h3>
-                <span class="live-badge">LIVE</span>
+                <span class="demo-badge">DEMO</span>
             </header>
             <div class="flow">
                 <span class="flow-node">📡 Sensor</span>
@@ -217,8 +216,8 @@
         <!-- READINGS -->
         <div class="panel">
             <header>
-                <h3>Pembacaan Sensor Terkini</h3>
-                <span class="chart-tag">REAL-TIME</span>
+                <h3>Contoh Pembacaan Sensor</h3>
+                <span class="chart-tag">DATA SIMULASI</span>
             </header>
             <div style="overflow-x:auto;">
                 <table class="data-table">

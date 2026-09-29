@@ -7,7 +7,7 @@
 /* ---------- HERO DASHBOARD ---------- */
 .dash-hero {
     position: relative;
-    padding: calc(var(--nav-h) + 48px) 0 48px;
+    padding: 48px 0;
     background: linear-gradient(180deg, var(--navy-900), var(--navy-800));
     color: var(--text-light);
     overflow: hidden;

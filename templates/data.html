@@ -158,6 +158,8 @@
     </div>
 </header>
 
+{% include "partials/data_disclosure.html" %}
+
 <section class="modul-hero">
     <div class="modul-hero-grid" aria-hidden="true"></div>
     <div class="container modul-hero-inner">
@@ -181,9 +183,9 @@
             </form>
 
             <div class="filter-pills">
-                <a href="{{ url_for('data_center.index') }}" class="pill {% if current_category == 'all' %}active{% endif %}">Semua</a>
+                <a href="{{ url_for('main.data_center') }}" class="pill {% if current_category == 'all' %}active{% endif %}">Semua</a>
                 {% for c in categories %}
-                <a href="{{ url_for('data_center.index', category=c.key, status=current_status if current_status != 'all' else None) }}"
+                <a href="{{ url_for('main.data_center', category=c.key, status=current_status if current_status != 'all' else None) }}"
                    class="pill {% if current_category == c.key %}active{% endif %}">
                     {{ c.label }} <span style="opacity:.6;font-family:monospace;margin-left:4px;">{{ c.count }}</span>
                 </a>
@@ -191,17 +193,17 @@
             </div>
 
             <div class="filter-pills" style="padding-top:12px;border-top:1px dashed rgba(255,255,255,.06);">
-                <a href="{{ url_for('data_center.index', category=current_category if current_category != 'all' else None) }}"
+                <a href="{{ url_for('main.data_center', category=current_category if current_category != 'all' else None) }}"
                    class="pill {% if current_status == 'all' %}active{% endif %}">Semua Status</a>
-                <a href="{{ url_for('data_center.index', category=current_category if current_category != 'all' else None, status='PUBLIC') }}"
+                <a href="{{ url_for('main.data_center', category=current_category if current_category != 'all' else None, status='PUBLIC') }}"
                    class="pill {% if current_status == 'PUBLIC' %}active{% endif %}">
                     Public <span style="opacity:.6;font-family:monospace;margin-left:4px;">{{ status_counts.PUBLIC }}</span>
                 </a>
-                <a href="{{ url_for('data_center.index', category=current_category if current_category != 'all' else None, status='RESTRICTED') }}"
+                <a href="{{ url_for('main.data_center', category=current_category if current_category != 'all' else None, status='RESTRICTED') }}"
                    class="pill {% if current_status == 'RESTRICTED' %}active{% endif %}">
                     Restricted <span style="opacity:.6;font-family:monospace;margin-left:4px;">{{ status_counts.RESTRICTED }}</span>
                 </a>
-                <a href="{{ url_for('data_center.index', category=current_category if current_category != 'all' else None, status='INTERNAL') }}"
+                <a href="{{ url_for('main.data_center', category=current_category if current_category != 'all' else None, status='INTERNAL') }}"
                    class="pill {% if current_status == 'INTERNAL' %}active{% endif %}">
                     Internal <span style="opacity:.6;font-family:monospace;margin-left:4px;">{{ status_counts.INTERNAL }}</span>
                 </a>
@@ -211,13 +213,13 @@
         {% if datasets %}
         <div class="dataset-grid">
             {% for d in datasets %}
-            <a href="{{ url_for('data_center.detail', slug=d.slug) }}" class="dataset-card">
+            <a href="{{ url_for('main.data_detail', slug=d.slug) }}" class="dataset-card">
                 <div class="dataset-head">
                     <span class="dataset-cat cat-{{ d.category }}">{{ d.category.replace('-', ' ')|title }}</span>
                     <span class="status-badge {{ d.status|lower }}">{{ d.status }}</span>
                 </div>
                 <h3>{{ d.name }}</h3>
-                <p class="dataset-desc">{{ d.description }}</p>
+                <p class="dataset-desc">{{ d.desc }}</p>
                 <div class="dataset-meta">
                     <div><span>Sumber</span><strong>{{ d.source }}</strong></div>
                     <div><span>Tahun</span><strong>{{ d.year }}</strong></div>
@@ -233,7 +235,7 @@
             <div style="font-size:3rem;margin-bottom:16px;opacity:.5;">📁</div>
             <h3 style="font-family:var(--font-display);font-size:1.15rem;color:#fff;margin-bottom:8px;">Tidak Ada Dataset</h3>
             <p style="color:#94a3b8;font-size:.9rem;">Coba ubah filter atau kata kunci pencarian.</p>
-            <a href="{{ url_for('data_center.index') }}" class="btn btn-outline" style="margin-top:20px;">Reset Filter</a>
+            <a href="{{ url_for('main.data_center') }}" class="btn btn-outline" style="margin-top:20px;">Reset Filter</a>
         </div>
         {% endif %}
 
@@ -242,9 +244,9 @@
             <div>
                 <h3 style="font-family:var(--font-display);font-size:1.05rem;color:#fff;margin-bottom:6px;">Data Provenance</h3>
                 <p style="font-size:.88rem;color:#cbd5e1;line-height:1.7;margin:0;">
-                    Semua dataset mencantumkan <strong style="color:#6ee7b7;">sumber resmi</strong>
-                    (BIG, BPS, BMKG, PUPR, KLHK, ESA Copernicus) atau penanda
-                    <em>hasil analisis internal</em>.
+                    Sumber yang tercantum merupakan referensi metadata. Isi dataset pada prototipe ini
+                    masih berupa <strong style="color:#6ee7b7;">data uji coba/simulasi</strong> dan belum
+                    diverifikasi sebagai data lapangan aktual.
                 </p>
             </div>
         </div>

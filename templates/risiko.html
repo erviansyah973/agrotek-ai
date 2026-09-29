@@ -65,6 +65,8 @@
     </div>
 </header>
 
+{% include "partials/data_disclosure.html" %}
+
 <section class="modul-hero">
     <div class="modul-hero-grid" aria-hidden="true"></div>
     <div class="container modul-hero-inner">
@@ -127,7 +129,7 @@
             <div class="alert-feed">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.06);">
                     <h3 style="font-family:var(--font-display);font-size:1rem;color:#fff;margin:0;">📢 Alert Terbaru</h3>
-                    <span style="display:inline-flex;align-items:center;gap:6px;font-size:.7rem;font-weight:700;color:#f87171;padding:3px 10px;background:rgba(239,68,68,.1);border-radius:999px;letter-spacing:.08em;">LIVE</span>
+                    <span style="display:inline-flex;align-items:center;gap:6px;font-size:.7rem;font-weight:700;color:#fbbf24;padding:3px 10px;background:rgba(251,191,36,.1);border-radius:999px;letter-spacing:.08em;">DEMO</span>
                 </div>
                 {% for a in alerts %}
                 <div class="alert-item {{ a.type }}" data-lat="{{ a.lat }}" data-lng="{{ a.lng }}" data-district="{{ a.district }}" onclick="focusAlert(this)">
@@ -144,7 +146,7 @@
             <div class="panel" style="padding:22px;margin:0;">
                 <header style="margin-bottom:14px;">
                     <h3>Peta Risiko</h3>
-                    <span class="chart-tag">SENTINEL + DEMO</span>
+                    <span class="chart-tag">DATA DEMO</span>
                 </header>
                 <div id="mapRisiko"></div>
             </div>

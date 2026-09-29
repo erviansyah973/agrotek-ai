@@ -5,7 +5,7 @@ AGROTEK AI — Main Routes
 
 import csv
 import io
-from flask import Blueprint, render_template, current_app, jsonify, Response
+from flask import Blueprint, render_template, current_app, jsonify, request, Response
 from app.auth_utils import require_login, current_user
 from app import data_catalog as catalog
 
@@ -194,13 +194,52 @@ def data_irrigation():
 @main_bp.route("/data")
 @require_login
 def data_center():
+    all_datasets = catalog.all_datasets()
+    categories = catalog.all_categories()
+    for category in categories:
+        category["count"] = sum(1 for dataset in all_datasets if dataset["category"] == category["key"])
+    status_counts = {
+        status: sum(1 for dataset in all_datasets if dataset["status"] == status)
+        for status in ("PUBLIC", "RESTRICTED", "INTERNAL")
+    }
+    category_keys = {category["key"] for category in categories}
+    current_category = request.args.get("category", "all").strip().lower()
+    if current_category != "all" and current_category not in category_keys:
+        current_category = "all"
+    current_status = request.args.get("status", "all").strip().upper()
+    if current_status not in ("all", "PUBLIC", "RESTRICTED", "INTERNAL"):
+        current_status = "all"
+    current_q = request.args.get("q", "").strip()[:100]
+
+    datasets = all_datasets
+    if current_category != "all":
+        datasets = [dataset for dataset in datasets if dataset["category"] == current_category]
+    if current_status != "all":
+        datasets = [dataset for dataset in datasets if dataset["status"] == current_status]
+    if current_q:
+        query = current_q.casefold()
+        datasets = [
+            dataset for dataset in datasets
+            if query in " ".join((
+                dataset["name"],
+                dataset["desc"],
+                dataset["source"],
+                dataset["category_label"],
+                " ".join(dataset["keywords"]),
+            )).casefold()
+        ]
+
     return render_template("data.html",
         app_name=current_app.config["APP_NAME"],
         app_subtitle=current_app.config["APP_SUBTITLE"],
         app_region=current_app.config["APP_REGION"],
         user=current_user(),
-        datasets=catalog.all_datasets(),
-        categories=catalog.all_categories())
+        datasets=datasets,
+        categories=categories,
+        current_category=current_category,
+        current_status=current_status,
+        current_q=current_q,
+        status_counts=status_counts)
 
 
 @main_bp.route("/data/<slug>")

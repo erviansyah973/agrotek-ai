@@ -6,6 +6,7 @@
     <meta name="description" content="AGROTEK AI — Demo Mode. Semua modul dalam satu tampilan.">
     <title>Demo — AGROTEK AI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/data-disclosure.css') }}">
     <style>
         body { margin: 0; font-family: var(--font, -apple-system, sans-serif); background: #f8fafc; overflow-x: hidden; }
 
@@ -590,6 +591,7 @@
 <section class="demo-hero" id="hero">
     <div class="demo-hero-grid"></div>
     <div class="container demo-hero-inner">
+        {% include "partials/data_disclosure.html" %}
         <div class="demo-badges">
             <span class="demo-badge">GIS</span>
             <span class="demo-badge">AI</span>
@@ -611,7 +613,7 @@
         <div class="section-head">
             <span class="eyebrow">Statistik Wilayah</span>
             <h2>Ringkasan Data Spasial</h2>
-            <p class="section-desc">Angka DEMO — akan tersinkronisasi dengan database PostGIS.</p>
+            <p class="section-desc">Semua angka pada demo ini merupakan data simulasi.</p>
         </div>
         <div class="stats-grid">
             {% for s in stats %}
@@ -626,13 +628,13 @@
     </div>
 </section>
 
-<!-- 2. LIVE MONITORING -->
+<!-- 2. CONTOH STATUS MODUL -->
 <section class="section section-dark" id="monitoring">
     <div class="container">
         <div class="section-head section-head-light">
-            <span class="eyebrow eyebrow-light">Live Monitoring</span>
-            <h2>Status Platform Real-Time</h2>
-            <p class="section-desc section-desc-light">Kondisi modul utama platform.</p>
+            <span class="eyebrow eyebrow-light">Contoh Data Simulasi</span>
+            <h2>Contoh Status Modul</h2>
+            <p class="section-desc section-desc-light">Nilai berikut hanya untuk demonstrasi, bukan pemantauan lapangan saat ini.</p>
         </div>
         <div class="monitor-grid">
             {% for m in monitoring %}

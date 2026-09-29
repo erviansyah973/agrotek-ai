@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/data-disclosure.css') }}">
 
     <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
@@ -180,7 +181,7 @@
         .hero {
             position: relative;
             min-height: 100vh;
-            padding: 120px 0 60px;
+            padding: 48px 0 60px;
             display: flex;
             align-items: center;
             overflow: hidden;
@@ -236,16 +237,9 @@
         }
         .hero-eyebrow .dot {
             width: 6px; height: 6px;
-            background: var(--emerald-400);
+            background: #94a3b8;
             border-radius: 50%;
-            box-shadow: 0 0 8px var(--emerald-400);
-            animation: pulse 2s infinite;
         }
-        @keyframes pulse {
-            0%,100% { opacity: 1; }
-            50% { opacity: .4; }
-        }
-
         .hero-title {
             font-family: var(--font-display);
             font-size: clamp(2.5rem, 5.5vw, 4.5rem);
@@ -377,8 +371,18 @@
         .floating-card .fc-dot {
             width: 6px; height: 6px;
             border-radius: 50%;
-            background: var(--emerald-400);
-            box-shadow: 0 0 8px var(--emerald-400);
+            background: #94a3b8;
+        }
+        .sample-tag {
+            margin-left: auto;
+            padding: 2px 5px;
+            color: #cbd5e1;
+            background: rgba(148,163,184,.12);
+            border: 1px solid rgba(148,163,184,.24);
+            border-radius: 4px;
+            font-size: .55rem;
+            font-weight: 700;
+            letter-spacing: .06em;
         }
         .fc-1 { top: 20px; left: 20px; animation-delay: 0s; }
         .fc-2 { top: 20px; right: 20px; animation-delay: 1s; }
@@ -402,11 +406,11 @@
         }
 
         /* ============================================================
-           LIVE TICKER
+           SIMULATION TICKER
            ============================================================ */
         .ticker {
             position: relative;
-            padding: 20px 0;
+            padding: 12px 0 20px;
             background: linear-gradient(90deg, var(--navy-900), var(--navy-800), var(--navy-900));
             border-top: 1px solid rgba(52,211,153,.15);
             border-bottom: 1px solid rgba(52,211,153,.15);
@@ -435,6 +439,16 @@
             animation: scrollX 40s linear infinite;
             white-space: nowrap;
         }
+        .ticker-label {
+            display: block;
+            max-width: var(--container);
+            margin: 0 auto 9px;
+            padding: 0 24px;
+            color: var(--amber-400);
+            font-size: .65rem;
+            font-weight: 800;
+            letter-spacing: .12em;
+        }
         @keyframes scrollX {
             from { transform: translateX(0); }
             to { transform: translateX(-50%); }
@@ -450,12 +464,10 @@
             font-weight: 600;
             font-size: .95rem;
         }
-        .ticker-item .live-dot {
+        .ticker-item .sample-dot {
             width: 6px; height: 6px;
             border-radius: 50%;
-            background: var(--emerald-400);
-            box-shadow: 0 0 8px var(--emerald-400);
-            animation: pulse 1.5s infinite;
+            background: #94a3b8;
         }
 
         /* ============================================================
@@ -850,7 +862,7 @@
 
         @media (max-width: 768px) {
             .nav-links { display: none; }
-            .hero { padding: 100px 0 60px; min-height: auto; }
+            .hero { padding: 40px 0 60px; min-height: auto; }
             .hero-right { height: 340px; }
             .floating-card { padding: 10px 12px; }
             .floating-card .fc-value { font-size: .95rem; }
@@ -908,6 +920,9 @@
     </div>
 </nav>
 
+{% set data_notice_variant = 'landing' %}
+{% include "partials/data_disclosure.html" %}
+
 <!-- ============================================================
      HERO
      ============================================================ -->
@@ -922,7 +937,7 @@
         <div class="hero-left">
             <div class="hero-eyebrow">
                 <span class="dot"></span>
-                Platform Aktif · Kabupaten Jember
+                Prototipe · Data Simulasi
             </div>
 
             <h1 class="hero-title">
@@ -932,8 +947,8 @@
 
             <p class="hero-sub">
                 Sistem informasi spasial dan pendukung keputusan untuk pertanian,
-                irigasi, hidrologi, dan pengelolaan sumber daya lahan — dibangun
-                dari data lapangan, untuk pertanian presisi.
+                irigasi, hidrologi, dan pengelolaan sumber daya lahan. Saat ini
+                platform ini merupakan prototipe dengan data uji coba/simulasi.
             </p>
 
             <div class="hero-actions">
@@ -972,12 +987,12 @@
 
             <div id="heroMap"></div>
 
-            <div class="hero-map-badge">JEMBER · LIVE · 3D</div>
+            <div class="hero-map-badge">JEMBER · DEMO · 3D</div>
 
             <div class="floating-card fc-1">
                 <div class="fc-label">
                     <span class="fc-dot"></span>
-                    Curah Hujan
+                    Curah Hujan <span class="sample-tag">DEMO</span>
                 </div>
                 <div class="fc-value">45 <small>mm/bln</small></div>
             </div>
@@ -985,7 +1000,7 @@
             <div class="floating-card fc-2">
                 <div class="fc-label">
                     <span class="fc-dot"></span>
-                    Debit Sungai
+                    Debit Sungai <span class="sample-tag">DEMO</span>
                 </div>
                 <div class="fc-value">4.2 <small>m³/s</small></div>
             </div>
@@ -993,7 +1008,7 @@
             <div class="floating-card fc-3">
                 <div class="fc-label">
                     <span class="fc-dot"></span>
-                    NDVI Rata-rata
+                    NDVI Rata-rata <span class="sample-tag">DEMO</span>
                 </div>
                 <div class="fc-value">0.62</div>
             </div>
@@ -1001,7 +1016,7 @@
             <div class="floating-card fc-4">
                 <div class="fc-label">
                     <span class="fc-dot"></span>
-                    Neraca Air
+                    Neraca Air <span class="sample-tag">DEMO</span>
                 </div>
                 <div class="fc-value">+10.6 <small>juta m³</small></div>
             </div>
@@ -1011,23 +1026,24 @@
 </section>
 
 <!-- ============================================================
-     LIVE TICKER
+     CONTOH DATA SIMULASI
      ============================================================ -->
 <div class="ticker">
+    <span class="ticker-label">DATA SIMULASI — NILAI CONTOH</span>
     <div class="ticker-track">
-        <span class="ticker-item"><span class="live-dot"></span><strong>AWLR Bedadung</strong> TMA 182 cm</span>
-        <span class="ticker-item"><span class="live-dot"></span><strong>AWLR Wuluhan</strong> TMA 215 cm</span>
-        <span class="ticker-item"><span class="live-dot"></span><strong>Weather Jenggawah</strong> Hujan 12 mm</span>
-        <span class="ticker-item"><span class="live-dot"></span><strong>Sensor Tanah A1</strong> Kelembapan 38%</span>
-        <span class="ticker-item"><span class="live-dot"></span><strong>Debit Bedadung</strong> 4.8 m³/s</span>
-        <span class="ticker-item"><span class="live-dot"></span><strong>Status Risiko</strong> Siaga</span>
+        <span class="ticker-item"><span class="sample-dot"></span><strong>AWLR Bedadung</strong> TMA 182 cm</span>
+        <span class="ticker-item"><span class="sample-dot"></span><strong>AWLR Wuluhan</strong> TMA 215 cm</span>
+        <span class="ticker-item"><span class="sample-dot"></span><strong>Weather Jenggawah</strong> Hujan 12 mm</span>
+        <span class="ticker-item"><span class="sample-dot"></span><strong>Sensor Tanah A1</strong> Kelembapan 38%</span>
+        <span class="ticker-item"><span class="sample-dot"></span><strong>Debit Bedadung</strong> 4.8 m³/s</span>
+        <span class="ticker-item"><span class="sample-dot"></span><strong>Status Risiko</strong> Siaga</span>
         <!-- Duplicate for seamless loop -->
-        <span class="ticker-item"><span class="live-dot"></span><strong>AWLR Bedadung</strong> TMA 182 cm</span>
-        <span class="ticker-item"><span class="live-dot"></span><strong>AWLR Wuluhan</strong> TMA 215 cm</span>
-        <span class="ticker-item"><span class="live-dot"></span><strong>Weather Jenggawah</strong> Hujan 12 mm</span>
-        <span class="ticker-item"><span class="live-dot"></span><strong>Sensor Tanah A1</strong> Kelembapan 38%</span>
-        <span class="ticker-item"><span class="live-dot"></span><strong>Debit Bedadung</strong> 4.8 m³/s</span>
-        <span class="ticker-item"><span class="live-dot"></span><strong>Status Risiko</strong> Siaga</span>
+        <span class="ticker-item"><span class="sample-dot"></span><strong>AWLR Bedadung</strong> TMA 182 cm</span>
+        <span class="ticker-item"><span class="sample-dot"></span><strong>AWLR Wuluhan</strong> TMA 215 cm</span>
+        <span class="ticker-item"><span class="sample-dot"></span><strong>Weather Jenggawah</strong> Hujan 12 mm</span>
+        <span class="ticker-item"><span class="sample-dot"></span><strong>Sensor Tanah A1</strong> Kelembapan 38%</span>
+        <span class="ticker-item"><span class="sample-dot"></span><strong>Debit Bedadung</strong> 4.8 m³/s</span>
+        <span class="ticker-item"><span class="sample-dot"></span><strong>Status Risiko</strong> Siaga</span>
     </div>
 </div>
 
@@ -1040,8 +1056,8 @@
             <span class="section-eyebrow">Statistik Wilayah</span>
             <h2 class="section-title">Data spasial Kabupaten Jember,<br>dalam satu platform.</h2>
             <p class="section-sub">
-                Semua angka terhubung ke database PostGIS. Terus bertambah seiring
-                data lapangan masuk.
+                Angka di halaman ini merupakan contoh untuk demonstrasi dan belum
+                mewakili pemantauan lapangan.
             </p>
         </div>
 
@@ -1108,13 +1124,13 @@
 
             <!-- Large: Peta 3D -->
             <a href="/peta3d" class="bento-card large map-preview reveal">
-                <span class="bento-tag">SHP ASLI</span>
+                <span class="bento-tag">LAYER DEMO</span>
                 <div>
                     <div class="bento-icon emerald">🏔️</div>
                     <h3>Peta 3D Google-Earth Style</h3>
                     <p>
-                        3D WebGIS dengan data SHP asli — jaringan sungai, DAS, dan irigasi
-                        Kabupaten Jember. Kontrol drag-tilt-rotate seperti Google Earth.
+                        3D WebGIS untuk menjelajahi contoh layer jaringan sungai, DAS,
+                        dan irigasi Kabupaten Jember.
                     </p>
                 </div>
                 <div class="bento-arrow">→</div>
@@ -1132,11 +1148,11 @@
 
             <!-- IoT -->
             <a href="/iot" class="bento-card tall reveal">
-                <span class="bento-tag">LIVE</span>
+                <span class="bento-tag">DEMO</span>
                 <div>
                     <div class="bento-icon cyan">📡</div>
                     <h3>IoT Monitoring</h3>
-                    <p>Sensor real-time: water level, hujan, kelembapan tanah.</p>
+                    <p>Contoh pembacaan simulasi tinggi air, hujan, dan kelembapan tanah.</p>
                 </div>
             </a>
 
@@ -1146,7 +1162,7 @@
                 <div>
                     <div class="bento-icon emerald">🛰️</div>
                     <h3>NDVI</h3>
-                    <p>Kesehatan vegetasi via Sentinel-2.</p>
+                    <p>Contoh indeks kesehatan vegetasi untuk eksplorasi.</p>
                 </div>
             </a>
 
@@ -1162,7 +1178,7 @@
 
             <!-- Early Warning -->
             <a href="/risiko" class="bento-card wide reveal">
-                <span class="bento-tag">REAL-TIME</span>
+                <span class="bento-tag">SIMULASI</span>
                 <div>
                     <div class="bento-icon red">⚠️</div>
                     <h3>Early Warning</h3>
@@ -1220,7 +1236,7 @@
                     <div style="font-size:4rem;">🏔️</div>
                     <div>
                         <div style="font-family:var(--font-display);font-size:1.5rem;font-weight:700;color:#fff;margin-bottom:8px;">Peta 3D Interaktif</div>
-                        <div style="color:#94a3b8;font-size:.95rem;max-width:400px;">Terrain 3D, layer SHP asli, drag-tilt-rotate Google Earth style</div>
+                        <div style="color:#94a3b8;font-size:.95rem;max-width:400px;">Terrain 3D dan contoh layer spasial untuk eksplorasi</div>
                     </div>
                     <a href="/login" class="btn btn-primary">Coba Sekarang →</a>
                 </div>
@@ -1310,8 +1326,8 @@
         <div class="footer-bottom">
             <div>&copy; 2026 AGROTEK AI — Kabupaten Jember, Jawa Timur.</div>
             <div style="display:flex;align-items:center;gap:8px;">
-                <span style="width:6px;height:6px;background:#34d399;border-radius:50%;box-shadow:0 0 8px #34d399;animation:pulse 2s infinite;"></span>
-                System Online
+                <span style="width:6px;height:6px;background:#94a3b8;border-radius:50%;"></span>
+                Demo · Data Simulasi
             </div>
         </div>
     </div>

@@ -6,6 +6,7 @@
     <title>Dashboard — AGROTEK AI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/data-disclosure.css') }}">
 </head>
 <body class="page-dashboard">
 
@@ -31,6 +32,9 @@
     </div>
 </header>
 
+{% set data_notice_variant = 'dashboard' %}
+{% include "partials/data_disclosure.html" %}
+
 <section class="dash-hero">
     <div class="dash-hero-bg"></div>
     <div class="container">
@@ -41,7 +45,7 @@
                 <p>Monitoring pertanian, irigasi, hidrologi, dan risiko bencana Kabupaten Jember.</p>
             </div>
             <div class="demo-pill">
-                <span class="dot dot-live"></span> DATA DEMO
+                <span class="dot dot-demo"></span> DATA DEMO
             </div>
         </div>
     </div>
@@ -177,8 +181,8 @@
         <div class="container footer-bottom-inner">
             <p>&copy; 2026 AGROTEK AI — Kabupaten Jember, Jawa Timur</p>
             <p class="footer-status">
-                <span class="dot dot-live"></span>
-                System Status: <strong>Online</strong>
+                <span class="dot dot-demo"></span>
+                Data Status: <strong>Simulasi</strong>
             </p>
         </div>
     </div>

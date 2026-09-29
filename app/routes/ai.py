@@ -341,7 +341,7 @@ def chat_endpoint():
     if messages[0].get("role") != "user" or messages[-1].get("role") != "user":
         return jsonify({"ok": False, "error": "Format percakapan tidak valid."}), 400
 
-    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
     try:
         answer = _generate_gemini_answer(api_key, model, contents)
     except HTTPError as error:

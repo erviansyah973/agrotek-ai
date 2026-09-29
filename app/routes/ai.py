@@ -345,11 +345,20 @@ def chat_endpoint():
     try:
         answer = _generate_gemini_answer(api_key, model, contents)
     except HTTPError as error:
-        logger.warning("Gemini API returned HTTP %s.", error.code)
+        # Log HTTP error code and attempt to read response body for diagnostics (do NOT log the API key)
+        try:
+            resp_body = error.read().decode("utf-8", errors="replace")
+            logger.warning("Gemini API returned HTTP %s. Response body: %s", error.code, resp_body)
+        except Exception:
+            logger.warning("Gemini API returned HTTP %s and response body could not be read.", error.code)
+
         if error.code == 429:
             return jsonify({"ok": False, "error": "Layanan AI sedang mencapai batas penggunaan. Coba lagi nanti."}), 429
         if error.code in (500, 502, 503, 504):
             return jsonify({"ok": False, "error": "Layanan AI sedang bermasalah. Coba lagi beberapa saat."}), 503
+        # 404 or other client errors: provide actionable hint without exposing sensitive details
+        if error.code == 404:
+            return jsonify({"ok": False, "error": "Layanan AI menolak permintaan (404). Periksa nama model (GEMINI_MODEL) dan pastikan akun memiliki akses ke model tersebut."}), 502
         return jsonify({"ok": False, "error": "Layanan AI menolak permintaan. Periksa konfigurasi kunci dan model di server."}), 502
     except (URLError, TimeoutError):
         logger.warning("Could not connect to Gemini API.")

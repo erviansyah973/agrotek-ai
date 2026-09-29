@@ -428,6 +428,12 @@
         overflow-wrap: anywhere;
         white-space: pre-wrap;
     }
+    .ai-chat-message p { margin: 0; }
+    .ai-chat-message p + p,
+    .ai-chat-message .ai-chat-heading { margin-top: 10px; }
+    .ai-chat-message ul,
+    .ai-chat-message ol { margin: 6px 0; padding-left: 22px; }
+    .ai-chat-message li + li { margin-top: 4px; }
     .ai-chat-message.assistant {
         align-self: flex-start;
         background: rgba(255,255,255,.07);

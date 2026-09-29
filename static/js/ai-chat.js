@@ -15,10 +15,89 @@
     const conversation = [];
     const maxMessages = 8;
 
+    function appendFormattedText(parent, text) {
+        const boldPattern = /\*\*(.+?)\*\*/g;
+        let lastIndex = 0;
+        let match;
+
+        while ((match = boldPattern.exec(text)) !== null) {
+            parent.append(document.createTextNode(text.slice(lastIndex, match.index)));
+            const strong = document.createElement('strong');
+            strong.textContent = match[1];
+            parent.append(strong);
+            lastIndex = boldPattern.lastIndex;
+        }
+
+        parent.append(document.createTextNode(text.slice(lastIndex)));
+    }
+
+    function renderAssistantAnswer(message, text) {
+        let paragraph = null;
+        let list = null;
+        let listType = null;
+
+        function flushParagraph() {
+            if (paragraph) message.append(paragraph);
+            paragraph = null;
+        }
+
+        function flushList() {
+            if (list) message.append(list);
+            list = null;
+            listType = null;
+        }
+
+        text.split(/\r?\n/).forEach((line) => {
+            const heading = line.match(/^#{1,3}\s+(.+)$/);
+            const item = line.match(/^\s*(?:[-*+]\s+|\d+[.)]\s+)(.+)$/);
+
+            if (!line.trim()) {
+                flushParagraph();
+                flushList();
+                return;
+            }
+
+            if (heading) {
+                flushParagraph();
+                flushList();
+                const headingElement = document.createElement('p');
+                headingElement.className = 'ai-chat-heading';
+                const headingText = document.createElement('strong');
+                appendFormattedText(headingText, heading[1]);
+                headingElement.append(headingText);
+                message.append(headingElement);
+                return;
+            }
+
+            if (item) {
+                flushParagraph();
+                const type = /^\s*\d+[.)]\s+/.test(line) ? 'ol' : 'ul';
+                if (type !== listType) {
+                    flushList();
+                    list = document.createElement(type);
+                    listType = type;
+                }
+                const listItem = document.createElement('li');
+                appendFormattedText(listItem, item[1]);
+                list.append(listItem);
+                return;
+            }
+
+            flushList();
+            if (!paragraph) paragraph = document.createElement('p');
+            else paragraph.append(document.createElement('br'));
+            appendFormattedText(paragraph, line);
+        });
+
+        flushParagraph();
+        flushList();
+    }
+
     function addMessage(role, text, state) {
         const message = document.createElement('div');
         message.className = `ai-chat-message ${role}${state ? ` ${state}` : ''}`;
-        message.textContent = text;
+        if (role === 'assistant' && !state) renderAssistantAnswer(message, text);
+        else message.textContent = text;
         messagesBox.appendChild(message);
         messagesBox.scrollTop = messagesBox.scrollHeight;
         return message;

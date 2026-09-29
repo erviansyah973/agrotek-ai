@@ -9,10 +9,35 @@ Skor: 0-100
 Kelas: S1 (Sangat Sesuai), S2 (Sesuai), S3 (Cukup Sesuai), N (Tidak Sesuai)
 """
 
+import json
+import logging
+import os
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
+
 from flask import Blueprint, render_template, current_app, jsonify, request
 from app.auth_utils import require_login, current_user
 
 ai_bp = Blueprint("ai", __name__)
+logger = logging.getLogger(__name__)
+
+CHAT_MAX_MESSAGES = 8
+CHAT_MAX_MESSAGE_LENGTH = 1200
+CHAT_MAX_TOTAL_LENGTH = 6000
+GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+AGRICULTURE_SYSTEM_INSTRUCTION = (
+    "Kamu adalah asisten informasi pertanian untuk membantu petani di Indonesia, "
+    "terutama wilayah Jember. Jawab dengan bahasa Indonesia yang sederhana, ramah, "
+    "praktis, dan terstruktur. Jika informasi tentang tanaman, lokasi, umur tanaman, "
+    "gejala, cuaca, atau kondisi tanah belum cukup, tanyakan detail yang diperlukan "
+    "dan jangan menebak diagnosis. Bedakan fakta dari perkiraan; jangan mengaku punya "
+    "data cuaca, harga, atau kondisi lapangan terkini jika tidak diberikan. Untuk "
+    "penyakit dan hama, berikan langkah pemeriksaan dan pengendalian terpadu yang "
+    "aman; jangan menyarankan dosis pestisida atau campuran bahan kimia. Minta pengguna "
+    "mengikuti label resmi dan berkonsultasi dengan PPL/dinas pertanian untuk keputusan "
+    "berisiko tinggi. Kamu juga boleh menjawab pertanyaan umum di luar pertanian secara "
+    "ringkas, tetapi arahkan kembali dengan sopan bila tidak relevan."
+)
 
 
 # ============================================================
@@ -265,7 +290,126 @@ def index():
         user=current_user(),
         kecamatan_list=kecamatan_list,
         komoditas_list=komoditas_list,
+        chat_enabled=bool(os.getenv("GEMINI_API_KEY")),
     )
+
+
+@ai_bp.route("/ai/chat", methods=["POST"])
+@require_login
+def chat_endpoint():
+    """Teruskan percakapan singkat ke Gemini tanpa menyimpan riwayat di server."""
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        return jsonify({
+            "ok": False,
+            "error": "Asisten chat belum dikonfigurasi. Minta administrator menambahkan kunci Gemini di server.",
+        }), 503
+
+    if request.content_length and request.content_length > 16_000:
+        return jsonify({"ok": False, "error": "Permintaan terlalu besar. Mulai percakapan baru."}), 413
+
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({"ok": False, "error": "Permintaan chat tidak valid."}), 400
+
+    messages = data.get("messages")
+    if not isinstance(messages, list) or not 1 <= len(messages) <= CHAT_MAX_MESSAGES:
+        return jsonify({"ok": False, "error": "Percakapan terlalu panjang. Mulai percakapan baru."}), 400
+
+    contents = []
+    total_length = 0
+    previous_role = None
+    for message in messages:
+        if not isinstance(message, dict):
+            return jsonify({"ok": False, "error": "Format pesan tidak valid."}), 400
+        role = message.get("role")
+        text = message.get("content")
+        if (
+            role not in ("user", "model")
+            or not isinstance(text, str)
+            or not text.strip()
+            or len(text) > CHAT_MAX_MESSAGE_LENGTH
+            or role == previous_role
+        ):
+            return jsonify({"ok": False, "error": "Format pesan tidak valid."}), 400
+        total_length += len(text)
+        if total_length > CHAT_MAX_TOTAL_LENGTH:
+            return jsonify({"ok": False, "error": "Percakapan terlalu panjang. Mulai percakapan baru."}), 400
+        contents.append({"role": role, "parts": [{"text": text.strip()}]})
+        previous_role = role
+
+    if messages[0].get("role") != "user" or messages[-1].get("role") != "user":
+        return jsonify({"ok": False, "error": "Format percakapan tidak valid."}), 400
+
+    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    try:
+        answer = _generate_gemini_answer(api_key, model, contents)
+    except HTTPError as error:
+        logger.warning("Gemini API returned HTTP %s.", error.code)
+        if error.code == 429:
+            return jsonify({"ok": False, "error": "Layanan AI sedang mencapai batas penggunaan. Coba lagi nanti."}), 429
+        if error.code in (500, 502, 503, 504):
+            return jsonify({"ok": False, "error": "Layanan AI sedang bermasalah. Coba lagi beberapa saat."}), 503
+        return jsonify({"ok": False, "error": "Layanan AI menolak permintaan. Periksa konfigurasi kunci dan model di server."}), 502
+    except (URLError, TimeoutError):
+        logger.warning("Could not connect to Gemini API.")
+        return jsonify({"ok": False, "error": "Tidak dapat terhubung ke layanan AI. Coba lagi nanti."}), 503
+    except (json.JSONDecodeError, UnicodeDecodeError, ValueError):
+        logger.warning("Gemini API returned an invalid response.")
+        return jsonify({"ok": False, "error": "Layanan AI mengembalikan jawaban yang tidak valid. Coba lagi."}), 502
+
+    if not answer:
+        return jsonify({"ok": False, "error": "AI belum dapat menjawab pertanyaan itu. Coba tulis ulang dengan detail."}), 502
+    return jsonify({"ok": True, "answer": answer})
+
+
+def _generate_gemini_answer(api_key, model, contents):
+    """Kirim isi chat terverifikasi ke Gemini; kunci hanya dikirim lewat header HTTPS."""
+    from urllib.parse import quote
+
+    if not isinstance(model, str) or not model or any(char not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-" for char in model):
+        raise ValueError("Invalid Gemini model name.")
+
+    body = json.dumps({
+        "systemInstruction": {"parts": [{"text": AGRICULTURE_SYSTEM_INSTRUCTION}]},
+        "contents": contents,
+        "generationConfig": {"temperature": 0.4, "maxOutputTokens": 700},
+    }).encode("utf-8")
+    api_url = GEMINI_API_URL.format(model=quote(model, safe=""))
+    req = Request(
+        api_url,
+        data=body,
+        headers={
+            "Content-Type": "application/json",
+            "x-goog-api-key": api_key,
+        },
+        method="POST",
+    )
+    with urlopen(req, timeout=30) as response:
+        raw_response = response.read(1_000_001)
+    if len(raw_response) > 1_000_000:
+        raise ValueError("Gemini response exceeded the size limit.")
+
+    result = json.loads(raw_response.decode("utf-8"))
+    if not isinstance(result, dict):
+        return ""
+    candidates = result.get("candidates", [])
+    if not isinstance(candidates, list) or not candidates:
+        return ""
+    candidate = candidates[0]
+    if not isinstance(candidate, dict):
+        return ""
+    content = candidate.get("content")
+    if not isinstance(content, dict):
+        return ""
+    parts = content.get("parts", [])
+    if not isinstance(parts, list):
+        return ""
+    return "\n".join(
+        part["text"].strip()
+        for part in parts
+        if isinstance(part, dict) and isinstance(part.get("text"), str) and part["text"].strip()
+    ).strip()
 
 
 @ai_bp.route("/ai/analyze", methods=["POST"])

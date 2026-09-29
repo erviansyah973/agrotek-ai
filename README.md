@@ -40,3 +40,19 @@ pip install -r requirements.txt
 
 # 4. Jalankan
 python app.py
+```
+
+## Asisten tanya-jawab pertanian
+
+Halaman **AGROTEK AI** menyediakan chat konsultasi pertanian menggunakan Gemini API. Buat API key melalui Google AI Studio, lalu simpan sebagai environment variable di server—jangan menaruhnya di kode JavaScript atau membagikannya.
+
+Untuk menjalankan lokal di PowerShell:
+
+```powershell
+$env:GEMINI_API_KEY = "API_KEY_ANDA"
+python app.py
+```
+
+Di Railway, tambahkan `GEMINI_API_KEY` pada **Project → Service → Variables**, lalu deploy/restart aplikasi. Opsional, atur `GEMINI_MODEL` untuk memilih model; nilai default adalah `gemini-2.5-flash`.
+
+Ketersediaan dan batas pemakaian gratis ditentukan oleh Google dan dapat berubah. Chat mengirim pertanyaan serta konteks percakapan singkat ke Gemini; jangan masukkan data pribadi atau rahasia. Jawaban AI adalah informasi awal, bukan diagnosis pasti—konfirmasikan saran berisiko dengan penyuluh pertanian dan ikuti label resmi produk.

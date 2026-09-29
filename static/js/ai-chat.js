@@ -93,6 +93,33 @@
         flushList();
     }
 
+    function addCopyButton(message, text) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'ai-chat-copy';
+        button.textContent = 'Salin jawaban';
+        button.setAttribute('aria-label', 'Salin jawaban asisten');
+        button.addEventListener('click', async () => {
+            const plainText = text
+                .replace(/\*\*(.*?)\*\*/g, '$1')
+                .replace(/^#{1,3}\s+/gm, '')
+                .trim();
+
+            try {
+                await navigator.clipboard.writeText(plainText);
+                button.textContent = 'Tersalin!';
+            } catch (error) {
+                console.error('[AGROTEK] Could not copy chat answer:', error);
+                button.textContent = 'Gagal menyalin';
+            }
+
+            window.setTimeout(() => {
+                button.textContent = 'Salin jawaban';
+            }, 2000);
+        });
+        message.append(button);
+    }
+
     function addMessage(role, text, state) {
         const message = document.createElement('div');
         message.className = `ai-chat-message ${role}${state ? ` ${state}` : ''}`;
@@ -166,7 +193,8 @@
             if (conversation.length > maxMessages) {
                 conversation.splice(0, conversation.length - maxMessages);
             }
-            addMessage('assistant', result.answer);
+            const answerMessage = addMessage('assistant', result.answer);
+            addCopyButton(answerMessage, result.answer);
         } catch (error) {
             console.error('[AGROTEK] Chat request failed:', error);
             pendingMessage.remove();

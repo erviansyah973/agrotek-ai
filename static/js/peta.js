@@ -76,6 +76,33 @@
         opacity: 0.9,
     };
 
+    const jemberBoundaryLayers = {
+        jemberBoundaryKabupaten: {
+            endpoint: 'kabupaten',
+            style: { color: '#0f766e', weight: 3, opacity: 0.95, fillOpacity: 0.02 },
+            nameField: 'NAME_2',
+            typeField: 'TYPE_2',
+            codeField: 'CC_2',
+            label: 'batas Kabupaten Jember',
+        },
+        jemberBoundaryKecamatan: {
+            endpoint: 'kecamatan',
+            style: { color: '#0891b2', weight: 1.5, opacity: 0.8, fillOpacity: 0.01 },
+            nameField: 'NAME_3',
+            typeField: 'TYPE_3',
+            codeField: 'CC_3',
+            label: 'batas kecamatan',
+        },
+        jemberBoundaryDesa: {
+            endpoint: 'desa',
+            style: { color: '#64748b', weight: 0.7, opacity: 0.65, fillOpacity: 0.01 },
+            nameField: 'NAME_4',
+            typeField: 'TYPE_4',
+            codeField: 'CC_4',
+            label: 'batas desa/kelurahan',
+        },
+    };
+
     const styleIrrigation = {
         color: '#f59e0b',
         weight: 2.5,
@@ -173,6 +200,32 @@
         layer.bindPopup(popup);
     }
 
+    function bindJemberBoundary(config, feature, layer) {
+        const properties = feature.properties || {};
+        const popup = document.createElement('div');
+        const title = document.createElement('div');
+        title.className = 'popup-title';
+        title.textContent = properties[config.nameField] || 'Batas wilayah';
+        popup.append(title);
+
+        [
+            ['Jenis wilayah', properties[config.typeField]],
+            ['Kode wilayah', properties[config.codeField]],
+        ].forEach(([label, value]) => {
+            if (!value) return;
+            const row = document.createElement('div');
+            row.className = 'popup-row';
+            const rowLabel = document.createElement('span');
+            const rowValue = document.createElement('span');
+            rowLabel.textContent = label;
+            rowValue.textContent = value;
+            row.append(rowLabel, rowValue);
+            popup.append(row);
+        });
+
+        layer.bindPopup(popup);
+    }
+
     function bindIrrigation(feature, layer) {
         const p = feature.properties || {};
         layer.bindPopup(`
@@ -214,6 +267,7 @@
     /* -------------------- LAYER STORAGE -------------------- */
     const activeLayers = {};
     const epaksiLoads = {};
+    const boundaryLoads = {};
     let jemberRiversLoad = null;
     const districtData = { features: [] };
 
@@ -295,6 +349,47 @@
         return jemberRiversLoad;
     }
 
+    function loadJemberBoundary(name) {
+        const config = jemberBoundaryLayers[name];
+        if (!config) return Promise.resolve(null);
+        if (activeLayers[name]) {
+            activeLayers[name].addTo(map);
+            return Promise.resolve(activeLayers[name]);
+        }
+        if (boundaryLoads[name]) return boundaryLoads[name];
+
+        const status = document.getElementById('jemberBoundaryStatus');
+        if (status) status.textContent = `Memuat ${config.label}...`;
+
+        boundaryLoads[name] = fetch(`/peta/data/boundaries/jember/${config.endpoint}`)
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.json();
+            })
+            .then(geojson => {
+                if (geojson.type !== 'FeatureCollection' || !Array.isArray(geojson.features)) {
+                    throw new Error('Format GeoJSON tidak valid');
+                }
+                const layer = L.geoJSON(geojson, {
+                    onEachFeature: (feature, featureLayer) => bindJemberBoundary(config, feature, featureLayer),
+                    style: config.style,
+                });
+                registerLayer(name, layer);
+                if (status) status.textContent = `${geojson.features.length.toLocaleString('id-ID')} fitur ${config.label} dimuat. Batas GADM 4.1 bukan batas legal.`;
+                return layer;
+            })
+            .catch(error => {
+                console.error(`[AGROTEK] Gagal memuat ${config.label}:`, error);
+                if (status) status.textContent = `Gagal memuat ${config.label}. Matikan lalu aktifkan lagi untuk mencoba ulang.`;
+                return null;
+            })
+            .finally(() => {
+                delete boundaryLoads[name];
+            });
+
+        return boundaryLoads[name];
+    }
+
     function loadIrrigation() {
         return fetch('/peta/data/irrigation')
             .then(r => r.json())
@@ -340,7 +435,11 @@
             })
             .catch(error => {
                 console.error(`[AGROTEK] Gagal memuat ${config.label}:`, error);
-                if (status) status.textContent = `Gagal memuat ${config.label}. Matikan lalu aktifkan lagi untuk mencoba ulang.`;
+                if (status && error.message === 'HTTP 403') {
+                    status.textContent = `Akses ${config.label} ditolak (HTTP 403). Muat ulang dan masuk kembali sebagai admin.`;
+                } else if (status) {
+                    status.textContent = `Gagal memuat ${config.label}. Matikan lalu aktifkan lagi untuk mencoba ulang.`;
+                }
                 return null;
             })
             .finally(() => {
@@ -360,6 +459,10 @@
     });
 
     /* -------------------- LAYER TOGGLE -------------------- */
+    document.querySelectorAll('.layer-item input[data-layer]:checked').forEach(cb => {
+        if (jemberBoundaryLayers[cb.dataset.layer]) loadJemberBoundary(cb.dataset.layer);
+    });
+
     document.querySelectorAll('.layer-item input[data-layer]').forEach(cb => {
         cb.addEventListener('change', () => {
             const name = cb.dataset.layer;
@@ -374,6 +477,10 @@
             }
             if (name === 'jemberRivers') {
                 loadJemberRivers();
+                return;
+            }
+            if (jemberBoundaryLayers[name]) {
+                loadJemberBoundary(name);
                 return;
             }
             if (epaksiStyles[name]) loadEpaksiLayer(name);

@@ -359,9 +359,36 @@
                     <label class="layer-item">
                         <input type="checkbox" data-layer="districts" checked>
                         <span class="layer-swatch" style="background:#38bdf8"></span>
-                        <span>Kecamatan</span>
+                        <span>Titik kecamatan (contoh)</span>
                     </label>
                 </li>
+                {% if jember_boundaries_available.kabupaten %}
+                <li>
+                    <label class="layer-item">
+                        <input type="checkbox" data-layer="jemberBoundaryKabupaten" checked>
+                        <span class="layer-swatch" style="background:#0f766e"></span>
+                        <span>Batas Kabupaten Jember</span>
+                    </label>
+                </li>
+                {% endif %}
+                {% if jember_boundaries_available.kecamatan %}
+                <li>
+                    <label class="layer-item">
+                        <input type="checkbox" data-layer="jemberBoundaryKecamatan" checked>
+                        <span class="layer-swatch" style="background:#0891b2"></span>
+                        <span>Batas kecamatan</span>
+                    </label>
+                </li>
+                {% endif %}
+                {% if jember_boundaries_available.desa %}
+                <li>
+                    <label class="layer-item">
+                        <input type="checkbox" data-layer="jemberBoundaryDesa">
+                        <span class="layer-swatch" style="background:#64748b"></span>
+                        <span>Batas desa/kelurahan</span>
+                    </label>
+                </li>
+                {% endif %}
                 <li>
                     <label class="layer-item">
                         <input type="checkbox" data-layer="rivers" checked>
@@ -386,6 +413,10 @@
                     </label>
                 </li>
             </ul>
+            <p class="layer-note">Batas wilayah: GADM 4.1, untuk penggunaan nonkomersial; bukan batas legal. <a href="https://gadm.org/license.html" target="_blank" rel="noopener noreferrer">Atribusi &amp; lisensi GADM</a>.</p>
+            {% if jember_boundaries_available.kabupaten or jember_boundaries_available.kecamatan or jember_boundaries_available.desa %}
+            <p class="layer-status" id="jemberBoundaryStatus" role="status" aria-live="polite">Tersedia: kabupaten (1), kecamatan (31), desa/kelurahan (248).</p>
+            {% endif %}
             {% if jember_rivers_available %}
             <p class="layer-note" id="jemberRiversStatus" role="status" aria-live="polite">Data sungai Jember tersedia; aktifkan layer untuk memuat 2.416 fitur.</p>
             {% endif %}
@@ -467,7 +498,16 @@
         <div class="map-legend">
             <h4>Legenda</h4>
             <ul>
-                <li><span class="legend-swatch" style="background:#38bdf8"></span> Kecamatan</li>
+                <li><span class="legend-swatch" style="background:#38bdf8"></span> Titik kecamatan (contoh)</li>
+                {% if jember_boundaries_available.kabupaten %}
+                <li><span class="legend-swatch" style="background:#0f766e"></span> Batas Kabupaten Jember · GADM</li>
+                {% endif %}
+                {% if jember_boundaries_available.kecamatan %}
+                <li><span class="legend-swatch" style="background:#0891b2"></span> Batas kecamatan · GADM</li>
+                {% endif %}
+                {% if jember_boundaries_available.desa %}
+                <li><span class="legend-swatch" style="background:#64748b"></span> Batas desa/kelurahan · GADM</li>
+                {% endif %}
                 <li><span class="legend-swatch" style="background:#0ea5e9"></span> Sungai (contoh)</li>
                 {% if jember_rivers_available %}
                 <li><span class="legend-swatch" style="background:#2563eb"></span> Sungai Jember · SHP 1:25.000</li>

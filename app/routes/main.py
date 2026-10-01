@@ -28,6 +28,11 @@ EPAKSI_LAYERS = {
     "petak": "irigasi_epaksi_petak.geojson",
 }
 JEMBER_RIVERS_FILE = "sungai_line_25k_jember.geojson"
+JEMBER_BOUNDARIES = {
+    "kabupaten": "batas_jember_kabupaten.geojson",
+    "kecamatan": "batas_jember_kecamatan.geojson",
+    "desa": "batas_jember_desa.geojson",
+}
 
 
 def _gis_data_dir():
@@ -174,6 +179,10 @@ def peta():
     jember_rivers_available = os.path.isfile(
         os.path.join(_gis_data_dir(), JEMBER_RIVERS_FILE)
     )
+    jember_boundaries_available = {
+        layer: os.path.isfile(os.path.join(_gis_data_dir(), filename))
+        for layer, filename in JEMBER_BOUNDARIES.items()
+    }
     return render_template("peta.html",
         app_name=current_app.config["APP_NAME"],
         app_subtitle=current_app.config["APP_SUBTITLE"],
@@ -181,6 +190,7 @@ def peta():
         user=current_user(),
         epaksi_available=epaksi_available,
         jember_rivers_available=jember_rivers_available,
+        jember_boundaries_available=jember_boundaries_available,
         is_logged_in=current_user() is not None)
 
 
@@ -265,6 +275,25 @@ def data_rivers():
 @main_bp.route("/peta/data/rivers/jember")
 def data_jember_rivers():
     file_path = os.path.join(_gis_data_dir(), JEMBER_RIVERS_FILE)
+    if not os.path.isfile(file_path):
+        abort(404)
+
+    response = send_file(
+        file_path,
+        mimetype="application/geo+json",
+        max_age=3600,
+    )
+    response.headers["Cache-Control"] = "public, max-age=3600"
+    return response
+
+
+@main_bp.route("/peta/data/boundaries/jember/<layer_name>")
+def data_jember_boundary(layer_name):
+    filename = JEMBER_BOUNDARIES.get(layer_name)
+    if filename is None:
+        abort(404)
+
+    file_path = os.path.join(_gis_data_dir(), filename)
     if not os.path.isfile(file_path):
         abort(404)
 

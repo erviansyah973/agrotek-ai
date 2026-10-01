@@ -61,4 +61,8 @@ Ketersediaan dan batas pemakaian gratis ditentukan oleh Google dan dapat berubah
 
 Layer bangunan irigasi, jaringan saluran, dan petak SHP-Epaksi disimpan di luar folder publik `static/` dan tidak disertakan dalam repository publik. Secara lokal, letakkan GeoJSON di `private_data/irigasi_epaksi/`; di Railway, pasang penyimpanan privat (misalnya volume `/data`) dan atur `EPAKSI_DATA_DIR=/data/irigasi_epaksi`, lalu salin tiga GeoJSON ke folder itu. Peta GIS, endpoint layer, dan unduhan paket hanya tersedia untuk role `admin`, dengan respons tanpa cache. Jika file tidak ada, kontrol layer dan unduhan tidak ditampilkan.
 
+## Layer sungai Kabupaten Jember
+
+Layer sungai Jember dibuat dari SHP garis sungai skala 1:25.000 yang dipotong dengan batas Kabupaten Jember. GeoJSON hasilnya (`sungai_line_25k_jember.geojson`, 2.416 fitur) disimpan di direktori data GIS yang sama, bukan di repository. Endpoint `/peta/data/rivers/jember` dan kontrol layernya bersifat publik; pengunjung dapat melihat dan mengunduh data tersebut. Tahun sumber tidak dicantumkan dan layer bukan pemantauan real-time. Untuk Railway, unggah file ke `/data/irigasi_epaksi/` pada volume yang sama.
+
 Sebelum deploy Railway, isi variabel `SECRET_KEY` dengan nilai acak minimal 32 karakter. Pada database baru, isi `ADMIN_INITIAL_PASSWORD` dengan password minimal 12 karakter; variabel itu juga dipakai sekali untuk mengganti password admin bawaan `admin123` jika masih aktif. Aplikasi produksi menolak startup jika secret tidak aman atau admin awal masih memakai password bawaan. Jangan menyimpan data SHP atau nilai rahasia di repository publik. Arsip sumber tidak disimpan di repository; tahun data tidak tercantum, sehingga layer ini bukan pemantauan real-time.

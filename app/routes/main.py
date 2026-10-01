@@ -27,15 +27,20 @@ EPAKSI_LAYERS = {
     "jaringan": "irigasi_epaksi_jaringan.geojson",
     "petak": "irigasi_epaksi_petak.geojson",
 }
+JEMBER_RIVERS_FILE = "sungai_line_25k_jember.geojson"
 
 
-def _epaksi_data_dir():
-    configured_path = os.environ.get("EPAKSI_DATA_DIR")
+def _gis_data_dir():
+    configured_path = os.environ.get("GIS_DATA_DIR") or os.environ.get("EPAKSI_DATA_DIR")
     if configured_path:
         return os.path.abspath(configured_path)
     return os.path.abspath(
         os.path.join(current_app.root_path, "..", "private_data", "irigasi_epaksi")
     )
+
+
+def _epaksi_data_dir():
+    return _gis_data_dir()
 
 
 # ============================================================
@@ -166,12 +171,16 @@ def peta():
         os.path.isfile(os.path.join(data_dir, filename))
         for filename in EPAKSI_LAYERS.values()
     )
+    jember_rivers_available = os.path.isfile(
+        os.path.join(_gis_data_dir(), JEMBER_RIVERS_FILE)
+    )
     return render_template("peta.html",
         app_name=current_app.config["APP_NAME"],
         app_subtitle=current_app.config["APP_SUBTITLE"],
         app_region=current_app.config["APP_REGION"],
         user=current_user(),
         epaksi_available=epaksi_available,
+        jember_rivers_available=jember_rivers_available,
         is_logged_in=current_user() is not None)
 
 
@@ -251,6 +260,21 @@ def data_rivers():
              [113.800, -8.080], [113.790, -8.150], [113.780, -8.220],
              [113.760, -8.300], [113.740, -8.360]]}},
     ]})
+
+
+@main_bp.route("/peta/data/rivers/jember")
+def data_jember_rivers():
+    file_path = os.path.join(_gis_data_dir(), JEMBER_RIVERS_FILE)
+    if not os.path.isfile(file_path):
+        abort(404)
+
+    response = send_file(
+        file_path,
+        mimetype="application/geo+json",
+        max_age=3600,
+    )
+    response.headers["Cache-Control"] = "public, max-age=3600"
+    return response
 
 
 @main_bp.route("/peta/data/irrigation")

@@ -70,6 +70,12 @@
         opacity: 0.9,
     };
 
+    const styleJemberRivers = {
+        color: '#2563eb',
+        weight: 2,
+        opacity: 0.9,
+    };
+
     const styleIrrigation = {
         color: '#f59e0b',
         weight: 2.5,
@@ -141,6 +147,32 @@
         `);
     }
 
+    function bindJemberRiver(feature, layer) {
+        const properties = feature.properties || {};
+        const popup = document.createElement('div');
+        const title = document.createElement('div');
+        title.className = 'popup-title';
+        title.textContent = properties.NAMOBJ || 'Sungai';
+        popup.append(title);
+
+        [
+            ['Keterangan', properties.REMARK],
+            ['Kode unsur', properties.FCODE],
+        ].forEach(([label, value]) => {
+            if (!value) return;
+            const row = document.createElement('div');
+            row.className = 'popup-row';
+            const rowLabel = document.createElement('span');
+            const rowValue = document.createElement('span');
+            rowLabel.textContent = label;
+            rowValue.textContent = value;
+            row.append(rowLabel, rowValue);
+            popup.append(row);
+        });
+
+        layer.bindPopup(popup);
+    }
+
     function bindIrrigation(feature, layer) {
         const p = feature.properties || {};
         layer.bindPopup(`
@@ -182,6 +214,7 @@
     /* -------------------- LAYER STORAGE -------------------- */
     const activeLayers = {};
     const epaksiLoads = {};
+    let jemberRiversLoad = null;
     const districtData = { features: [] };
 
     function registerLayer(name, layer) {
@@ -219,6 +252,47 @@
                 registerLayer('rivers', layer);
             })
             .catch(err => console.error('[AGROTEK] rivers error:', err));
+    }
+
+    function loadJemberRivers() {
+        if (activeLayers.jemberRivers) {
+            activeLayers.jemberRivers.addTo(map);
+            return Promise.resolve(activeLayers.jemberRivers);
+        }
+        if (jemberRiversLoad) return jemberRiversLoad;
+
+        const status = document.getElementById('jemberRiversStatus');
+        if (status) status.textContent = 'Memuat data sungai Jember...';
+
+        jemberRiversLoad = fetch('/peta/data/rivers/jember')
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.json();
+            })
+            .then(geojson => {
+                if (geojson.type !== 'FeatureCollection' || !Array.isArray(geojson.features)) {
+                    throw new Error('Format GeoJSON tidak valid');
+                }
+                const layer = L.geoJSON(geojson, {
+                    onEachFeature: bindJemberRiver,
+                    style: styleJemberRivers,
+                });
+                registerLayer('jemberRivers', layer);
+                if (status) {
+                    status.textContent = `${geojson.features.length.toLocaleString('id-ID')} fitur sungai Jember dimuat.`;
+                }
+                return layer;
+            })
+            .catch(error => {
+                console.error('[AGROTEK] Gagal memuat sungai Jember:', error);
+                if (status) status.textContent = 'Gagal memuat sungai Jember. Matikan lalu aktifkan lagi untuk mencoba ulang.';
+                return null;
+            })
+            .finally(() => {
+                jemberRiversLoad = null;
+            });
+
+        return jemberRiversLoad;
     }
 
     function loadIrrigation() {
@@ -296,6 +370,10 @@
             }
             if (layer) {
                 layer.addTo(map);
+                return;
+            }
+            if (name === 'jemberRivers') {
+                loadJemberRivers();
                 return;
             }
             if (epaksiStyles[name]) loadEpaksiLayer(name);

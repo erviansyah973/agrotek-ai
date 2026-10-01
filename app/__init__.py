@@ -23,6 +23,7 @@ def create_app(config_name="default"):
         static_folder="../static",
     )
     app.config.from_object(config[config_name])
+    app.config["APP_ENV"] = config_name
     if config_name == "production":
         app.config["SECRET_KEY"] = production_secret
 
@@ -51,8 +52,10 @@ def create_app(config_name="default"):
     from app.routes.iot import iot_bp
     from app.routes.lahan import lahan_bp
     from app.routes.ndvi import ndvi_bp
+    from app.routes.dashboard import dashboard_bp
 
     app.register_blueprint(main_bp)
+    app.register_blueprint(dashboard_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(hub_bp)
     app.register_blueprint(admin_bp)

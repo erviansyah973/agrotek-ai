@@ -328,7 +328,7 @@
     </div>
 </header>
 
-{% if epaksi_available %}
+{% if epaksi_available or jember_rivers_available or jember_boundaries_available.kabupaten or jember_boundaries_available.kecamatan or jember_boundaries_available.desa %}
 {% set data_notice_variant = 'map' %}
 {% else %}
 {% set data_notice_variant = 'general' %}
@@ -347,8 +347,11 @@
             <h3>Pencarian</h3>
             <div class="search-box">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-                <input type="text" id="searchInput" placeholder="Cari kecamatan..." aria-label="Cari kecamatan">
+                <input type="text" id="searchInput" placeholder="{% if jember_boundaries_available.kecamatan %}Cari kecamatan...{% else %}Layer kecamatan belum tersedia{% endif %}" aria-label="Cari kecamatan"{% if not jember_boundaries_available.kecamatan %} disabled{% endif %}>
             </div>
+            {% if not jember_boundaries_available.kecamatan %}
+            <p class="layer-note">Pencarian kecamatan tersedia setelah data batas kecamatan dipasang.</p>
+            {% endif %}
             <ul class="search-results" id="searchResults"></ul>
         </div>
 
@@ -387,17 +390,17 @@
                     <label class="layer-item">
                         <input type="checkbox" data-layer="jemberRivers">
                         <span class="layer-swatch" style="background:#2563eb"></span>
-                        <span>Sungai Jember · skala 1:25.000</span>
+                        <span>Sungai Jember · data arsip</span>
                     </label>
                 </li>
                 {% endif %}
             </ul>
-            <p class="layer-note">Batas wilayah: GADM 4.1, untuk penggunaan nonkomersial; bukan batas legal. <a href="https://gadm.org/license.html" target="_blank" rel="noopener noreferrer">Atribusi &amp; lisensi GADM</a>.</p>
             {% if jember_boundaries_available.kabupaten or jember_boundaries_available.kecamatan or jember_boundaries_available.desa %}
-            <p class="layer-status" id="jemberBoundaryStatus" role="status" aria-live="polite">Tersedia: kabupaten (1), kecamatan (31), desa/kelurahan (248).</p>
+            <p class="layer-note">Batas GADM 4.1 hanya untuk penggunaan nonkomersial dan bukan batas legal. <a href="https://gadm.org/license.html" target="_blank" rel="noopener noreferrer">Atribusi &amp; lisensi GADM</a>.</p>
+            <p class="layer-status" id="jemberBoundaryStatus" role="status" aria-live="polite">Aktifkan layer batas yang tersedia untuk memuat datanya.</p>
             {% endif %}
             {% if jember_rivers_available %}
-            <p class="layer-note" id="jemberRiversStatus" role="status" aria-live="polite">Data sungai Jember tersedia; aktifkan layer untuk memuat 2.416 fitur.</p>
+            <p class="layer-note" id="jemberRiversStatus" role="status" aria-live="polite">Dataset sungai tersedia; aktifkan layer untuk memuat fitur.</p>
             {% endif %}
         </div>
 
@@ -410,21 +413,21 @@
                     <label class="layer-item">
                         <input type="checkbox" data-layer="epaksiBuildings">
                         <span class="layer-swatch" style="background:#ef4444"></span>
-                        <span>Bangunan irigasi (3.926)</span>
+                        <span>Bangunan irigasi</span>
                     </label>
                 </li>
                 <li>
                     <label class="layer-item">
                         <input type="checkbox" data-layer="epaksiNetworks">
                         <span class="layer-swatch" style="background:#f97316"></span>
-                        <span>Jaringan saluran (2.769)</span>
+                        <span>Jaringan saluran</span>
                     </label>
                 </li>
                 <li>
                     <label class="layer-item">
                         <input type="checkbox" data-layer="epaksiParcels">
                         <span class="layer-swatch" style="background:#22c55e"></span>
-                        <span>Petak irigasi (362)</span>
+                        <span>Petak irigasi</span>
                     </label>
                 </li>
             </ul>
@@ -487,7 +490,7 @@
                 <li><span class="legend-swatch" style="background:#64748b"></span> Batas desa/kelurahan · GADM</li>
                 {% endif %}
                 {% if jember_rivers_available %}
-                <li><span class="legend-swatch" style="background:#2563eb"></span> Sungai Jember · SHP 1:25.000</li>
+                <li><span class="legend-swatch" style="background:#2563eb"></span> Sungai Jember · dataset arsip</li>
                 {% endif %}
                 {% if epaksi_available %}
                 <li><span class="legend-swatch" style="background:#ef4444"></span> Bangunan irigasi · SHP-Epaksi</li>
@@ -517,7 +520,8 @@
         center: [-8.1845, 113.6681],
         zoom: 10,
         tileUrl: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        dataUrl: "/peta/data/__LAYER__"
+        dataUrl: "/peta/data/__LAYER__",
+        riversUrl: {{ jember_rivers_url|tojson }}
     };
 </script>
 <script src="{{ url_for('static', filename='js/peta.js') }}"></script>

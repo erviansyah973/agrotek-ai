@@ -205,6 +205,7 @@
             <button type="submit" class="login-submit">Masuk →</button>
         </form>
 
+        {% if show_demo_accounts %}
         <div class="login-help">
             <p>Akun demo (klik untuk isi otomatis)</p>
             <div class="login-accounts">
@@ -212,6 +213,7 @@
                     <strong>Umum</strong>
                     <span>umum</span>
                 </div>
+                {% endif %}
                 <div class="login-account" onclick="fillLogin('mahasiswa','mhs123')">
                     <strong>Mahasiswa</strong>
                     <span>mahasiswa</span>

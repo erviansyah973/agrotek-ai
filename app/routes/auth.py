@@ -43,6 +43,7 @@ def login():
         app_name=current_app.config["APP_NAME"],
         app_subtitle=current_app.config["APP_SUBTITLE"],
         error=error,
+        show_demo_accounts=current_app.config["DEBUG"],
     )
 
 

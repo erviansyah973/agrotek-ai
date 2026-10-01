@@ -1,5 +1,5 @@
 """
-AGROTEK AI — IoT Ready
+AGROTEK AI — IoT Demo
 =======================
 Halaman /iot: monitoring device IoT + endpoint untuk ingest data sensor.
 Arsitektur siap menerima sensor fisik di masa depan.
@@ -19,18 +19,18 @@ iot_bp = Blueprint("iot", __name__)
 # DEVICE TERDAFTAR (DEMO)
 # ============================================================
 DEVICES = [
-    {"code": "AWLR-BDD-01",   "name": "AWLR Bedadung",           "type": "water_level",   "kecamatan": "Patrang",   "status": "online",  "battery": 87, "last_seen": "2 menit lalu"},
-    {"code": "AWLR-WLH-01",   "name": "AWLR Wuluhan",            "type": "water_level",   "kecamatan": "Wuluhan",   "status": "online",  "battery": 92, "last_seen": "1 menit lalu"},
-    {"code": "ARR-JGW-01",    "name": "Pos Hujan Jenggawah",     "type": "rain_gauge",    "kecamatan": "Jenggawah", "status": "online",  "battery": 78, "last_seen": "5 menit lalu"},
-    {"code": "ARR-AMB-01",    "name": "Pos Hujan Ambulu",        "type": "rain_gauge",    "kecamatan": "Ambulu",    "status": "online",  "battery": 81, "last_seen": "3 menit lalu"},
-    {"code": "AWS-SIL-01",    "name": "AWS Silo",                "type": "weather_station","kecamatan": "Silo",     "status": "offline", "battery": 12, "last_seen": "6 jam lalu"},
-    {"code": "SM-TNH-A01",    "name": "Sensor Tanah Blok A1",    "type": "soil_moisture", "kecamatan": "Wuluhan",   "status": "online",  "battery": 65, "last_seen": "1 menit lalu"},
-    {"code": "SM-TNH-A02",    "name": "Sensor Tanah Blok A2",    "type": "soil_moisture", "kecamatan": "Wuluhan",   "status": "online",  "battery": 71, "last_seen": "2 menit lalu"},
-    {"code": "SM-TNH-B01",    "name": "Sensor Tanah Blok B1",    "type": "soil_moisture", "kecamatan": "Ambulu",    "status": "warning", "battery": 34, "last_seen": "15 menit lalu"},
+    {"code": "AWLR-BDD-01",   "name": "AWLR Bedadung",           "type": "water_level",   "kecamatan": "Patrang",   "status": "online",  "battery": 87, "last_seen": "08:00 (contoh)"},
+    {"code": "AWLR-WLH-01",   "name": "AWLR Wuluhan",            "type": "water_level",   "kecamatan": "Wuluhan",   "status": "online",  "battery": 92, "last_seen": "08:05 (contoh)"},
+    {"code": "ARR-JGW-01",    "name": "Pos Hujan Jenggawah",     "type": "rain_gauge",    "kecamatan": "Jenggawah", "status": "online",  "battery": 78, "last_seen": "08:10 (contoh)"},
+    {"code": "ARR-AMB-01",    "name": "Pos Hujan Ambulu",        "type": "rain_gauge",    "kecamatan": "Ambulu",    "status": "online",  "battery": 81, "last_seen": "08:12 (contoh)"},
+    {"code": "AWS-SIL-01",    "name": "AWS Silo",                "type": "weather_station","kecamatan": "Silo",     "status": "offline", "battery": 12, "last_seen": "06:00 (contoh)"},
+    {"code": "SM-TNH-A01",    "name": "Sensor Tanah Blok A1",    "type": "soil_moisture", "kecamatan": "Wuluhan",   "status": "online",  "battery": 65, "last_seen": "08:15 (contoh)"},
+    {"code": "SM-TNH-A02",    "name": "Sensor Tanah Blok A2",    "type": "soil_moisture", "kecamatan": "Wuluhan",   "status": "online",  "battery": 71, "last_seen": "08:15 (contoh)"},
+    {"code": "SM-TNH-B01",    "name": "Sensor Tanah Blok B1",    "type": "soil_moisture", "kecamatan": "Ambulu",    "status": "warning", "battery": 34, "last_seen": "08:14 (contoh)"},
 ]
 
 # ============================================================
-# PEMBACAAN SENSOR TERKINI (DEMO - realtime)
+# CONTOH PEMBACAAN SENSOR (DATA SIMULASI)
 # ============================================================
 LATEST_READINGS = [
     {"device_code": "AWLR-BDD-01", "parameter": "water_level",  "value": 182,  "unit": "cm",    "time": "08:00", "quality": "good"},
@@ -93,17 +93,19 @@ def data_devices():
     """Endpoint JSON: daftar device."""
     return jsonify({
         "total": len(DEVICES),
+        "data_mode": "simulated",
         "devices": DEVICES,
     })
 
 
 @iot_bp.route("/iot/data/readings")
 def data_readings():
-    """Endpoint JSON: pembacaan terbaru (bisa di-polling oleh JS)."""
+    """Endpoint JSON: static sample readings, not current sensor measurements."""
     return jsonify({
         "count": len(LATEST_READINGS),
+        "data_mode": "simulated",
         "readings": LATEST_READINGS,
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": None,
     })
 
 

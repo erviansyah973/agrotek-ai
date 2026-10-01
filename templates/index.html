@@ -99,9 +99,7 @@
             <a href="#dashboard" class="btn btn-ghost btn-lg">Lihat Dashboard →</a>
         </div>
         <div class="hero-meta reveal">
-            <span><span class="dot dot-live"></span>Sistem aktif</span>
-            <span>•</span>
-            <span id="heroClock">—</span>
+            <span>Prototipe · Data simulasi</span>
         </div>
     </div>
 
@@ -118,7 +116,7 @@
         <div class="section-head reveal">
             <span class="eyebrow">Statistik Wilayah</span>
             <h2>Ringkasan Data Spasial</h2>
-            <p class="section-desc">Angka DEMO — akan tersinkronisasi otomatis dengan database PostGIS.</p>
+            <p class="section-desc">Angka contoh untuk demonstrasi; belum diverifikasi sebagai data lapangan aktual.</p>
         </div>
         <div class="stats-grid">
             {% for s in stats %}
@@ -136,15 +134,15 @@
 </section>
 
 <!-- ============================================================
-     3. LIVE MONITORING
+     3. CONTOH DATA SIMULASI
      ============================================================ -->
 <section class="section section-dark" id="monitoring">
     <div class="section-bg-grid" aria-hidden="true"></div>
     <div class="container">
         <div class="section-head section-head-light reveal">
-            <span class="eyebrow eyebrow-light">Live Monitoring</span>
-            <h2>Status Platform Real-Time</h2>
-            <p class="section-desc">Ringkasan kondisi modul utama. Akan digantikan oleh feed IoT pada fase lanjutan.</p>
+            <span class="eyebrow eyebrow-light">Data Simulasi</span>
+            <h2>Contoh Status Modul</h2>
+            <p class="section-desc">Nilai demonstrasi untuk menunjukkan rancangan informasi modul. Belum terhubung ke feed pemantauan lapangan.</p>
         </div>
         <div class="monitor-grid">
             {% for m in monitoring %}
@@ -159,9 +157,7 @@
             {% endfor %}
         </div>
         <div class="monitor-footer reveal">
-            <span><span class="dot dot-live"></span>Last updated: <strong id="lastUpdated">—</strong></span>
-            <span>•</span>
-            <span>Sumber: DEMO</span>
+            <span>Semua nilai pada bagian ini adalah contoh simulasi.</span>
         </div>
     </div>
 </section>
@@ -250,7 +246,7 @@
                 </table>
             </div>
             <div class="panel reveal">
-                <header><h3>Monitoring Sensor Terkini</h3></header>
+                <header><h3>Contoh Pembacaan Sensor</h3><span class="chart-tag">DATA SIMULASI</span></header>
                 <table class="data-table">
                     <thead><tr><th>Waktu</th><th>Sensor</th><th>Param</th><th>Nilai</th></tr></thead>
                     <tbody>
@@ -285,7 +281,7 @@
                     Jember · EPSG:4326
                 </div>
                 <div class="map-badge map-badge-tr">
-                    <span class="dot dot-live"></span> Live
+                    DATA DEMO
                 </div>
                 <div class="map-pins">
                     <span class="pin pin-a"></span>
@@ -403,8 +399,7 @@
         <div class="container footer-bottom-inner">
             <p>&copy; 2026 AGROTEK AI — Kabupaten Jember, Jawa Timur.</p>
             <p class="footer-status">
-                <span class="dot dot-live"></span>
-                System Status: <strong>Online</strong>
+                Data platform: <strong>Simulasi</strong>
             </p>
         </div>
     </div>

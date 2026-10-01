@@ -12,6 +12,8 @@ hub_bp = Blueprint("hub", __name__)
 MODULES = [
     {"id": "statistik", "title": "Statistik Wilayah", "desc": "Data spasial & statistik Kabupaten Jember.",
      "icon": "📊", "color": "emerald", "endpoint": "main.statistik", "perm": "view_statistik"},
+    {"id": "dashboard", "title": "Dashboard", "desc": "Ringkasan indikator pertanian, hidrologi, dan risiko (data simulasi).",
+     "icon": "📈", "color": "emerald", "endpoint": "dashboard.index", "perm": "view_statistik"},
     {"id": "pertanian", "title": "Pertanian", "desc": "Komoditas, produksi, dan kalender tanam.",
      "icon": "🌱", "color": "emerald", "endpoint": "pertanian.index", "perm": "view_statistik"},
     {"id": "irigasi", "title": "Smart Irrigation", "desc": "Jaringan irigasi, bangunan air, dan neraca air.",

@@ -236,7 +236,7 @@
         const status = document.getElementById('jemberRiversStatus');
         if (status) status.textContent = 'Memuat data sungai Jember...';
 
-        jemberRiversLoad = fetch('/peta/data/rivers/jember')
+        jemberRiversLoad = fetch(CFG.riversUrl || '/peta/data/rivers/jember')
             .then(response => {
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 return response.json();

@@ -6,7 +6,7 @@
 
     console.log('[AGROTEK] IoT module loaded.');
 
-    /* Auto-refresh pembacaan sensor tiap 30 detik (siap untuk real-time) */
+    /* Poll the gateway health endpoint; this does not refresh simulated readings. */
     let refreshCount = 0;
 
     async function checkIoTStatus() {
@@ -23,7 +23,7 @@
     // Cek status setelah halaman load
     checkIoTStatus();
 
-    // Polling tiap 60 detik (bisa ditingkatkan real-time nanti)
+    // Recheck service availability every minute.
     setInterval(checkIoTStatus, 60000);
 
     /* Highlight baris device yang baru update (opsional) */
@@ -35,5 +35,5 @@
         }, i * 40);
     });
 
-    console.log('[AGROTEK] IoT page ready. Endpoint ingest siap menerima data sensor.');
+    console.log('[AGROTEK] IoT demo page ready. Ingest endpoint is a placeholder.');
 })();

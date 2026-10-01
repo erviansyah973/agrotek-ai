@@ -2,7 +2,7 @@
 AGROTEK AI — Early Warning System
 ==================================
 Halaman /risiko: monitoring risiko banjir & kekeringan.
-Auto-focus peta + status real-time.
+Auto-focus peta + contoh status risiko berbasis data simulasi.
 """
 
 from flask import Blueprint, render_template, current_app, jsonify

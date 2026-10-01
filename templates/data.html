@@ -23,6 +23,16 @@
         background: rgba(255,255,255,.03);
         transition: all .2s;
     }
+    .filter-search button {
+        flex: 0 0 auto;
+        padding: 7px 12px;
+        border: 1px solid rgba(52,211,153,.28);
+        border-radius: 8px;
+        color: #6ee7b7;
+        background: rgba(52,211,153,.08);
+        font-size: .78rem;
+        font-weight: 700;
+    }
     .filter-search:focus-within {
         border-color: #34d399;
         background: rgba(52,211,153,.04);
@@ -173,42 +183,48 @@
     <div class="container">
 
         <div class="filter-bar">
-            <form method="get" action="/data" style="display:contents;">
+            <form method="get" action="{{ url_for('main.data_center') }}" style="display:contents;">
                 <div class="filter-search">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
                     <input type="text" name="q" value="{{ current_q }}" placeholder="Cari dataset, sumber, deskripsi..." autocomplete="off">
+                    {% if current_category != 'all' %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
+                    {% if current_status != 'all' %}<input type="hidden" name="status" value="{{ current_status }}">{% endif %}
+                    <button type="submit">Cari</button>
                 </div>
-                {% if current_category != 'all' %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
-                {% if current_status != 'all' %}<input type="hidden" name="status" value="{{ current_status }}">{% endif %}
             </form>
 
             <div class="filter-pills">
-                <a href="{{ url_for('main.data_center') }}" class="pill {% if current_category == 'all' %}active{% endif %}">Semua</a>
+                <a href="{{ url_for('main.data_center', status=current_status if current_status != 'all' else None, q=current_q if current_q else None) }}"
+                   class="pill {% if current_category == 'all' %}active{% endif %}"{% if current_category == 'all' %} aria-current="page"{% endif %}>Semua</a>
                 {% for c in categories %}
-                <a href="{{ url_for('main.data_center', category=c.key, status=current_status if current_status != 'all' else None) }}"
-                   class="pill {% if current_category == c.key %}active{% endif %}">
+                <a href="{{ url_for('main.data_center', category=c.key, status=current_status if current_status != 'all' else None, q=current_q if current_q else None) }}"
+                   class="pill {% if current_category == c.key %}active{% endif %}"{% if current_category == c.key %} aria-current="page"{% endif %}>
                     {{ c.label }} <span style="opacity:.6;font-family:monospace;margin-left:4px;">{{ c.count }}</span>
                 </a>
                 {% endfor %}
             </div>
 
             <div class="filter-pills" style="padding-top:12px;border-top:1px dashed rgba(255,255,255,.06);">
-                <a href="{{ url_for('main.data_center', category=current_category if current_category != 'all' else None) }}"
-                   class="pill {% if current_status == 'all' %}active{% endif %}">Semua Status</a>
-                <a href="{{ url_for('main.data_center', category=current_category if current_category != 'all' else None, status='PUBLIC') }}"
-                   class="pill {% if current_status == 'PUBLIC' %}active{% endif %}">
+                <a href="{{ url_for('main.data_center', category=current_category if current_category != 'all' else None, q=current_q if current_q else None) }}"
+                   class="pill {% if current_status == 'all' %}active{% endif %}"{% if current_status == 'all' %} aria-current="page"{% endif %}>Semua Status</a>
+                <a href="{{ url_for('main.data_center', category=current_category if current_category != 'all' else None, status='PUBLIC', q=current_q if current_q else None) }}"
+                   class="pill {% if current_status == 'PUBLIC' %}active{% endif %}"{% if current_status == 'PUBLIC' %} aria-current="page"{% endif %}>
                     Public <span style="opacity:.6;font-family:monospace;margin-left:4px;">{{ status_counts.PUBLIC }}</span>
                 </a>
-                <a href="{{ url_for('main.data_center', category=current_category if current_category != 'all' else None, status='RESTRICTED') }}"
-                   class="pill {% if current_status == 'RESTRICTED' %}active{% endif %}">
+                <a href="{{ url_for('main.data_center', category=current_category if current_category != 'all' else None, status='RESTRICTED', q=current_q if current_q else None) }}"
+                   class="pill {% if current_status == 'RESTRICTED' %}active{% endif %}"{% if current_status == 'RESTRICTED' %} aria-current="page"{% endif %}>
                     Restricted <span style="opacity:.6;font-family:monospace;margin-left:4px;">{{ status_counts.RESTRICTED }}</span>
                 </a>
-                <a href="{{ url_for('main.data_center', category=current_category if current_category != 'all' else None, status='INTERNAL') }}"
-                   class="pill {% if current_status == 'INTERNAL' %}active{% endif %}">
+                <a href="{{ url_for('main.data_center', category=current_category if current_category != 'all' else None, status='INTERNAL', q=current_q if current_q else None) }}"
+                   class="pill {% if current_status == 'INTERNAL' %}active{% endif %}"{% if current_status == 'INTERNAL' %} aria-current="page"{% endif %}>
                     Internal <span style="opacity:.6;font-family:monospace;margin-left:4px;">{{ status_counts.INTERNAL }}</span>
                 </a>
             </div>
         </div>
+
+        <p class="muted-sm" role="status" style="margin:0 0 16px;">
+            Menampilkan {{ datasets|length }} dari {{ dataset_count }} dataset.
+        </p>
 
         {% if datasets %}
         <div class="dataset-grid">
@@ -254,8 +270,4 @@
     </div>
 </section>
 
-{% endblock %}
-
-{% block body_extra %}
-<script src="{{ url_for('static', filename='js/data_center.js') }}"></script>
 {% endblock %}

@@ -16,6 +16,7 @@ from flask import (
     request,
     Response,
     send_file,
+    url_for,
 )
 from app.auth_utils import require_login, require_role, current_user
 from app import data_catalog as catalog
@@ -46,6 +47,13 @@ def _gis_data_dir():
 
 def _epaksi_data_dir():
     return _gis_data_dir()
+
+
+def _gadm_public_distribution_allowed():
+    return (
+        current_app.config.get("APP_ENV") != "production"
+        or os.environ.get("GADM_PUBLIC_DISTRIBUTION_ALLOWED") == "true"
+    )
 
 
 # ============================================================
@@ -87,7 +95,7 @@ MODULES_DEMO = [
     {"icon": "🌱", "color": "emerald", "title": "Pertanian",         "desc": "Komoditas, produksi, produktivitas, dan kalender tanam."},
     {"icon": "💧", "color": "sky",     "title": "Smart Irrigation",  "desc": "Jaringan irigasi, bendung, saluran, dan neraca air."},
     {"icon": "🌊", "color": "cyan",    "title": "Hydrology",         "desc": "Curah hujan, debit, tinggi muka air, dan DAS."},
-    {"icon": "⚠️", "color": "red",     "title": "Early Warning",     "desc": "Risiko banjir & kekeringan dengan status real-time."},
+    {"icon": "⚠️", "color": "red",     "title": "Early Warning",     "desc": "Contoh risiko banjir & kekeringan berbasis data simulasi."},
     {"icon": "🗺️", "color": "amber",   "title": "Analisis Lahan",    "desc": "Kesesuaian lahan dengan metode weighted overlay."},
     {"icon": "🤖", "color": "purple",  "title": "AGROTEK AI",        "desc": "Rekomendasi berbasis parameter spasial dengan transparansi penuh."},
 ]
@@ -121,12 +129,83 @@ def demo():
 @main_bp.route("/peta3d")
 def peta3d():
     """3D WebGIS Google-Earth style dengan SHP asli Jember."""
+    data_dir = _gis_data_dir()
+    epaksi_dir = _epaksi_data_dir()
+    gadm_available = _gadm_public_distribution_allowed()
+    layer_availability = {
+        layer: gadm_available and os.path.isfile(os.path.join(data_dir, filename))
+        for layer, filename in JEMBER_BOUNDARIES.items()
+    }
+    layer_availability.update({
+        layer: os.path.isfile(os.path.join(epaksi_dir, filename))
+        for layer, filename in EPAKSI_LAYERS.items()
+    })
+    layer_endpoints = {
+        **{
+            layer: url_for("main.data_jember_boundary", layer_name=layer)
+            for layer in JEMBER_BOUNDARIES
+        },
+        **{
+            layer: url_for("main.data_epaksi", layer_name=layer)
+            for layer in EPAKSI_LAYERS
+        },
+    }
+    optional_layers = [
+        {
+            "key": "kabupaten",
+            "label": "Kabupaten Jember",
+            "symbol": "▱",
+            "color": "#fb7185",
+            "kind": "boundary",
+        },
+        {
+            "key": "kecamatan",
+            "label": "Kecamatan",
+            "symbol": "▱",
+            "color": "#22d3ee",
+            "kind": "boundary",
+        },
+        {
+            "key": "desa",
+            "label": "Desa / Kelurahan",
+            "symbol": "▱",
+            "color": "#c4b5fd",
+            "kind": "boundary",
+        },
+        {
+            "key": "bangunan",
+            "label": "Bangunan",
+            "symbol": "▰",
+            "color": "#fb923c",
+            "kind": "asset",
+        },
+        {
+            "key": "jaringan",
+            "label": "Jaringan",
+            "symbol": "━",
+            "color": "#facc15",
+            "kind": "asset",
+        },
+        {
+            "key": "petak",
+            "label": "Petak",
+            "symbol": "▰",
+            "color": "#a3e635",
+            "kind": "asset",
+        },
+    ]
+    for layer in optional_layers:
+        layer["available"] = layer_availability[layer["key"]]
+        layer["endpoint"] = layer_endpoints[layer["key"]]
     return render_template(
         "peta3d.html",
         app_name=current_app.config["APP_NAME"],
         app_subtitle=current_app.config["APP_SUBTITLE"],
         app_region=current_app.config["APP_REGION"],
         user=current_user(),
+        layer_availability=layer_availability,
+        layer_endpoints=layer_endpoints,
+        optional_layers=optional_layers,
         is_logged_in=current_user() is not None,
     )
 
@@ -141,13 +220,40 @@ def peta():
         os.path.isfile(os.path.join(data_dir, filename))
         for filename in EPAKSI_LAYERS.values()
     )
-    jember_rivers_available = os.path.isfile(
-        os.path.join(_gis_data_dir(), JEMBER_RIVERS_FILE)
+    jember_rivers_archive = os.path.join(_gis_data_dir(), JEMBER_RIVERS_FILE)
+    jember_rivers_bundled = os.path.join(
+        current_app.static_folder, "data", "sungai_jember.geojson"
     )
+    if os.path.isfile(jember_rivers_archive):
+        jember_rivers_url = url_for("main.data_jember_rivers")
+    elif os.path.isfile(jember_rivers_bundled):
+        jember_rivers_url = url_for("static", filename="data/sungai_jember.geojson")
+    else:
+        jember_rivers_url = None
+    jember_rivers_available = jember_rivers_url is not None
+    gadm_available = _gadm_public_distribution_allowed()
     jember_boundaries_available = {
-        layer: os.path.isfile(os.path.join(_gis_data_dir(), filename))
+        layer: gadm_available and os.path.isfile(os.path.join(_gis_data_dir(), filename))
         for layer, filename in JEMBER_BOUNDARIES.items()
     }
+    map_layer_descriptions = []
+    if jember_rivers_available:
+        map_layer_descriptions.append(
+            "Dataset sungai tersedia; metadata sumber dan tahun pembaruan belum lengkap."
+        )
+    if any(jember_boundaries_available.values()):
+        map_layer_descriptions.append(
+            "Layer batas GADM tersedia; bukan batas legal dan hanya untuk penggunaan nonkomersial."
+        )
+    if epaksi_available:
+        map_layer_descriptions.append(
+            "Aset irigasi SHP-Epaksi tersedia sebagai arsip, bukan pemantauan real-time."
+        )
+    map_layer_unavailable = [
+        f"Batas {layer} GADM belum dipasang."
+        for layer, available in jember_boundaries_available.items()
+        if not available
+    ]
     return render_template("peta.html",
         app_name=current_app.config["APP_NAME"],
         app_subtitle=current_app.config["APP_SUBTITLE"],
@@ -155,7 +261,10 @@ def peta():
         user=current_user(),
         epaksi_available=epaksi_available,
         jember_rivers_available=jember_rivers_available,
+        jember_rivers_url=jember_rivers_url,
         jember_boundaries_available=jember_boundaries_available,
+        map_layer_descriptions=map_layer_descriptions,
+        map_layer_unavailable=map_layer_unavailable,
         is_logged_in=current_user() is not None)
 
 
@@ -224,7 +333,7 @@ def data_jember_rivers():
 @main_bp.route("/peta/data/boundaries/jember/<layer_name>")
 def data_jember_boundary(layer_name):
     filename = JEMBER_BOUNDARIES.get(layer_name)
-    if filename is None:
+    if filename is None or not _gadm_public_distribution_allowed():
         abort(404)
 
     file_path = os.path.join(_gis_data_dir(), filename)
@@ -287,6 +396,7 @@ def data_center():
         app_region=current_app.config["APP_REGION"],
         user=current_user(),
         datasets=datasets,
+        dataset_count=len(all_datasets),
         categories=categories,
         current_category=current_category,
         current_status=current_status,

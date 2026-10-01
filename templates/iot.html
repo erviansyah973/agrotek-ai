@@ -115,9 +115,9 @@
 <section class="modul-hero">
     <div class="modul-hero-grid" aria-hidden="true"></div>
     <div class="container modul-hero-inner">
-        <span class="modul-eyebrow">IoT Ready</span>
+        <span class="modul-eyebrow">IoT Demo</span>
         <h1>IoT <span class="grad">Monitoring Platform</span></h1>
-        <p>Contoh tampilan monitoring tinggi muka air, curah hujan, kelembapan tanah, dan cuaca dengan data simulasi. Arsitektur disiapkan untuk menerima perangkat sensor fisik.</p>
+        <p>Contoh tampilan tinggi muka air, curah hujan, kelembapan tanah, dan cuaca. Semua status, waktu, dan nilai perangkat di bawah adalah simulasi; belum ada feed sensor aktif.</p>
     </div>
 </section>
 
@@ -127,20 +127,20 @@
         <!-- KPI -->
         <div class="kpi-grid">
             <div class="kpi-card">
-                <div class="kpi-label">Total Device</div>
+                <div class="kpi-label">Contoh Device</div>
                 <div class="kpi-value">{{ kpi.total }} <small>device</small></div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-label">Online</div>
-                <div class="kpi-value" style="color:#34d399;">{{ kpi.online }} <small>device</small></div>
+                <div class="kpi-label">Contoh Aktif</div>
+                <div class="kpi-value" style="color:#94a3b8;">{{ kpi.online }} <small>device · DEMO</small></div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-label">Warning</div>
-                <div class="kpi-value" style="color:#fbbf24;">{{ kpi.warning }} <small>device</small></div>
+                <div class="kpi-label">Contoh Perlu Cek</div>
+                <div class="kpi-value" style="color:#94a3b8;">{{ kpi.warning }} <small>device · DEMO</small></div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-label">Offline</div>
-                <div class="kpi-value" style="color:#94a3b8;">{{ kpi.offline }} <small>device</small></div>
+                <div class="kpi-label">Contoh Nonaktif</div>
+                <div class="kpi-value" style="color:#94a3b8;">{{ kpi.offline }} <small>device · DEMO</small></div>
             </div>
         </div>
 
@@ -177,13 +177,13 @@
         <!-- DEVICES -->
         <div class="panel">
             <header>
-                <h3>Daftar Device IoT</h3>
-                <span class="chart-tag">{{ devices|length }} DEVICE</span>
+                <h3>Contoh Status Device IoT</h3>
+                <span class="chart-tag">DATA SIMULASI · {{ devices|length }} DEVICE</span>
             </header>
             <div style="overflow-x:auto;">
                 <table class="data-table">
                     <thead>
-                        <tr><th>Kode</th><th>Nama</th><th>Tipe</th><th>Kecamatan</th><th>Baterai</th><th>Status</th><th>Terakhir</th></tr>
+                        <tr><th>Kode</th><th>Nama Contoh</th><th>Tipe</th><th>Kecamatan</th><th>Baterai Contoh</th><th>Status Contoh</th><th>Waktu Contoh</th></tr>
                     </thead>
                     <tbody>
                         {% for d in devices %}
@@ -201,9 +201,9 @@
                                 <span class="mono">{{ d.battery }}%</span>
                             </td>
                             <td>
-                                {% if d.status == 'online' %}<span class="badge badge-emerald"><span class="status-dot online"></span>Online</span>
-                                {% elif d.status == 'warning' %}<span class="badge badge-amber"><span class="status-dot warning"></span>Warning</span>
-                                {% else %}<span class="badge badge-slate"><span class="status-dot offline"></span>Offline</span>{% endif %}
+                                {% if d.status == 'online' %}<span class="badge badge-slate"><span class="status-dot offline"></span>Aktif · DEMO</span>
+                                {% elif d.status == 'warning' %}<span class="badge badge-slate"><span class="status-dot offline"></span>Perlu Cek · DEMO</span>
+                                {% else %}<span class="badge badge-slate"><span class="status-dot offline"></span>Nonaktif · DEMO</span>{% endif %}
                             </td>
                             <td class="muted-sm">{{ d.last_seen }}</td>
                         </tr>
@@ -239,7 +239,7 @@
                 </table>
             </div>
             <p class="muted-sm" style="margin-top:14px;font-style:italic;">
-                Data DEMO. Untuk integrasi sensor fisik, gunakan <code style="background:rgba(255,255,255,.05);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;color:#c084fc;">POST /api/iot/ingest</code>.
+                Nilai, status, dan waktu di atas adalah contoh simulasi, bukan pembacaan sensor saat ini. Endpoint untuk uji integrasi: <code style="background:rgba(255,255,255,.05);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;color:#c084fc;">POST /api/iot/ingest</code>.
             </p>
         </div>
 
@@ -268,7 +268,7 @@
                         <tr>
                             <td><span class="badge badge-amber">GET</span></td>
                             <td><code>/iot/data/readings</code></td>
-                            <td>Pembacaan sensor terbaru</td>
+                            <td>Mengambil contoh pembacaan sensor simulasi</td>
                         </tr>
                     </tbody>
                 </table>

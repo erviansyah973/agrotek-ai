@@ -92,41 +92,6 @@ MODULES_DEMO = [
     {"icon": "🤖", "color": "purple",  "title": "AGROTEK AI",        "desc": "Rekomendasi berbasis parameter spasial dengan transparansi penuh."},
 ]
 
-DISTRICTS = [
-    {"id": 1,  "name": "Kencong",       "lat": -8.280, "lng": 113.380, "area_km2": 62.4,  "village_count": 5},
-    {"id": 2,  "name": "Gumukmas",      "lat": -8.320, "lng": 113.420, "area_km2": 93.2,  "village_count": 8},
-    {"id": 3,  "name": "Puger",         "lat": -8.300, "lng": 113.480, "area_km2": 142.6, "village_count": 12},
-    {"id": 4,  "name": "Wuluhan",       "lat": -8.300, "lng": 113.550, "area_km2": 105.2, "village_count": 7},
-    {"id": 5,  "name": "Ambulu",        "lat": -8.320, "lng": 113.620, "area_km2": 103.5, "village_count": 7},
-    {"id": 6,  "name": "Tempurejo",     "lat": -8.350, "lng": 113.720, "area_km2": 210.4, "village_count": 8},
-    {"id": 7,  "name": "Silo",          "lat": -8.200, "lng": 113.850, "area_km2": 206.3, "village_count": 9},
-    {"id": 8,  "name": "Mayang",        "lat": -8.120, "lng": 113.800, "area_km2": 60.3,  "village_count": 7},
-    {"id": 9,  "name": "Mumbulsari",    "lat": -8.150, "lng": 113.750, "area_km2": 56.8,  "village_count": 7},
-    {"id": 10, "name": "Jenggawah",     "lat": -8.220, "lng": 113.680, "area_km2": 48.7,  "village_count": 8},
-    {"id": 11, "name": "Ajung",         "lat": -8.200, "lng": 113.650, "area_km2": 40.2,  "village_count": 7},
-    {"id": 12, "name": "Rambipuji",     "lat": -8.200, "lng": 113.600, "area_km2": 54.9,  "village_count": 8},
-    {"id": 13, "name": "Balung",        "lat": -8.250, "lng": 113.550, "area_km2": 46.1,  "village_count": 8},
-    {"id": 14, "name": "Umbulsari",     "lat": -8.200, "lng": 113.420, "area_km2": 65.4,  "village_count": 10},
-    {"id": 15, "name": "Semboro",       "lat": -8.200, "lng": 113.380, "area_km2": 41.8,  "village_count": 6},
-    {"id": 16, "name": "Jombang",       "lat": -8.180, "lng": 113.350, "area_km2": 45.9,  "village_count": 6},
-    {"id": 17, "name": "Sumberbaru",    "lat": -8.100, "lng": 113.350, "area_km2": 132.7, "village_count": 10},
-    {"id": 18, "name": "Tanggul",       "lat": -8.050, "lng": 113.420, "area_km2": 100.5, "village_count": 8},
-    {"id": 19, "name": "Bangsalsari",   "lat": -8.100, "lng": 113.500, "area_km2": 88.3,  "village_count": 11},
-    {"id": 20, "name": "Panti",         "lat": -8.080, "lng": 113.600, "area_km2": 96.4,  "village_count": 7},
-    {"id": 21, "name": "Sukorambi",     "lat": -8.120, "lng": 113.680, "area_km2": 42.7,  "village_count": 5},
-    {"id": 22, "name": "Arjasa",        "lat": -8.080, "lng": 113.720, "area_km2": 60.5,  "village_count": 6},
-    {"id": 23, "name": "Pakusari",      "lat": -8.120, "lng": 113.750, "area_km2": 34.8,  "village_count": 7},
-    {"id": 24, "name": "Kalisat",       "lat": -8.100, "lng": 113.800, "area_km2": 89.6,  "village_count": 12},
-    {"id": 25, "name": "Ledokombo",     "lat": -8.080, "lng": 113.850, "area_km2": 105.8, "village_count": 10},
-    {"id": 26, "name": "Sumberjambe",   "lat": -8.020, "lng": 113.850, "area_km2": 96.2,  "village_count": 9},
-    {"id": 27, "name": "Sukowono",      "lat": -8.050, "lng": 113.780, "area_km2": 60.4,  "village_count": 12},
-    {"id": 28, "name": "Jelbuk",        "lat": -8.050, "lng": 113.720, "area_km2": 51.6,  "village_count": 6},
-    {"id": 29, "name": "Kaliwates",     "lat": -8.170, "lng": 113.700, "area_km2": 24.7,  "village_count": 7},
-    {"id": 30, "name": "Sumbersari",    "lat": -8.170, "lng": 113.720, "area_km2": 32.5,  "village_count": 7},
-    {"id": 31, "name": "Patrang",       "lat": -8.130, "lng": 113.700, "area_km2": 45.3,  "village_count": 8},
-]
-
-
 # ============================================================
 # PUBLIC
 # ============================================================
@@ -241,35 +206,6 @@ def data_epaksi(layer_name):
 # ------------------------------------------------------------
 # JSON endpoints peta
 # ------------------------------------------------------------
-@main_bp.route("/peta/data/districts")
-def data_districts():
-    features = [{
-        "type": "Feature",
-        "properties": {"id": d["id"], "name": d["name"],
-                       "area_km2": d["area_km2"], "village_count": d["village_count"]},
-        "geometry": {"type": "Point", "coordinates": [d["lng"], d["lat"]]},
-    } for d in DISTRICTS]
-    return jsonify({"type": "FeatureCollection", "features": features})
-
-
-@main_bp.route("/peta/data/rivers")
-def data_rivers():
-    return jsonify({"type": "FeatureCollection", "features": [
-        {"type": "Feature", "properties": {"name": "Kali Bedadung", "class": "utama"},
-         "geometry": {"type": "LineString", "coordinates": [
-             [113.640, -8.050], [113.660, -8.120], [113.680, -8.170],
-             [113.700, -8.230], [113.720, -8.280], [113.700, -8.350]]}},
-        {"type": "Feature", "properties": {"name": "Kali Tanggul", "class": "sekunder"},
-         "geometry": {"type": "LineString", "coordinates": [
-             [113.420, -8.020], [113.450, -8.100], [113.480, -8.180],
-             [113.500, -8.260], [113.490, -8.330]]}},
-        {"type": "Feature", "properties": {"name": "Kali Mayang", "class": "sekunder"},
-         "geometry": {"type": "LineString", "coordinates": [
-             [113.800, -8.080], [113.790, -8.150], [113.780, -8.220],
-             [113.760, -8.300], [113.740, -8.360]]}},
-    ]})
-
-
 @main_bp.route("/peta/data/rivers/jember")
 def data_jember_rivers():
     file_path = os.path.join(_gis_data_dir(), JEMBER_RIVERS_FILE)
@@ -302,19 +238,6 @@ def data_jember_boundary(layer_name):
     )
     response.headers["Cache-Control"] = "public, max-age=3600"
     return response
-
-
-@main_bp.route("/peta/data/irrigation")
-def data_irrigation():
-    return jsonify({"type": "FeatureCollection", "features": [
-        {"type": "Feature", "properties": {"name": "Saluran Primer Bedadung", "type": "primer"},
-         "geometry": {"type": "LineString", "coordinates": [
-             [113.680, -8.120], [113.660, -8.160], [113.640, -8.200],
-             [113.610, -8.240], [113.580, -8.270]]}},
-        {"type": "Feature", "properties": {"name": "Saluran Sekunder Wuluhan", "type": "sekunder"},
-         "geometry": {"type": "LineString", "coordinates": [
-             [113.580, -8.270], [113.560, -8.290], [113.540, -8.300]]}},
-    ]})
 
 
 # ============================================================

@@ -64,12 +64,6 @@
     });
 
     /* -------------------- STYLE DEFINITIONS -------------------- */
-    const styleRivers = {
-        color: '#0ea5e9',
-        weight: 3,
-        opacity: 0.9,
-    };
-
     const styleJemberRivers = {
         color: '#2563eb',
         weight: 2,
@@ -103,12 +97,6 @@
         },
     };
 
-    const styleIrrigation = {
-        color: '#f59e0b',
-        weight: 2.5,
-        dashArray: '5 4',
-    };
-
     const epaksiStyles = {
         epaksiBuildings: {
             style: { color: '#ef4444' },
@@ -140,40 +128,7 @@
         },
     };
 
-    /* Custom divIcon untuk marker kecamatan */
-    const districtIcon = L.divIcon({
-        className: 'agrotek-marker',
-        html: '<span></span>',
-        iconSize: [12, 12],
-        iconAnchor: [6, 6],
-    });
-
     /* -------------------- BINDERS -------------------- */
-    function bindDistrict(feature, layer) {
-        const p = feature.properties || {};
-        const name = p.name || '-';
-        layer.bindPopup(`
-            <div class="popup-title">Kecamatan ${name}</div>
-            <div class="popup-row"><span>Luas wilayah</span><span>${p.area_km2 || '-'} km²</span></div>
-            <div class="popup-row"><span>Jumlah desa</span><span>${p.village_count || '-'}</span></div>
-            <div class="popup-row"><span>Sumber data</span><span>DEMO</span></div>
-        `, { maxWidth: 260 });
-
-        layer.bindTooltip(name, {
-            direction: 'top',
-            offset: [0, -8],
-            className: 'agrotek-tooltip',
-        });
-    }
-
-    function bindRiver(feature, layer) {
-        const p = feature.properties || {};
-        layer.bindPopup(`
-            <div class="popup-title">${p.name || 'Sungai'}</div>
-            <div class="popup-row"><span>Kelas</span><span>${p.class || '-'}</span></div>
-        `);
-    }
-
     function bindJemberRiver(feature, layer) {
         const properties = feature.properties || {};
         const popup = document.createElement('div');
@@ -226,14 +181,6 @@
         layer.bindPopup(popup);
     }
 
-    function bindIrrigation(feature, layer) {
-        const p = feature.properties || {};
-        layer.bindPopup(`
-            <div class="popup-title">${p.name || 'Irigasi'}</div>
-            <div class="popup-row"><span>Tipe</span><span>${p.type || '-'}</span></div>
-        `);
-    }
-
     function bindEpaksiAsset(feature, layer) {
         const properties = feature.properties || {};
         const popup = document.createElement('div');
@@ -279,35 +226,6 @@
     }
 
     /* -------------------- LOAD LAYERS -------------------- */
-    function loadDistricts() {
-        return fetch('/peta/data/districts')
-            .then(r => r.json())
-            .then(geojson => {
-                districtData.features = geojson.features || [];
-
-                const layer = L.geoJSON(geojson, {
-                    onEachFeature: bindDistrict,
-                    pointToLayer: (feature, latlng) => L.marker(latlng, { icon: districtIcon }),
-                });
-
-                return registerLayer('districts', layer);
-            })
-            .catch(err => console.error('[AGROTEK] districts error:', err));
-    }
-
-    function loadRivers() {
-        return fetch('/peta/data/rivers')
-            .then(r => r.json())
-            .then(geojson => {
-                const layer = L.geoJSON(geojson, {
-                    onEachFeature: bindRiver,
-                    style: styleRivers,
-                });
-                registerLayer('rivers', layer);
-            })
-            .catch(err => console.error('[AGROTEK] rivers error:', err));
-    }
-
     function loadJemberRivers() {
         if (activeLayers.jemberRivers) {
             activeLayers.jemberRivers.addTo(map);
@@ -370,6 +288,9 @@
                 if (geojson.type !== 'FeatureCollection' || !Array.isArray(geojson.features)) {
                     throw new Error('Format GeoJSON tidak valid');
                 }
+                if (name === 'jemberBoundaryKecamatan') {
+                    districtData.features = geojson.features;
+                }
                 const layer = L.geoJSON(geojson, {
                     onEachFeature: (feature, featureLayer) => bindJemberBoundary(config, feature, featureLayer),
                     style: config.style,
@@ -388,19 +309,6 @@
             });
 
         return boundaryLoads[name];
-    }
-
-    function loadIrrigation() {
-        return fetch('/peta/data/irrigation')
-            .then(r => r.json())
-            .then(geojson => {
-                const layer = L.geoJSON(geojson, {
-                    onEachFeature: bindIrrigation,
-                    style: styleIrrigation,
-                });
-                registerLayer('irrigation', layer);
-            })
-            .catch(err => console.error('[AGROTEK] irrigation error:', err));
     }
 
     function loadEpaksiLayer(name) {
@@ -449,15 +357,6 @@
         return epaksiLoads[name];
     }
 
-    // Load semua layer paralel
-    Promise.all([
-        loadDistricts(),
-        loadRivers(),
-        loadIrrigation(),
-    ]).then(() => {
-        console.log('[AGROTEK] Semua layer dimuat.');
-    });
-
     /* -------------------- LAYER TOGGLE -------------------- */
     document.querySelectorAll('.layer-item input[data-layer]:checked').forEach(cb => {
         if (jemberBoundaryLayers[cb.dataset.layer]) loadJemberBoundary(cb.dataset.layer);
@@ -498,18 +397,22 @@
 
             if (!q) return;
 
+            const nameField = jemberBoundaryLayers.jemberBoundaryKecamatan.nameField;
             const matches = districtData.features
-                .filter(f => (f.properties.name || '').toLowerCase().includes(q))
+                .filter(f => (f.properties?.[nameField] || '').toLowerCase().includes(q))
                 .slice(0, 8);
 
             matches.forEach(f => {
                 const li = document.createElement('li');
-                li.textContent = f.properties.name;
+                const name = f.properties[nameField];
+                li.textContent = name;
                 li.addEventListener('click', () => {
-                    const [lng, lat] = f.geometry.coordinates;
-                    map.flyTo([lat, lng], 14, { duration: 0.8 });
+                    const bounds = L.geoJSON(f).getBounds();
+                    if (bounds.isValid()) {
+                        map.flyToBounds(bounds, { padding: [30, 30], maxZoom: 14, duration: 0.8 });
+                    }
                     searchResults.innerHTML = '';
-                    searchInput.value = f.properties.name;
+                    searchInput.value = name;
                 });
                 searchResults.appendChild(li);
             });

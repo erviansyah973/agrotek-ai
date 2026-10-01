@@ -59,7 +59,7 @@ Ketersediaan dan batas pemakaian gratis ditentukan oleh Google dan dapat berubah
 
 ## Layer aset irigasi SHP-Epaksi
 
-Layer bangunan irigasi, jaringan saluran, dan petak SHP-Epaksi disimpan di luar folder publik `static/` dan tidak disertakan dalam repository publik. Secara lokal, letakkan GeoJSON di `private_data/irigasi_epaksi/`; di Railway, pasang penyimpanan privat (misalnya volume `/data`) dan atur `EPAKSI_DATA_DIR=/data/irigasi_epaksi`, lalu salin tiga GeoJSON ke folder itu. Peta GIS, endpoint layer, dan unduhan paket hanya tersedia untuk role `admin`, dengan respons tanpa cache. Jika file tidak ada, kontrol layer dan unduhan tidak ditampilkan.
+Layer bangunan irigasi, jaringan saluran, dan petak SHP-Epaksi disimpan di volume Railway di luar folder publik `static/` dan tidak disertakan dalam repository publik. Secara lokal, letakkan GeoJSON di `private_data/irigasi_epaksi/`; di Railway, pasang volume `/data`, atur `EPAKSI_DATA_DIR=/data/irigasi_epaksi`, lalu salin tiga GeoJSON ke folder itu. Peta, endpoint GeoJSON, dan unduhan paket tersedia untuk publik dan dapat diakses atau disalin pengunjung. Jangan gunakan data ini bila lisensi/sumbernya tidak mengizinkan distribusi publik. Tahun dan status pembaruan arsip tidak tercantum; data bukan pemantauan real-time. Jika file tidak ada, kontrol layer dan unduhan tidak ditampilkan.
 
 ## Layer sungai Kabupaten Jember
 

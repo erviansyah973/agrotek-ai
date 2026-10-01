@@ -195,7 +195,6 @@ def peta():
 
 
 @main_bp.route("/peta/unduh/epaksi")
-@require_role("admin")
 def download_epaksi():
     data_dir = _epaksi_data_dir()
     if not all(os.path.isfile(os.path.join(data_dir, filename)) for filename in EPAKSI_LAYERS.values()):
@@ -215,12 +214,11 @@ def download_epaksi():
         download_name="agrotek-shp-epaksi-geojson.zip",
         max_age=0,
     )
-    response.headers["Cache-Control"] = "private, no-store"
+    response.headers["Cache-Control"] = "public, max-age=3600"
     return response
 
 
 @main_bp.route("/peta/data/epaksi/<layer_name>")
-@require_role("admin")
 def data_epaksi(layer_name):
     filename = EPAKSI_LAYERS.get(layer_name)
     if filename is None:
@@ -234,9 +232,9 @@ def data_epaksi(layer_name):
     response = send_file(
         file_path,
         mimetype="application/geo+json",
-        max_age=0,
+        max_age=3600,
     )
-    response.headers["Cache-Control"] = "private, no-store"
+    response.headers["Cache-Control"] = "public, max-age=3600"
     return response
 
 

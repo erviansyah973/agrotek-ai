@@ -328,7 +328,7 @@
     </div>
 </header>
 
-{% if user and user.get('role') == 'admin' and epaksi_available %}
+{% if epaksi_available %}
 {% set data_notice_variant = 'map' %}
 {% else %}
 {% set data_notice_variant = 'general' %}
@@ -422,10 +422,10 @@
             {% endif %}
         </div>
 
-        {% if user and user.get('role') == 'admin' and epaksi_available %}
+        {% if epaksi_available %}
         <div class="peta-section">
             <h3>Aset Irigasi · SHP-Epaksi</h3>
-            <p class="layer-note">4 daerah irigasi · WGS 84 · tahun data tidak dicantumkan. Pilih layer untuk memuat datanya.</p>
+            <p class="layer-note">Data arsip SHP-Epaksi · WGS 84 · bukan pemantauan real-time. Layer dan unduhan tersedia untuk publik.</p>
             <ul class="layer-list">
                 <li>
                     <label class="layer-item">
@@ -452,10 +452,10 @@
             <p class="layer-status" id="epaksiLayerStatus" role="status" aria-live="polite"></p>
         </div>
 
-        {% if user and user.get('role') == 'admin' and epaksi_available %}
+        {% if epaksi_available %}
         <div class="peta-section">
-            <h3>Unduh data · Admin</h3>
-            <p class="layer-note">Unduh paket GeoJSON dari tiga layer SHP-Epaksi.</p>
+            <h3>Unduh data SHP-Epaksi</h3>
+            <p class="layer-note">Paket GeoJSON tiga layer tersedia untuk publik.</p>
             <div class="tool-buttons">
                 <a class="tool-btn" href="{{ url_for('main.download_epaksi') }}" style="text-decoration:none">
                     <span aria-hidden="true">⬇️</span>
@@ -513,7 +513,7 @@
                 <li><span class="legend-swatch" style="background:#2563eb"></span> Sungai Jember · SHP 1:25.000</li>
                 {% endif %}
                 <li><span class="legend-swatch" style="background:#f59e0b"></span> Contoh irigasi (simulasi)</li>
-                {% if user and user.get('role') == 'admin' %}
+                {% if epaksi_available %}
                 <li><span class="legend-swatch" style="background:#ef4444"></span> Bangunan irigasi · SHP-Epaksi</li>
                 <li><span class="legend-swatch" style="background:#f97316"></span> Jaringan saluran · SHP-Epaksi</li>
                 <li><span class="legend-swatch" style="background:#22c55e"></span> Petak irigasi · SHP-Epaksi</li>

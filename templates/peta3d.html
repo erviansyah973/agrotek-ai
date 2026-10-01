@@ -149,6 +149,66 @@
             font-size: .65rem; font-weight: 700; letter-spacing: .1em;
             text-transform: uppercase;
         }
+        .layer-guidance {
+            margin: -1px 2px 9px; color: #8294a8;
+            font-size: .72rem; line-height: 1.5;
+        }
+        .preset-row { display: flex; gap: 8px; margin: 0 0 10px; }
+        .preset-btn, .clear-detail-btn {
+            min-height: 40px; padding: 8px 10px; border-radius: 8px;
+            border: 1px solid rgba(255,255,255,.13);
+            background: rgba(255,255,255,.045); color: #cbd5e1;
+            font: inherit; font-size: .76rem; cursor: pointer;
+        }
+        .preset-btn { flex: 1; }
+        .preset-btn.active {
+            border-color: rgba(110,231,183,.62); color: #d1fae5;
+            background: rgba(16,185,129,.15);
+        }
+        .preset-btn:hover, .clear-detail-btn:hover {
+            border-color: rgba(110,231,183,.5); color: #fff;
+        }
+        .active-layer-summary {
+            padding: 10px 11px; border-radius: 8px; margin-bottom: 8px;
+            background: rgba(125,211,252,.07);
+            border-left: 2px solid #7eb6c5;
+            color: #cbd5e1; font-size: .72rem; line-height: 1.5;
+        }
+        .active-layer-summary[data-density="high"] {
+            border-left-color: #f0b36c; background: rgba(240,179,108,.1);
+            color: #ffdfb3;
+        }
+        .active-layer-summary strong { color: #fff; }
+        .clear-detail-btn {
+            width: 100%; min-height: 36px; margin: 0 0 10px;
+            text-align: center; color: #b9c7d6;
+        }
+        .epaksi-legend {
+            display: grid; gap: 6px; margin: 8px 2px 11px;
+            color: #94a3b8; font-size: .68rem; line-height: 1.4;
+        }
+        .epaksi-legend-item { display: flex; align-items: center; gap: 8px; }
+        .legend-mark { position: relative; display: inline-block; flex: 0 0 22px; height: 12px; }
+        .legend-mark.building::before {
+            content: ''; position: absolute; left: 6px; top: 2px; width: 8px; height: 8px;
+            border-radius: 50%; background: #e39a64; border: 1px solid #17283a;
+        }
+        .legend-mark.network::before, .legend-mark.network::after {
+            content: ''; position: absolute; left: 0; top: 5px; width: 22px;
+            border-top: 4px solid #18313b;
+        }
+        .legend-mark.network::after { top: 6px; border-top: 2px solid #55bfd0; }
+        .legend-mark.plot::before {
+            content: ''; position: absolute; left: 5px; top: 1px; width: 12px; height: 10px;
+            background: rgba(188,197,139,.23); border: 1px solid #aeb985;
+        }
+        .mobile-secondary > summary { list-style: none; cursor: pointer; }
+        .mobile-secondary > summary::-webkit-details-marker { display: none; }
+        .mobile-secondary > summary::after {
+            content: '＋'; margin-left: auto; color: #94a3b8; font-size: .9rem;
+        }
+        .mobile-secondary[open] > summary::after { content: '−'; }
+        .mobile-secondary[open] > summary { margin-bottom: 12px; }
         .layer-status {
             min-height: 1.25rem; margin: 8px 2px 0;
             color: #94a3b8; font-size: .7rem; line-height: 1.5;
@@ -191,6 +251,28 @@
             background: linear-gradient(135deg, #10b981, #059669);
             border-color: #10b981; color: #fff; font-weight: 600;
         }
+        .basemap-btn:disabled { cursor: wait; opacity: .65; }
+        .basemap-status {
+            min-height: 1.2rem; margin: 8px 2px 0;
+            color: #94a3b8; font-size: .7rem; line-height: 1.5;
+        }
+        .basemap-status[data-state="loading"] { color: #7dd3fc; }
+        .basemap-status[data-state="error"] { color: #fca5a5; }
+        .basemap-status button {
+            margin-left: 6px; border: 0; padding: 0;
+            background: none; color: #6ee7b7; font: inherit;
+            text-decoration: underline; cursor: pointer;
+        }
+        .active-layer-chip {
+            position: absolute; top: 74px; left: 16px; z-index: 45;
+            max-width: min(620px, calc(100vw - 32px));
+            padding: 8px 12px; border-radius: 8px;
+            border: 1px solid rgba(255,255,255,.18);
+            background: rgba(10,22,40,.92); color: #d8e3ec;
+            box-shadow: 0 6px 20px rgba(0,0,0,.35);
+            font-size: .72rem; line-height: 1.4; pointer-events: none;
+        }
+        .active-layer-chip[data-density="high"] { border-color: rgba(240,179,108,.7); color: #ffdfb3; }
 
         .info-badge { font-size: .72rem; color: #94a3b8; line-height: 1.8; }
         .info-badge strong { color: #6ee7b7; }
@@ -278,14 +360,14 @@
 
         .marker-3d {
             width: 16px; height: 16px;
-            background: linear-gradient(135deg, #34d399, #0ea5e9);
-            border: 2px solid #fff; border-radius: 50%;
-            box-shadow: 0 0 0 4px rgba(52,211,153,.3), 0 0 20px rgba(52,211,153,.8);
+            background: #6f9c8c;
+            border: 2px solid rgba(241,245,249,.9); border-radius: 50%;
+            box-shadow: 0 0 0 3px rgba(67,113,100,.22);
             cursor: pointer; transition: all .2s;
         }
         .marker-3d:hover, .marker-3d:active {
             transform: scale(1.5);
-            box-shadow: 0 0 0 8px rgba(52,211,153,.25), 0 0 30px rgba(52,211,153,1);
+            box-shadow: 0 0 0 6px rgba(67,113,100,.24);
         }
 
         .maplibregl-popup-content {
@@ -334,16 +416,19 @@
         .loading p { font-size: .85rem; color: #6ee7b7; letter-spacing: .1em; text-transform: uppercase; }
 
         @media (max-width: 768px) {
-            .sidebar { top: 80px; width: 85%; max-width: 320px; padding-top: 16px; }
+            .sidebar { top: 80px; width: min(88%, 360px); max-width: 360px; padding-top: 16px; }
             .sidebar.closed { transform: translateX(-100%); }
             .menu-toggle { width: 52px; height: 52px; }
             .back-link { padding: 0 14px; font-size: .78rem; left: 76px; }
+            .active-layer-chip { top: 76px; left: 12px; max-width: calc(100vw - 24px); }
             .hud-pitch {
                 left: 16px; bottom: 16px;
                 padding: 6px 10px; font-size: .65rem; gap: 10px;
             }
             .ctrl-btn-mini { width: 48px; height: 48px; font-size: 1.25rem; }
             .maplibregl-ctrl-top-right { top: 80px !important; right: 8px !important; }
+            .sidebar .section-title { margin-bottom: 9px; }
+            .sidebar .section { margin-bottom: 14px; padding-bottom: 12px; }
         }
         @media (min-width: 769px) {
             .sidebar { width: 340px; box-shadow: 4px 0 40px rgba(0,0,0,.35); }
@@ -384,64 +469,20 @@
     {% include "partials/data_disclosure.html" %}
 
     <div class="section">
-        <div class="section-title">View Mode</div>
-        <button class="ctrl-btn active" id="btnTerrain">
-            <span class="icon">🗻</span><span>3D Terrain</span>
-        </button>
-        <button class="ctrl-btn" id="btnRotate">
-            <span class="icon">🔄</span><span>Auto-Rotate</span>
-        </button>
-        <button class="ctrl-btn" id="btnReset">
-            <span class="icon">🎯</span><span>Reset View</span>
-        </button>
-    </div>
-
-    <div class="section">
-        <div class="section-title">Basemap</div>
-        <div class="basemap-grid">
-            <button class="basemap-btn" data-basemap="street">🗺️ Street</button>
-            <button class="basemap-btn active" data-basemap="satellite">🛰️ Satellite</button>
-            <button class="basemap-btn" data-basemap="terrain">⛰️ Terrain</button>
-            <button class="basemap-btn" data-basemap="dark">🌙 Dark</button>
-        </div>
-    </div>
-
-    <div class="section">
-        <div class="section-title">Layer SHP</div>
-        <label class="layer-toggle">
-            <input type="checkbox" id="layerSHP_Sungai" aria-label="Sungai" checked>
-            <span class="check" aria-hidden="true">✓</span>
-            <span>🌊 Sungai</span>
-        </label>
-        <label class="layer-toggle">
-            <input type="checkbox" id="layerSHP_DAS" aria-label="DAS" checked>
-            <span class="check" aria-hidden="true">✓</span>
-            <span>💧 DAS</span>
-        </label>
-        <label class="layer-toggle">
-            <input type="checkbox" id="layerSHP_Irigasi" aria-label="Irigasi" checked>
-            <span class="check" aria-hidden="true">✓</span>
-            <span>🚿 Irigasi</span>
-        </label>
-        <label class="layer-toggle">
-            <input type="checkbox" id="layerMarker" aria-label="Kecamatan demo" checked>
-            <span class="check" aria-hidden="true">✓</span>
-            <span>📍 Kecamatan</span>
-        </label>
-        <label class="layer-toggle">
-            <input type="checkbox" id="layerBuilding" aria-label="Bangunan 3D demo" checked>
-            <span class="check" aria-hidden="true">✓</span>
-            <span>🏢 3D Building</span>
-        </label>
-    </div>
-
-    <div class="section">
         <div class="section-title">Batas &amp; Aset GIS</div>
+        <p class="layer-group-label">Tampilan peta</p>
+        <div class="preset-row" role="group" aria-label="Preset tampilan peta">
+            <button class="preset-btn active" type="button" data-preset="orientation">Orientasi</button>
+            <button class="preset-btn" type="button" data-preset="irrigation">Irigasi</button>
+        </div>
+        <p class="active-layer-summary" id="activeLayerSummary" role="status" aria-live="polite"></p>
+        <button class="clear-detail-btn" id="clearDetailLayers" type="button">Matikan semua detail</button>
         <p class="layer-group-label">Batas Administrasi · GADM</p>
+        <p class="layer-guidance">Tampilan awal: Kabupaten + Kecamatan. Desa lebih rapat; aktifkan hanya saat perlu detail lokal.</p>
         {% for layer in optional_layers if layer.kind == 'boundary' %}
         {% if layer.available %}
         <label class="layer-toggle" data-overlay-row="{{ layer.key }}">
-            <input type="checkbox" data-overlay-toggle="{{ layer.key }}" aria-label="{{ layer.label }}">
+            <input type="checkbox" data-overlay-toggle="{{ layer.key }}" aria-label="{{ layer.label }}" {% if layer.key in ['kabupaten', 'kecamatan'] %}checked{% endif %}>
             <span class="check" aria-hidden="true">✓</span>
             <span class="layer-swatch" aria-hidden="true" style="color:{{ layer.color }}">{{ layer.symbol }}</span>
             <span>{{ layer.label }}</span>
@@ -455,6 +496,12 @@
         {% endif %}
         {% endfor %}
         <p class="layer-group-label">SHP-Epaksi · Arsip</p>
+        <p class="layer-guidance">Bangunan = titik, Jaringan = garis, Petak = poligon. Simbol dan jenis geometri membantu membedakan aset saat digabungkan.</p>
+        <div class="epaksi-legend" aria-label="Legenda geometri Epaksi">
+            <div class="epaksi-legend-item"><span class="legend-mark building" aria-hidden="true"></span><span><strong>Bangunan</strong> · titik</span></div>
+            <div class="epaksi-legend-item"><span class="legend-mark network" aria-hidden="true"></span><span><strong>Jaringan</strong> · garis beraksen</span></div>
+            <div class="epaksi-legend-item"><span class="legend-mark plot" aria-hidden="true"></span><span><strong>Petak</strong> · poligon berisi tipis</span></div>
+        </div>
         {% for layer in optional_layers if layer.kind == 'asset' %}
         {% if layer.available %}
         <label class="layer-toggle" data-overlay-row="{{ layer.key }}">
@@ -476,26 +523,80 @@
     </div>
 
     <div class="section">
-        <div class="section-title">Opacity</div>
-        <div class="opacity-row">
-            <label>Sungai</label>
-            <input type="range" id="opSungai" min="0" max="100" value="95">
-            <span class="value" id="opSungaiVal">95%</span>
-        </div>
-        <div class="opacity-row">
-            <label>DAS</label>
-            <input type="range" id="opDAS" min="0" max="100" value="30">
-            <span class="value" id="opDASVal">30%</span>
-        </div>
-        <div class="opacity-row">
-            <label>Building</label>
-            <input type="range" id="opBuilding" min="0" max="100" value="85">
-            <span class="value" id="opBuildingVal">85%</span>
-        </div>
+        <div class="section-title">View Mode</div>
+        <button class="ctrl-btn active" id="btnTerrain">
+            <span class="icon">🗻</span><span>3D Terrain</span>
+        </button>
+        <button class="ctrl-btn" id="btnRotate">
+            <span class="icon">🔄</span><span>Auto-Rotate</span>
+        </button>
+        <button class="ctrl-btn" id="btnReset">
+            <span class="icon">🎯</span><span>Reset View</span>
+        </button>
     </div>
 
     <div class="section">
-        <div class="section-title">Kontrol</div>
+        <div class="section-title">Basemap</div>
+        <div class="basemap-grid">
+            <button class="basemap-btn" data-basemap="street" aria-pressed="false">🗺️ Street</button>
+            <button class="basemap-btn active" data-basemap="satellite" aria-pressed="true">🛰️ Satellite</button>
+            <button class="basemap-btn" data-basemap="terrain" aria-pressed="false">⛰️ Terrain</button>
+            <button class="basemap-btn" data-basemap="dark" aria-pressed="false">🌙 Dark</button>
+        </div>
+        <p class="basemap-status" id="basemapStatus" role="status" aria-live="polite"></p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Layer SHP · Detail</div>
+        <p class="layer-guidance">Data sungai, DAS, dan irigasi cukup padat. Aktifkan satu per satu sesuai kebutuhan.</p>
+        <label class="layer-toggle">
+            <input type="checkbox" id="layerSHP_Sungai" aria-label="Sungai">
+            <span class="check" aria-hidden="true">✓</span>
+            <span>🌊 Sungai</span>
+        </label>
+        <label class="layer-toggle">
+            <input type="checkbox" id="layerSHP_DAS" aria-label="DAS">
+            <span class="check" aria-hidden="true">✓</span>
+            <span>💧 DAS</span>
+        </label>
+        <label class="layer-toggle">
+            <input type="checkbox" id="layerSHP_Irigasi" aria-label="Irigasi">
+            <span class="check" aria-hidden="true">✓</span>
+            <span>🚿 Irigasi</span>
+        </label>
+        <label class="layer-toggle">
+            <input type="checkbox" id="layerMarker" aria-label="Kecamatan demo">
+            <span class="check" aria-hidden="true">✓</span>
+            <span>📍 Penanda kecamatan · demo</span>
+        </label>
+        <label class="layer-toggle">
+            <input type="checkbox" id="layerBuilding" aria-label="Bangunan 3D demo">
+            <span class="check" aria-hidden="true">✓</span>
+            <span>🏢 Bangunan 3D · demo</span>
+        </label>
+    </div>
+
+    <details class="section mobile-secondary" data-mobile-collapse open>
+        <summary class="section-title">Opacity</summary>
+        <div class="opacity-row">
+            <label>Sungai</label>
+            <input type="range" id="opSungai" min="0" max="100" value="80">
+            <span class="value" id="opSungaiVal">80%</span>
+        </div>
+        <div class="opacity-row">
+            <label>DAS</label>
+            <input type="range" id="opDAS" min="0" max="100" value="6">
+            <span class="value" id="opDASVal">6%</span>
+        </div>
+        <div class="opacity-row">
+            <label>Building</label>
+            <input type="range" id="opBuilding" min="0" max="100" value="68">
+            <span class="value" id="opBuildingVal">68%</span>
+        </div>
+    </details>
+
+    <details class="section mobile-secondary" data-mobile-collapse open>
+        <summary class="section-title">Kontrol</summary>
         <div class="info-badge">
             <strong>📱 HP (Touch):</strong><br>
             • 1 jari drag = geser<br>
@@ -507,7 +608,7 @@
             • Klik kanan = tilt + rotate<br>
             • <kbd>R</kbd> reset · <kbd>3</kbd> terrain · <kbd>F</kbd> fullscreen
         </div>
-    </div>
+        </details>
 </div>
 
 <div class="hud-pitch">
@@ -515,6 +616,8 @@
     <div class="item"><span>B</span><span id="bearingVal">-20°</span></div>
     <div class="item"><span>Z</span><span id="zoomVal">11.5</span></div>
 </div>
+
+<p class="active-layer-chip" id="activeLayerChip" aria-live="polite"></p>
 
 <div class="hud-ctrl">
     <button class="ctrl-btn-mini active" id="btnTerrainMini" title="Terrain">🗻</button>
@@ -541,12 +644,134 @@ const DISTRICTS = [
 ];
 const OPTIONAL_LAYERS = {{ optional_layers|tojson }};
 const optionalGeoJSON = Object.create(null);
+const optionalLayerRequests = Object.create(null);
+let activePresetKey = 'orientation';
+let applyingPreset = false;
 
-function setOverlayStatus(message, state = '') {
-    const status = document.getElementById('overlayStatus');
-    status.textContent = message;
-    status.dataset.state = state;
+const LAYER_LABELS = {
+    kabupaten: 'Kabupaten Jember',
+    kecamatan: 'Kecamatan',
+    desa: 'Desa / Kelurahan',
+    bangunan: 'Bangunan',
+    jaringan: 'Jaringan',
+    petak: 'Petak'
+};
+
+function checkedOptionalLayer(key) {
+    return document.querySelector(`[data-overlay-toggle="${key}"]`)?.checked || false;
 }
+
+function updateLayerSummary() {
+    const summary = document.getElementById('activeLayerSummary');
+    if (!summary) return;
+    const labels = [];
+    document.querySelectorAll('input[type="checkbox"]:checked').forEach(toggle => {
+        const optionalKey = toggle.dataset.overlayToggle;
+        labels.push(optionalKey ? LAYER_LABELS[optionalKey] : toggle.getAttribute('aria-label'));
+    });
+    const activeDetails = [
+        'desa', 'bangunan', 'jaringan', 'petak',
+        'sungai', 'das', 'irigasi', 'layerMarker', 'layerBuilding'
+    ].filter(key => {
+        if (['desa', 'bangunan', 'jaringan', 'petak'].includes(key)) return checkedOptionalLayer(key);
+        const id = key === 'sungai' ? 'layerSHP_Sungai'
+            : key === 'das' ? 'layerSHP_DAS'
+                : key === 'irigasi' ? 'layerSHP_Irigasi' : key;
+        return document.getElementById(id)?.checked || false;
+    });
+    const activeAssets = ['bangunan', 'jaringan', 'petak'].filter(checkedOptionalLayer);
+    const dense = activeDetails.length >= 4
+        || (checkedOptionalLayer('desa') && activeDetails.length >= 2)
+        || (activeAssets.length >= 2 && activeDetails.length >= 3);
+    const presetLabel = activePresetKey === 'orientation' ? 'Orientasi'
+        : activePresetKey === 'irrigation' ? 'Irigasi' : 'Kustom';
+    const countyAvailable = Boolean(document.querySelector('[data-overlay-toggle="kabupaten"]'));
+    const districtAvailable = Boolean(document.querySelector('[data-overlay-toggle="kecamatan"]'));
+    let message = `${presetLabel} · ${labels.length} layer aktif`;
+    if (labels.length) message += `: ${labels.join(', ')}`;
+    else message += ': tidak ada layer yang ditampilkan';
+    if (activePresetKey !== 'custom' && !districtAvailable) {
+        message += countyAvailable
+            ? '. Kecamatan tidak tersedia; bingkai Kabupaten saja.'
+            : '. Batas GADM tidak tersedia; hanya basemap yang ditampilkan.';
+    }
+    if (activePresetKey === 'irrigation'
+        && !document.querySelector('[data-overlay-toggle="jaringan"]')) {
+        message += '. Data jaringan tidak tersedia.';
+    }
+    if (dense) {
+        message += `. Perhatian: ${activeDetails.length} layer detail aktif; garis/titik padat dapat menutupi batas.`;
+    }
+    summary.textContent = message;
+    summary.dataset.density = dense ? 'high' : 'normal';
+    summary.setAttribute('aria-label', `${message}${dense ? ' Gunakan Matikan semua detail untuk kembali ke peta yang lebih ringan.' : ''}`);
+    const chip = document.getElementById('activeLayerChip');
+    if (chip) {
+        chip.textContent = summary.textContent;
+        chip.dataset.density = summary.dataset.density;
+    }
+    document.querySelectorAll('[data-preset]').forEach(button => {
+        const active = button.dataset.preset === activePresetKey;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
+    });
+}
+
+function closeSidebar() {
+    if (!isMobile()) return;
+    sidebar.classList.add('closed');
+    menuToggle.classList.remove('open');
+}
+
+function setLayerToggle(toggle, checked) {
+    if (!toggle || toggle.checked === checked) return;
+    toggle.checked = checked;
+    toggle.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+function applyMapPreset(preset) {
+    applyingPreset = true;
+    const useIrrigation = preset === 'irrigation';
+    OPTIONAL_LAYERS.forEach(layer => {
+        const selected = ['kabupaten', 'kecamatan'].includes(layer.key)
+            || (useIrrigation && layer.key === 'jaringan');
+        setLayerToggle(document.querySelector(`[data-overlay-toggle="${layer.key}"]`), selected);
+    });
+    ['layerSHP_Sungai', 'layerSHP_DAS', 'layerSHP_Irigasi', 'layerMarker', 'layerBuilding']
+        .forEach(id => setLayerToggle(document.getElementById(id), false));
+    activePresetKey = preset;
+    applyingPreset = false;
+    updateLayerSummary();
+    closeSidebar();
+}
+
+function clearDetailLayers() {
+    applyingPreset = true;
+    ['desa', 'bangunan', 'jaringan', 'petak'].forEach(key =>
+        setLayerToggle(document.querySelector(`[data-overlay-toggle="${key}"]`), false));
+    ['layerSHP_Sungai', 'layerSHP_DAS', 'layerSHP_Irigasi', 'layerMarker', 'layerBuilding']
+        .forEach(id => setLayerToggle(document.getElementById(id), false));
+    activePresetKey = checkedOptionalLayer('kabupaten') || checkedOptionalLayer('kecamatan')
+        ? 'orientation' : 'custom';
+    applyingPreset = false;
+    updateLayerSummary();
+    closeSidebar();
+}
+
+function setOverlayStatus(message, state = '', retryLayerKey = null) {
+    const status = document.getElementById('overlayStatus');
+    status.replaceChildren(document.createTextNode(message));
+    status.dataset.state = state;
+    if (retryLayerKey) {
+        const retry = document.createElement('button');
+        retry.type = 'button';
+        retry.textContent = 'Coba lagi';
+        retry.addEventListener('click', () => retryOptionalLayer(retryLayerKey));
+        status.append(' ', retry);
+    }
+}
+
+updateLayerSummary();
 
 let styleReady = false;
 
@@ -570,6 +795,30 @@ function geometryTypeFilter(types) {
     return ['any', ...types.map(type => ['==', ['geometry-type'], type])];
 }
 
+const BOUNDARY_STYLES = {
+    kabupaten: { fillOpacity: 0.015, casingWidth: 4, casingOpacity: 0.72, lineWidth: 2.2, lineOpacity: 0.96 },
+    kecamatan: { fillOpacity: 0.009, casingWidth: 2.8, casingOpacity: 0.58, lineWidth: 1.2, lineOpacity: 0.82 },
+    desa: { fillOpacity: 0.003, casingWidth: 1.8, casingOpacity: 0.4, lineWidth: 0.7, lineOpacity: 0.62 }
+};
+
+function sortOptionalOverlayLayers() {
+    const order = [
+        'bangunan-fill', 'jaringan-fill', 'petak-fill',
+        'bangunan-outline', 'petak-outline',
+        'jaringan-casing', 'jaringan-line', 'bangunan-line', 'petak-line',
+        'bangunan-point', 'jaringan-point', 'petak-point',
+        'kabupaten-fill', 'kecamatan-fill', 'desa-fill',
+        'desa-casing', 'desa-outline', 'desa-line',
+        'kecamatan-casing', 'kecamatan-outline', 'kecamatan-line',
+        'kabupaten-casing', 'kabupaten-outline', 'kabupaten-line',
+        'kabupaten-point', 'kecamatan-point', 'desa-point'
+    ];
+    order.forEach(part => {
+        const layerId = `overlay-${part}`;
+        if (map.getLayer(layerId)) map.moveLayer(layerId);
+    });
+}
+
 function addOptionalOverlay(layer, data, visible) {
     const sourceId = `overlay-${layer.key}`;
     if (!map.getSource(sourceId)) {
@@ -580,16 +829,33 @@ function addOptionalOverlay(layer, data, visible) {
         data.features.map(feature => feature.geometry?.type).filter(Boolean)
     );
     const color = layer.color;
-    const polygonOpacity = layer.key === 'petak' ? 0.2 : layer.kind === 'boundary' ? 0.09 : 0.42;
+    const boundaryStyle = BOUNDARY_STYLES[layer.key];
+    const polygonOpacity = boundaryStyle?.fillOpacity
+        ?? (layer.key === 'petak' ? 0.09 : layer.key === 'jaringan' ? 0.05 : 0.22);
     if (geometryTypes.has('Polygon') || geometryTypes.has('MultiPolygon')) {
         const fillId = `${sourceId}-fill`;
         if (!map.getLayer(fillId)) {
             map.addLayer({
                 id: fillId, type: 'fill', source: sourceId,
                 filter: geometryTypeFilter(['Polygon', 'MultiPolygon']),
-                paint: { 'fill-color': color, 'fill-opacity': polygonOpacity, 'fill-outline-color': color },
+                paint: { 'fill-color': color, 'fill-opacity': polygonOpacity },
                 layout: { visibility: visible ? 'visible' : 'none' }
             });
+        }
+        if (boundaryStyle) {
+            const casingId = `${sourceId}-casing`;
+            if (!map.getLayer(casingId)) {
+                map.addLayer({
+                    id: casingId, type: 'line', source: sourceId,
+                    filter: geometryTypeFilter(['Polygon', 'MultiPolygon']),
+                    paint: {
+                        'line-color': '#102238',
+                        'line-width': boundaryStyle.casingWidth,
+                        'line-opacity': boundaryStyle.casingOpacity
+                    },
+                    layout: { visibility: visible ? 'visible' : 'none' }
+                });
+            }
         }
         const outlineId = `${sourceId}-outline`;
         if (!map.getLayer(outlineId)) {
@@ -598,14 +864,31 @@ function addOptionalOverlay(layer, data, visible) {
                 filter: geometryTypeFilter(['Polygon', 'MultiPolygon']),
                 paint: {
                     'line-color': color,
-                    'line-width': layer.kind === 'boundary' ? 1.6 : 1.2,
-                    'line-opacity': 0.95
+                    'line-width': boundaryStyle?.lineWidth
+                        ?? (layer.key === 'petak' ? 0.65 : layer.key === 'jaringan' ? 1 : 0.95),
+                    'line-opacity': boundaryStyle?.lineOpacity
+                        ?? (layer.key === 'petak' ? 0.58 : layer.key === 'jaringan' ? 0.82 : 0.86)
                 },
                 layout: { visibility: visible ? 'visible' : 'none' }
             });
         }
     }
     if (geometryTypes.has('LineString') || geometryTypes.has('MultiLineString')) {
+        if (layer.key === 'jaringan') {
+            const casingId = `${sourceId}-casing`;
+            if (!map.getLayer(casingId)) {
+                map.addLayer({
+                    id: casingId, type: 'line', source: sourceId,
+                    filter: geometryTypeFilter(['LineString', 'MultiLineString']),
+                    paint: {
+                        'line-color': '#102238',
+                        'line-width': 3.4,
+                        'line-opacity': 0.78
+                    },
+                    layout: { visibility: visible ? 'visible' : 'none' }
+                });
+            }
+        }
         const lineId = `${sourceId}-line`;
         if (!map.getLayer(lineId)) {
             map.addLayer({
@@ -613,8 +896,8 @@ function addOptionalOverlay(layer, data, visible) {
                 filter: geometryTypeFilter(['LineString', 'MultiLineString']),
                 paint: {
                     'line-color': color,
-                    'line-width': layer.key === 'jaringan' ? 2.5 : 1.8,
-                    'line-opacity': 0.95
+                    'line-width': boundaryStyle?.lineWidth ?? (layer.key === 'jaringan' ? 1.65 : 1.05),
+                    'line-opacity': boundaryStyle?.lineOpacity ?? (layer.key === 'jaringan' ? 0.94 : 0.68)
                 },
                 layout: { visibility: visible ? 'visible' : 'none' }
             });
@@ -627,66 +910,179 @@ function addOptionalOverlay(layer, data, visible) {
                 id: pointId, type: 'circle', source: sourceId,
                 filter: geometryTypeFilter(['Point', 'MultiPoint']),
                 paint: {
-                    'circle-radius': 5,
+                    'circle-radius': layer.key === 'bangunan'
+                        ? ['interpolate', ['linear'], ['zoom'], 8, 1.8, 11, 2.6, 14, 3.8, 17, 5.2]
+                        : 2.8,
                     'circle-color': color,
-                    'circle-stroke-color': '#f8fafc',
-                    'circle-stroke-width': 1,
-                    'circle-opacity': 0.95
+                    'circle-stroke-color': layer.key === 'bangunan' ? '#4d3425' : '#17283a',
+                    'circle-stroke-width': layer.key === 'bangunan' ? 1 : 0.7,
+                    'circle-opacity': 0.88
                 },
                 layout: { visibility: visible ? 'visible' : 'none' }
             });
         }
     }
-    [ 'fill', 'outline', 'line', 'point' ].forEach(part => {
+    [ 'fill', 'casing', 'outline', 'line', 'point' ].forEach(part => {
         const layerId = `${sourceId}-${part}`;
         if (map.getLayer(layerId)) {
             map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
         }
     });
+    sortOptionalOverlayLayers();
 }
 
-async function loadOptionalLayer(layer, toggle) {
-    toggle.disabled = true;
-    setOverlayStatus(`Memuat ${layer.label}…`, 'loading');
-    try {
-        const response = await fetch(layer.endpoint, { cache: 'no-store' });
-        if (!response.ok) {
-            const error = new Error(response.status === 404
-                ? 'Endpoint tidak tersedia (404)'
-                : `Server merespons ${response.status}`);
-            error.status = response.status;
-            throw error;
-        }
-        const data = await response.json();
-        if (data.type !== 'FeatureCollection' || !Array.isArray(data.features)) {
-            throw new Error('Format GeoJSON tidak valid');
-        }
-        await waitForStyleReady();
-        optionalGeoJSON[layer.key] = data;
-        addOptionalOverlay(layer, data, true);
-        setOverlayStatus(`${layer.label} ditampilkan.`, 'success');
-    } catch (error) {
-        toggle.checked = false;
-        if (error.status === 404) {
-            const row = document.querySelector(`[data-overlay-row="${layer.key}"]`);
-            row.hidden = true;
-            setOverlayStatus(`${layer.label} tidak tersedia di server (404).`, 'error');
+async function restorePreviousBasemap(failedKey, error, revision) {
+    if (revision !== styleRevision) return;
+    const previousKey = activeBasemapKey;
+    const state = currentLayerState();
+    const recoveryRevision = ++styleRevision;
+    styleReady = false;
+    setBasemapStatus(`${BASEMAP_LABELS[failedKey]} gagal dimuat. Memulihkan ${BASEMAP_LABELS[previousKey]}…`, 'loading');
+
+    let settled = false;
+    const timeout = setTimeout(() => finishRecovery(false), 20000);
+    const cleanup = () => {
+        clearTimeout(timeout);
+        map.off('style.load', onStyleLoad);
+        map.off('error', onStyleError);
+    };
+    const finishRecovery = (restored, recoveryError) => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        styleReady = restored;
+        basemapSwitching = false;
+        updateBasemapButtons(previousKey);
+        if (restored) {
+            setBasemapStatus(
+                `${BASEMAP_LABELS[failedKey]} gagal dimuat; kembali ke ${BASEMAP_LABELS[previousKey]}.`,
+                'error'
+            );
         } else {
-            setOverlayStatus(`Gagal memuat ${layer.label}. Periksa koneksi lalu coba lagi.`, 'error');
-            console.warn(`[AGROTEK] Layer ${layer.key} gagal dimuat:`, error);
+            setBasemapStatus(
+                `${BASEMAP_LABELS[failedKey]} gagal dimuat dan ${BASEMAP_LABELS[previousKey]} tidak dapat dipulihkan.`,
+                'error'
+            );
+            console.error('[AGROTEK] Basemap recovery failed:', recoveryError || error);
         }
-    } finally {
-        if (!document.querySelector(`[data-overlay-row="${layer.key}"]`).hidden) {
-            toggle.disabled = false;
+    };
+    const onStyleError = event => {
+        if (recoveryRevision === styleRevision && event.error) finishRecovery(false, event.error);
+    };
+    const onStyleLoad = async () => {
+        if (recoveryRevision !== styleRevision || settled) return;
+        try {
+            if (state.terrain) map.setTerrain({ source: 'terrain-dem', exaggeration: 1.5 });
+            else map.setTerrain(null);
+            map.setSky({ 'sky-color': '#0a1628', 'horizon-color': '#1e3a5f', 'fog-color': '#0a1628' });
+            await reAddLayers(state, recoveryRevision);
+            if (recoveryRevision !== styleRevision || settled) return;
+            map.jumpTo({
+                center: state.center, zoom: state.zoom,
+                pitch: state.pitch, bearing: state.bearing
+            });
+            finishRecovery(true);
+            updateLayerSummary();
+        } catch (recoveryError) {
+            finishRecovery(false, recoveryError);
         }
+    };
+
+    map.once('style.load', onStyleLoad);
+    map.on('error', onStyleError);
+    try {
+        map.setStyle(BASEMAPS[previousKey], { diff: false });
+    } catch (recoveryError) {
+        finishRecovery(false, recoveryError);
     }
 }
 
-function loadOptionalLayers() {
+function failBasemapSwitch(revision, key, error) {
+    if (revision !== styleRevision) return;
+    basemapSwitching = true;
+    console.error(`[AGROTEK] Basemap ${key} failed:`, error);
+    restorePreviousBasemap(key, error, revision);
+}
+
+async function loadOptionalLayer(layer, toggle) {
+    if (optionalGeoJSON[layer.key]) {
+        addOptionalOverlay(layer, optionalGeoJSON[layer.key], toggle.checked);
+        return;
+    }
+    if (optionalLayerRequests[layer.key]) return optionalLayerRequests[layer.key];
+
+    const request = (async () => {
+        setOverlayStatus(`Memuat ${layer.label}…`, 'loading');
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 20000);
+        try {
+            const response = await fetch(layer.endpoint, {
+                cache: 'no-store',
+                signal: controller.signal
+            });
+            if (!response.ok) {
+                const error = new Error(response.status === 404
+                    ? 'Endpoint tidak tersedia (404)'
+                    : `Server merespons ${response.status}`);
+                error.status = response.status;
+                throw error;
+            }
+            const data = await response.json();
+            if (data.type !== 'FeatureCollection' || !Array.isArray(data.features)) {
+                throw new Error('Format GeoJSON tidak valid');
+            }
+            await waitForStyleReady();
+            optionalGeoJSON[layer.key] = data;
+            addOptionalOverlay(layer, data, toggle.checked);
+            setOverlayStatus(toggle.checked
+                ? `${layer.label} ditampilkan.`
+                : `${layer.label} dimuat dan disembunyikan.`, 'success');
+        } catch (error) {
+            toggle.checked = false;
+            updateLayerSummary();
+            if (error.status === 404) {
+                const row = document.querySelector(`[data-overlay-row="${layer.key}"]`);
+                row.hidden = true;
+                setOverlayStatus(`${layer.label} tidak tersedia di server (404).`, 'error');
+            } else {
+                const message = error.name === 'AbortError'
+                    ? `Permintaan ${layer.label} melewati batas waktu.`
+                    : `Gagal memuat ${layer.label}. Periksa koneksi lalu coba lagi.`;
+                setOverlayStatus(message, 'error', layer.key);
+                console.warn(`[AGROTEK] Layer ${layer.key} gagal dimuat:`, error);
+            }
+        } finally {
+            clearTimeout(timeout);
+            delete optionalLayerRequests[layer.key];
+            toggle.disabled = false;
+        }
+    })();
+    optionalLayerRequests[layer.key] = request;
+    return request;
+}
+
+function retryOptionalLayer(layerKey) {
+    const layer = OPTIONAL_LAYERS.find(item => item.key === layerKey);
+    const toggle = document.querySelector(`[data-overlay-toggle="${layerKey}"]`);
+    if (!layer || !toggle || optionalLayerRequests[layerKey]) return;
+    toggle.checked = true;
+    activePresetKey = 'custom';
+    updateLayerSummary();
+    loadOptionalLayer(layer, toggle);
+}
+
+async function loadOptionalLayers() {
+    const initiallyVisible = OPTIONAL_LAYERS.filter(layer =>
+        layer.available && document.querySelector(`[data-overlay-toggle="${layer.key}"]`)?.checked
+    );
     if (!OPTIONAL_LAYERS.some(layer => layer.available)) {
         setOverlayStatus('Layer batas dan aset belum tersedia di server.');
-    } else {
+    } else if (initiallyVisible.length === 0) {
         setOverlayStatus('Pilih layer untuk memuat data GIS.');
+    }
+    for (const layer of initiallyVisible) {
+        const toggle = document.querySelector(`[data-overlay-toggle="${layer.key}"]`);
+        if (toggle) await loadOptionalLayer(layer, toggle);
     }
 }
 
@@ -772,8 +1168,8 @@ const BASEMAPS = {
         sources: {
             'basemap': {
                 type: 'raster',
-                tiles: ['https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'],
-                tileSize: 256, attribution: '© CARTO'
+                tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'],
+                tileSize: 256, attribution: 'Tiles © Esri, HERE, Garmin, FAO, NOAA, USGS, EPA'
             },
             'terrain-dem': {
                 type: 'raster-dem',
@@ -809,6 +1205,7 @@ const map = new maplibregl.Map({
 map.on('style.load', () => {
     styleReady = true;
     document.getElementById('loading').classList.add('hide');
+    if (!basemapSwitching) setBasemapStatus('Satellite siap.', 'success');
 });
 
 map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
@@ -909,12 +1306,12 @@ async function loadSHP() {
         const sungaiVisibility = document.getElementById('layerSHP_Sungai').checked ? 'visible' : 'none';
         if (!map.getLayer('shp-sungai-glow')) map.addLayer({
             id: 'shp-sungai-glow', type: 'line', source: 'shp-sungai',
-            paint: { 'line-color': '#38bdf8', 'line-width': 8, 'line-opacity': 0.2, 'line-blur': 6 },
+            paint: { 'line-color': '#5d9cae', 'line-width': 4, 'line-opacity': 0.1, 'line-blur': 3 },
             layout: { visibility: sungaiVisibility }
         });
         if (!map.getLayer('shp-sungai-line')) map.addLayer({
             id: 'shp-sungai-line', type: 'line', source: 'shp-sungai',
-            paint: { 'line-color': '#0ea5e9', 'line-width': 1.5, 'line-opacity': 0.9 },
+            paint: { 'line-color': '#5d9cae', 'line-width': 1.2, 'line-opacity': 0.82 },
             layout: { visibility: sungaiVisibility }
         });
 
@@ -924,12 +1321,12 @@ async function loadSHP() {
         const dasVisibility = document.getElementById('layerSHP_DAS').checked ? 'visible' : 'none';
         if (!map.getLayer('shp-das-fill')) map.addLayer({
             id: 'shp-das-fill', type: 'fill', source: 'shp-das',
-            paint: { 'fill-color': '#10b981', 'fill-opacity': 0.15 },
+            paint: { 'fill-color': '#82967b', 'fill-opacity': 0.06 },
             layout: { visibility: dasVisibility }
         });
         if (!map.getLayer('shp-das-line')) map.addLayer({
             id: 'shp-das-line', type: 'line', source: 'shp-das',
-            paint: { 'line-color': '#38bdf8', 'line-width': 2, 'line-dasharray': [4, 3], 'line-opacity': 0.8 },
+            paint: { 'line-color': '#9cac8d', 'line-width': 1.2, 'line-dasharray': [3, 3], 'line-opacity': 0.65 },
             layout: { visibility: dasVisibility }
         });
 
@@ -939,7 +1336,7 @@ async function loadSHP() {
         const irigasiVisibility = document.getElementById('layerSHP_Irigasi').checked ? 'visible' : 'none';
         if (!map.getLayer('shp-irigasi-line')) map.addLayer({
             id: 'shp-irigasi-line', type: 'line', source: 'shp-irigasi',
-            paint: { 'line-color': '#f59e0b', 'line-width': 1.5, 'line-opacity': 0.85 },
+            paint: { 'line-color': '#c89c55', 'line-width': 1.2, 'line-opacity': 0.72 },
             layout: { visibility: irigasiVisibility }
         });
 
@@ -981,18 +1378,20 @@ map.once('style.load', () => {
         paint: {
             'fill-extrusion-color': [
                 'interpolate', ['linear'], ['get', 'height'],
-                20, '#10b981', 50, '#0ea5e9', 100, '#a855f7'
+                20, '#c88965', 100, '#c88965'
             ],
             'fill-extrusion-height': ['get', 'height'],
             'fill-extrusion-base': 0,
-            'fill-extrusion-opacity': 0.85,
-            'fill-extrusion-vertical-gradient': true
-        }
+            'fill-extrusion-opacity': 0.68,
+            'fill-extrusion-vertical-gradient': false
+        },
+        layout: { visibility: document.getElementById('layerBuilding').checked ? 'visible' : 'none' }
     });
 
     DISTRICTS.forEach(d => {
         const el = document.createElement('div');
         el.className = 'marker-3d';
+        el.style.display = document.getElementById('layerMarker').checked ? '' : 'none';
         new maplibregl.Marker({ element: el })
             .setLngLat([d.lng, d.lat])
             .setPopup(new maplibregl.Popup({ offset: 20, closeButton: false })
@@ -1026,12 +1425,22 @@ let styleRevision = 0;
 const sidebar = document.getElementById('sidebar');
 const menuToggle = document.getElementById('menuToggle');
 function isMobile() { return window.innerWidth <= 768; }
+let mobileLayout = isMobile();
+document.querySelectorAll('[data-mobile-collapse]').forEach(section => {
+    section.open = !mobileLayout;
+});
 if (isMobile()) sidebar.classList.add('closed');
 menuToggle.addEventListener('click', () => {
     sidebar.classList.toggle('closed');
     menuToggle.classList.toggle('open', !sidebar.classList.contains('closed'));
 });
 window.addEventListener('resize', () => {
+    if (mobileLayout !== isMobile()) {
+        mobileLayout = isMobile();
+        document.querySelectorAll('[data-mobile-collapse]').forEach(section => {
+            section.open = !mobileLayout;
+        });
+    }
     if (!isMobile() && sidebar.classList.contains('closed')) {
         sidebar.classList.remove('closed');
         menuToggle.classList.remove('open');
@@ -1085,8 +1494,36 @@ function toggleFullscreen() {
 }
 
 let activeBasemapKey = 'satellite';
-let queuedBasemapKey = null;
 let basemapSwitching = false;
+let requestedBasemapKey = activeBasemapKey;
+const BASEMAP_LABELS = {
+    street: 'Street',
+    satellite: 'Satellite',
+    terrain: 'Terrain',
+    dark: 'Dark'
+};
+
+function updateBasemapButtons(activeKey, busy = false) {
+    document.querySelectorAll('.basemap-btn').forEach(button => {
+        const active = button.dataset.basemap === activeKey;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
+        button.disabled = busy;
+    });
+}
+
+function setBasemapStatus(message, state = '') {
+    const status = document.getElementById('basemapStatus');
+    status.replaceChildren(document.createTextNode(message));
+    status.dataset.state = state;
+    if (state === 'error') {
+        const retry = document.createElement('button');
+        retry.type = 'button';
+        retry.textContent = 'Coba lagi';
+        retry.addEventListener('click', () => switchBasemap(requestedBasemapKey));
+        status.append(' ', retry);
+    }
+}
 
 function currentLayerState() {
     return {
@@ -1105,34 +1542,68 @@ function currentLayerState() {
 }
 
 function switchBasemap(key) {
-    if (basemapSwitching) {
-        queuedBasemapKey = key;
-        return;
-    }
+    if (!BASEMAPS[key]) return;
+    if (basemapSwitching) return;
     if (key === activeBasemapKey) return;
 
     basemapSwitching = true;
+    requestedBasemapKey = key;
     const state = currentLayerState();
     const revision = ++styleRevision;
     styleReady = false;
-    map.once('style.load', async () => {
-        if (revision !== styleRevision) return;
-        if (state.terrain) map.setTerrain({ source: 'terrain-dem', exaggeration: 1.5 });
-        map.setSky({ 'sky-color': '#0a1628', 'horizon-color': '#1e3a5f', 'fog-color': '#0a1628' });
-        await reAddLayers(state, revision);
-        if (revision !== styleRevision) return;
-        map.jumpTo({
-            center: state.center, zoom: state.zoom,
-            pitch: state.pitch, bearing: state.bearing
-        });
-        activeBasemapKey = key;
-        basemapSwitching = false;
+    updateBasemapButtons(activeBasemapKey, true);
+    setBasemapStatus(`Memuat ${BASEMAP_LABELS[key]}…`, 'loading');
 
-        const nextKey = queuedBasemapKey;
-        queuedBasemapKey = null;
-        if (nextKey && nextKey !== activeBasemapKey) switchBasemap(nextKey);
-    });
-    map.setStyle(BASEMAPS[key], { diff: false });
+    let settled = false;
+    const timeout = setTimeout(() => failSwitch(new Error('Peta tidak merespons dalam 20 detik.')), 20000);
+    const cleanup = () => {
+        clearTimeout(timeout);
+        map.off('style.load', onStyleLoad);
+        map.off('error', onStyleError);
+    };
+    const finishSwitch = () => {
+        if (settled) return false;
+        settled = true;
+        cleanup();
+        return true;
+    };
+    const failSwitch = error => {
+        if (!finishSwitch()) return;
+        failBasemapSwitch(revision, key, error);
+    };
+    const onStyleError = event => {
+        if (revision !== styleRevision || settled || !event.error) return;
+        failSwitch(event.error);
+    };
+    const onStyleLoad = async () => {
+        if (revision !== styleRevision || settled) return;
+        try {
+            if (state.terrain) map.setTerrain({ source: 'terrain-dem', exaggeration: 1.5 });
+            map.setSky({ 'sky-color': '#0a1628', 'horizon-color': '#1e3a5f', 'fog-color': '#0a1628' });
+            await reAddLayers(state, revision);
+            if (revision !== styleRevision || settled) return;
+            map.jumpTo({
+                center: state.center, zoom: state.zoom,
+                pitch: state.pitch, bearing: state.bearing
+            });
+            if (!finishSwitch()) return;
+            styleReady = true;
+            activeBasemapKey = key;
+            basemapSwitching = false;
+            updateBasemapButtons(activeBasemapKey);
+            setBasemapStatus(`${BASEMAP_LABELS[key]} siap.`, 'success');
+            updateLayerSummary();
+        } catch (error) {
+            failSwitch(error);
+        }
+    };
+    map.once('style.load', onStyleLoad);
+    map.on('error', onStyleError);
+    try {
+        map.setStyle(BASEMAPS[key], { diff: false });
+    } catch (error) {
+        failSwitch(error);
+    }
 }
 
 document.getElementById('btnTerrain').addEventListener('click', toggleTerrain);
@@ -1145,45 +1616,48 @@ document.getElementById('btnFullscreen').addEventListener('click', toggleFullscr
 
 document.querySelectorAll('.basemap-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-        document.querySelectorAll('.basemap-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
         switchBasemap(btn.dataset.basemap);
     });
 });
 
 async function reAddLayers(state, revision) {
     try {
-        const sungai = await fetch('/static/data/sungai_jember.geojson').then(r => r.json());
-        const das = await fetch('/static/data/das_jember.geojson').then(r => r.json());
-        const irigasi = await fetch('/static/data/irigasi_jember.geojson').then(r => r.json());
+        const fetchGeoJSON = async url => {
+            const response = await fetch(url, { cache: 'no-store' });
+            if (!response.ok) throw new Error(`Gagal memuat ${url} (${response.status})`);
+            return response.json();
+        };
+        const sungai = await fetchGeoJSON('/static/data/sungai_jember.geojson');
+        const das = await fetchGeoJSON('/static/data/das_jember.geojson');
+        const irigasi = await fetchGeoJSON('/static/data/irigasi_jember.geojson');
         if (revision !== undefined && revision !== styleRevision) return;
 
         if (!map.getSource('shp-sungai')) {
             map.addSource('shp-sungai', { type: 'geojson', data: sungai });
             map.addLayer({ id: 'shp-sungai-glow', type: 'line', source: 'shp-sungai',
-                paint: { 'line-color': '#38bdf8', 'line-width': 8, 'line-opacity': 0.2, 'line-blur': 6 } });
+                paint: { 'line-color': '#5d9cae', 'line-width': 4, 'line-opacity': 0.1, 'line-blur': 3 } });
             map.addLayer({ id: 'shp-sungai-line', type: 'line', source: 'shp-sungai',
-                paint: { 'line-color': '#0ea5e9', 'line-width': 1.5, 'line-opacity': 0.9 } });
+                paint: { 'line-color': '#5d9cae', 'line-width': 1.2, 'line-opacity': 0.82 } });
         }
         if (!map.getSource('shp-das')) {
             map.addSource('shp-das', { type: 'geojson', data: das });
             map.addLayer({ id: 'shp-das-fill', type: 'fill', source: 'shp-das',
-                paint: { 'fill-color': '#10b981', 'fill-opacity': 0.15 } });
+                paint: { 'fill-color': '#82967b', 'fill-opacity': 0.06 } });
             map.addLayer({ id: 'shp-das-line', type: 'line', source: 'shp-das',
-                paint: { 'line-color': '#38bdf8', 'line-width': 2, 'line-dasharray': [4, 3], 'line-opacity': 0.8 } });
+                paint: { 'line-color': '#9cac8d', 'line-width': 1.2, 'line-dasharray': [3, 3], 'line-opacity': 0.65 } });
         }
         if (!map.getSource('shp-irigasi')) {
             map.addSource('shp-irigasi', { type: 'geojson', data: irigasi });
             map.addLayer({ id: 'shp-irigasi-line', type: 'line', source: 'shp-irigasi',
-                paint: { 'line-color': '#f59e0b', 'line-width': 1.5, 'line-opacity': 0.85 } });
+                paint: { 'line-color': '#c89c55', 'line-width': 1.2, 'line-opacity': 0.72 } });
         }
         if (!map.getSource('buildings')) {
             map.addSource('buildings', { type: 'geojson', data: BUILDINGS_GEOJSON });
             map.addLayer({ id: 'building-3d', type: 'fill-extrusion', source: 'buildings',
                 paint: { 'fill-extrusion-color': ['interpolate', ['linear'], ['get', 'height'],
-                    20, '#10b981', 50, '#0ea5e9', 100, '#a855f7'],
+                    20, '#c88965', 100, '#c88965'],
                     'fill-extrusion-height': ['get', 'height'], 'fill-extrusion-base': 0,
-                    'fill-extrusion-opacity': 0.85, 'fill-extrusion-vertical-gradient': true } });
+                    'fill-extrusion-opacity': 0.68, 'fill-extrusion-vertical-gradient': false } });
         }
 
         ['shp-sungai-glow', 'shp-sungai-line'].forEach(id => {
@@ -1205,6 +1679,7 @@ async function reAddLayers(state, revision) {
         });
     } catch (err) {
         console.error('[AGROTEK] reAddLayers error:', err);
+        throw err;
     }
 }
 
@@ -1241,6 +1716,17 @@ OPTIONAL_LAYERS.forEach(layer => {
         }
     });
 });
+
+document.querySelectorAll('input[type="checkbox"]').forEach(toggle => {
+    toggle.addEventListener('change', () => {
+        if (!applyingPreset) activePresetKey = 'custom';
+        updateLayerSummary();
+    });
+});
+document.querySelectorAll('[data-preset]').forEach(button => {
+    button.addEventListener('click', () => applyMapPreset(button.dataset.preset));
+});
+document.getElementById('clearDetailLayers').addEventListener('click', clearDetailLayers);
 
 function bindOpacity(sliderId, valId, layerId, propName) {
     const s = document.getElementById(sliderId);
